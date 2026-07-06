@@ -6,6 +6,9 @@ export const commerceConfig = {
   enableCart: true,
   enableExternalPaymentLinks: true,
   enableWhatsappCheckout: true,
+  // Namespace usado en localStorage para el carrito. Cambia el prefijo al
+  // reutilizar el template para otro cliente si quieres aislar el carrito.
+  cartStorageKey: "shop_cart_v1",
   whatsappCheckout: {
     enabled: true,
     phone: brandConfig.whatsapp,
