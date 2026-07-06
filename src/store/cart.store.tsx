@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CartItem, ProductForCart } from "@/types/cart";
+import { commerceConfig } from "@/config/commerce.config";
 
-const STORAGE_KEY = "orbynex_cart_v1";
+const STORAGE_KEY = commerceConfig.cartStorageKey;
 
 interface CartContextValue {
   items: CartItem[];

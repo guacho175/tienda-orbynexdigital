@@ -13,11 +13,12 @@ import { EmptyState } from "@/components/ui-common/EmptyState";
 import { useCart } from "@/store/cart.store";
 import { buildWhatsappCheckoutUrl } from "@/utils/whatsapp";
 import { commerceConfig } from "@/config/commerce.config";
+import { brandConfig } from "@/config/brand.config";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
-    meta: [{ title: "Checkout — Orbynex Digital" }],
+    meta: [{ title: `Checkout — ${brandConfig.name}` }],
   }),
   component: CheckoutPage,
 });

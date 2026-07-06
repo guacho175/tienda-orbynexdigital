@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { useCart } from "@/store/cart.store";
+import { brandConfig } from "@/config/brand.config";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({
-    meta: [{ title: "Carrito — Orbynex Digital" }],
+    meta: [{ title: `Carrito — ${brandConfig.name}` }],
   }),
   component: CartPage,
 });
