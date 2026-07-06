@@ -41,7 +41,19 @@ SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
 ```
 
-No configurar `SUPABASE_SERVICE_ROLE_KEY` para el frontend. Este template no necesita exponer esa clave para subir imagenes; las policies de Supabase Storage validan el rol admin con la sesion del usuario.
+Para Flow API dinamico, configurar ademas estas variables server-side en Vercel:
+
+```bash
+FLOW_API_KEY=
+FLOW_SECRET_KEY=
+FLOW_BASE_URL=https://sandbox.flow.cl/api
+FLOW_RETURN_URL=https://<dominio>/checkout/resultado
+FLOW_CONFIRMATION_URL=https://<dominio>/api/flow/confirm
+APP_PUBLIC_URL=https://<dominio>
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+`SUPABASE_SERVICE_ROLE_KEY` solo debe existir como variable server-side para Vercel Functions. No usar prefijos publicos como `VITE_`, `NEXT_PUBLIC_` o equivalentes para Flow secrets ni service role.
 
 ## 4. Dominio propio
 
@@ -76,6 +88,6 @@ En Supabase/Lovable Cloud, configurar:
 
 - No se implementa Cloudflare.
 - No se migra Supabase.
-- No se implementa Flow API.
+- Flow API Fase 2 incluye endpoints server-side. El frontend de checkout Flow sigue fuera de alcance hasta la Fase 3.
 - No se implementa Mercado Pago API.
 - Los pagos siguen usando `products.payment_url`.

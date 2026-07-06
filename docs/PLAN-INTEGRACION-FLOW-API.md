@@ -1,7 +1,7 @@
 # Plan tecnico cerrado: integracion Flow API sandbox
 
 Fecha: 2026-07-06  
-Estado: plan aprobado pendiente de implementacion  
+Estado: Fase 2 endpoints server-side implementados localmente en rama `feature/flow-api-dynamic-checkout`; checkout/frontend pendientes
 Alcance: reemplazar o complementar `payment_url` con pago dinamico Flow API para carritos con varios productos, sin romper el flujo actual.
 
 ## 1. Auditoria del proyecto
@@ -366,18 +366,27 @@ Responsabilidad:
 
 ### Fase 1: Preparacion DB
 
-- Crear migracion para `orders` y `order_items`.
-- Definir RLS y grants.
-- Actualizar tipos Supabase si aplica.
-- No tocar checkout aun.
+Estado: implementada localmente.
+
+- Migracion creada: `supabase/migrations/20260705225916_orders_flow_api_phase_1.sql`.
+- Crea `public.orders` y `public.order_items`.
+- Define constraints, indices, trigger `updated_at`, grants y RLS.
+- Lectura cliente limitada a ordenes propias o admin.
+- Escritura directa desde `anon`/`authenticated` denegada; futuras Vercel Functions deberan usar `service_role` solo server-side.
+- Tipos Supabase no regenerados: no hay comando local seguro documentado para generarlos.
+- Checkout, endpoints Flow, webhook y frontend siguen pendientes.
 
 ### Fase 2: Endpoints server-side
 
-- Crear `api/flow/create-payment.ts`.
-- Crear `api/flow/confirm.ts`.
-- Crear helper server-only para firma Flow.
-- Crear helper server-only para recalcular carrito.
-- Probar endpoints con sandbox.
+Estado: implementada localmente.
+
+- Creados `api/flow/create-payment.ts`, `api/flow/confirm.ts` y `api/flow/order-status.ts`.
+- Creados helpers server-only bajo `src/server/flow/` para HTTP, env, firma Flow, Supabase admin y recalculo de carrito.
+- `create-payment` valida payload, recalcula productos desde `public.products`, crea `orders`/`order_items`, llama `payment/create` y guarda `flow_token`/`flow_url`.
+- `confirm` recibe token, consulta `payment/getStatus`, compara monto/moneda/commerceOrder y actualiza estado con idempotencia basica.
+- `order-status` expone estado acotado con `commerceOrder` + `publicLookupToken`.
+- Documentacion de pruebas: `docs/FLOW-FASE-2-ENDPOINTS.md`.
+- Pendiente operativo: configurar variables server-side en Vercel y probar sandbox real.
 
 ### Fase 3: Checkout frontend
 
@@ -433,4 +442,3 @@ No tocar:
 - sistema actual `payment_url`
 - Supabase/Lovable como backend principal
 - Mercado Pago
-
