@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { CreditCard, ExternalLink, Loader2, MessageCircle, ShoppingBag } from "lucide-react";
+import { CreditCard, ExternalLink, Loader2, ShoppingBag } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { ProductImage } from "@/components/product/ProductImage";
 import { useCart } from "@/store/cart.store";
-import { buildWhatsappCheckoutUrl } from "@/utils/whatsapp";
 import { commerceConfig } from "@/config/commerce.config";
 import { brandConfig } from "@/config/brand.config";
 import { toast } from "sonner";
@@ -38,8 +37,7 @@ type FlowPaymentResponse = {
 };
 
 function CheckoutPage() {
-  const navigate = useNavigate();
-  const { items, total, clear } = useCart();
+  const { items, total } = useCart();
   const [form, setForm] = useState({ name: "", email: "", phone: "", comment: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [flowError, setFlowError] = useState<string | null>(null);
@@ -85,24 +83,6 @@ function CheckoutPage() {
     }
     setErrors({});
     return result.data;
-  }
-
-  function handleWhatsapp() {
-    const parsed = validate();
-    if (!parsed) return;
-    const url = buildWhatsappCheckoutUrl(
-      items,
-      parsed,
-      total,
-      commerceConfig.currency,
-      commerceConfig.locale,
-    );
-    window.open(url, "_blank", "noopener,noreferrer");
-    toast.success("Pedido enviado por WhatsApp", {
-      description: "En breve te confirmamos los detalles.",
-    });
-    clear();
-    navigate({ to: "/" });
   }
 
   async function handleFlowPayment() {
@@ -160,7 +140,7 @@ function CheckoutPage() {
     <>
       <PageHeader
         title="Finalizar compra"
-        subtitle="Completa tus datos y elige pago online, WhatsApp o pago externo cuando este disponible."
+        subtitle="Completa tus datos y elige pago online o pago externo cuando este disponible."
       />
       <Container className="py-8 sm:py-12">
         <BackLink to="/carrito" label="Volver al carrito" />
@@ -169,7 +149,7 @@ function CheckoutPage() {
           <div className="card-surface p-6 sm:p-8">
             <h2 className="text-lg font-semibold text-foreground">Datos de contacto</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Usamos esta informacion para crear el pago o preparar el mensaje de WhatsApp.
+              Usamos esta informacion para crear el pago y coordinar los detalles del pedido.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -200,7 +180,7 @@ function CheckoutPage() {
                   ) : null}
                 </div>
                 <div>
-                  <Label htmlFor="phone">Telefono / WhatsApp</Label>
+                  <Label htmlFor="phone">Telefono</Label>
                   <Input
                     id="phone"
                     value={form.phone}
@@ -228,8 +208,7 @@ function CheckoutPage() {
               <div>
                 <h3 className="text-base font-semibold text-foreground">Opciones de pago</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  El pago online procesa el carrito completo. WhatsApp queda como alternativa de
-                  coordinacion.
+                  El pago online procesa el carrito completo y deja el pedido listo para gestion.
                 </p>
               </div>
 
@@ -266,17 +245,6 @@ function CheckoutPage() {
                 </>
               ) : null}
 
-              <Button
-                onClick={handleWhatsapp}
-                size="lg"
-                variant={commerceConfig.flowCheckout.enabled ? "outline" : "default"}
-                className={commerceConfig.flowCheckout.enabled ? "w-full" : "btn-hero w-full"}
-                disabled={isCreatingFlowPayment}
-              >
-                <MessageCircle className="mr-1 h-4 w-4" />
-                Enviar pedido por WhatsApp
-              </Button>
-
               {singleItemWithLink ? (
                 <Button
                   onClick={handleExternalPayment}
@@ -291,7 +259,7 @@ function CheckoutPage() {
               ) : items.some((i) => i.payment_url) ? (
                 <p className="rounded-md border border-border/60 bg-secondary/40 p-3 text-sm text-muted-foreground">
                   Los links externos quedan disponibles por producto individual. Para este carrito
-                  completo usa pago online o WhatsApp.
+                  completo usa pago online.
                 </p>
               ) : null}
 

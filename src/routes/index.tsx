@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   CreditCard,
   Layers,
-  MessageCircle,
   Package,
   ReceiptText,
   ShieldCheck,
@@ -21,8 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Price } from "@/components/ui-common/Price";
 import { homeConfig } from "@/config/home.config";
+import { brandConfig } from "@/config/brand.config";
 import { fetchFeaturedProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
-import { buildWhatsappContactUrl } from "@/utils/whatsapp";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -57,13 +56,13 @@ function Home() {
         <Container className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="text-center lg:text-left">
             <div className="mb-5 inline-flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 px-4 py-3 shadow-[0_18px_60px_-28px_oklch(0.82_0.15_200/0.7)] backdrop-blur">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[image:var(--gradient-primary)] text-base font-black text-primary-foreground">
-                O
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-bold leading-none text-foreground">orbynex.digital</p>
-                <p className="mt-1 text-xs text-muted-foreground">commerce para servicios</p>
-              </div>
+              <img
+                src={brandConfig.logoUrl}
+                alt={brandConfig.name}
+                className="h-12 w-auto max-w-[210px] object-contain"
+                width={291}
+                height={80}
+              />
             </div>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1 text-xs font-semibold uppercase text-accent">
               <Sparkles className="h-3.5 w-3.5" />
@@ -83,14 +82,14 @@ function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <a href={buildWhatsappContactUrl()} target="_blank" rel="noreferrer">
-                  <MessageCircle className="mr-1 h-4 w-4" />
+                <a href={hero.secondaryCta.href}>
                   {hero.secondaryCta.label}
+                  <ArrowRight className="ml-1 h-4 w-4" />
                 </a>
               </Button>
             </div>
             <div className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
-              {["Pagos online", "Pedidos por WhatsApp", "Catalogo editable"].map((item) => (
+              {["Pagos online", "Pedidos claros", "Catalogo editable"].map((item) => (
                 <div
                   key={item}
                   className="rounded-2xl border border-border/50 bg-background/35 px-4 py-3"
@@ -163,7 +162,7 @@ function Home() {
                   {
                     icon: ShieldCheck,
                     title: "Compra o conversa",
-                    copy: "Pago online y WhatsApp disponibles",
+                    copy: "Pago online y contacto comercial disponibles",
                   },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -285,7 +284,7 @@ function Home() {
         </div>
       </Section>
 
-      <Section className="pt-0">
+      <Section id="como-comprar" className="pt-0">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Como compra tu cliente
@@ -349,10 +348,7 @@ function Home() {
               <Link to="/catalogo">{finalCta.primaryCta.label}</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href={buildWhatsappContactUrl()} target="_blank" rel="noreferrer">
-                <MessageCircle className="mr-1 h-4 w-4" />
-                {finalCta.secondaryCta.label}
-              </a>
+              <Link to="/catalogo">{finalCta.secondaryCta.label}</Link>
             </Button>
           </div>
         </div>

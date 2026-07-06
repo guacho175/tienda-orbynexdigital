@@ -17,7 +17,7 @@ export const brandConfig = {
   locale: "es-CL",
   currency: "CLP",
   logoText: "Orbynex", // Texto usado como logo si no hay imagen
-  logoUrl: null as string | null,
+  logoUrl: "/logo/logo_orbynex_horizontal_blanco_v2_trim.png",
 };
 
 export type BrandConfig = typeof brandConfig;

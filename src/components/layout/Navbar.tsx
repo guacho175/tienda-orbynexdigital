@@ -15,10 +15,13 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-md bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)]" />
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            {brandConfig.name}
-          </span>
+          <img
+            src={brandConfig.logoUrl}
+            alt={brandConfig.name}
+            className="h-10 w-auto max-w-[180px] object-contain"
+            width={291}
+            height={80}
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

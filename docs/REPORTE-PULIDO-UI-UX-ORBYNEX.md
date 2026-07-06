@@ -18,6 +18,7 @@ Fecha: 2026-07-06
 - `src/routes/_authenticated/admin.new.tsx`
 - `src/routes/_authenticated/admin.edit.$id.tsx`
 - `src/styles.css`
+- `public/logo/logo_orbynex_horizontal_blanco_v2_trim.png`
 
 ## Cambios realizados
 
@@ -31,6 +32,8 @@ Fecha: 2026-07-06
 - Toaster/Sonner queda flotante, top-right, con borde, sombra, close button y mensajes mas accionables.
 - Carrito, checkout y footer recibieron copy mas comercial.
 - CTA primario global usa gradiente blue-to-fuchsia y las superficies usan radio mas consistente con la identidad Orbynex.
+- Logo real de Orbynex agregado desde `C:\Users\galin\OneDrive\Documentos\Orbynex.digital\public\logo` y usado en navbar, hero y footer.
+- Referencias visibles a WhatsApp retiradas de home, catalogo, carrito, checkout y docs. La configuracion interna se conserva para no romper compatibilidad.
 
 ## Criterios responsive aplicados
 
@@ -49,7 +52,9 @@ Fecha: 2026-07-06
   - Catalogo mobile: OK, sin overflow.
   - Carrito mobile: OK, sin overflow.
   - Checkout mobile: OK, sin overflow.
-  - Busqueda de copy publico: sin `payment_url`, `Flow API`, `Supabase`, `Probar carrito`, `Flujo demo` ni textos de prueba.
+  - Docs desktop: OK, sin referencias visibles a WhatsApp.
+  - Logo real renderiza correctamente en navbar, hero y footer.
+  - Busqueda de copy publico: sin `payment_url`, `Flow API`, `Supabase`, `Probar carrito`, `Flujo demo`, textos de prueba ni referencias visibles a WhatsApp.
 
 ## Riesgos y pendientes
 

@@ -24,7 +24,7 @@ export const commerceConfig = {
   },
   legal: {
     termsShort:
-      "Al comprar aceptas nuestros terminos. Las compras se procesan por pago online, WhatsApp o el link de pago disponible.",
+      "Al comprar aceptas nuestros terminos. Las compras se procesan por pago online o el link de pago disponible.",
   },
 };
 

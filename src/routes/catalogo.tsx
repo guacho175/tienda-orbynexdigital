@@ -18,7 +18,7 @@ export const Route = createFileRoute("/catalogo")({
       { title: `Catalogo de productos - ${brandConfig.name}` },
       {
         name: "description",
-        content: "Catalogo de servicios digitales con carrito, pago online y WhatsApp.",
+        content: "Catalogo de servicios digitales con carrito y pago online.",
       },
     ],
   }),

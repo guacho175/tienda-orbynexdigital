@@ -5,9 +5,9 @@ export const homeConfig = {
     eyebrow: "Tienda online para servicios digitales",
     title: "Vende servicios y productos digitales con una tienda clara, simple y profesional",
     subtitle:
-      "Publica tu catalogo, recibe pedidos por WhatsApp y permite pagos online desde una experiencia pensada para clientes reales.",
+      "Publica tu catalogo, recibe pedidos claros y permite pagos online desde una experiencia pensada para clientes reales.",
     primaryCta: { label: "Ver servicios", href: "/catalogo" },
-    secondaryCta: { label: "Hablar por WhatsApp", href: "whatsapp" },
+    secondaryCta: { label: "Ver como comprar", href: "#como-comprar" },
   },
   categoriesFallback: [
     "Sitios web",
@@ -47,7 +47,8 @@ export const homeConfig = {
     {
       step: "3",
       title: "Finaliza la compra",
-      description: "Paga online o envia el pedido por WhatsApp si necesita coordinar detalles.",
+      description:
+        "Paga online o solicita contacto si necesita coordinar detalles antes de avanzar.",
     },
     {
       step: "4",
@@ -65,7 +66,7 @@ export const homeConfig = {
       "Productos con imagenes optimizadas",
       "Carrito de compra claro",
       "Pago online disponible",
-      "Pedidos por WhatsApp",
+      "Pedidos claros para atender",
       "Categorias faciles de explorar",
       "Panel de productos",
       "Experiencia responsive",
@@ -90,7 +91,7 @@ export const homeConfig = {
     subtitle:
       "Publica servicios, muestra precios y recibe pedidos desde una experiencia profesional de principio a fin.",
     primaryCta: { label: "Ver servicios", href: "/catalogo" },
-    secondaryCta: { label: "Hablar por WhatsApp", href: "whatsapp" },
+    secondaryCta: { label: "Ver catalogo completo", href: "/catalogo" },
   },
 };
 

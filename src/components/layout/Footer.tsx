@@ -3,7 +3,6 @@ import { Instagram, Mail, Phone } from "lucide-react";
 import { brandConfig } from "@/config/brand.config";
 import { navigationConfig } from "@/config/navigation.config";
 import { Container } from "./Container";
-import { buildWhatsappContactUrl } from "@/utils/whatsapp";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -13,8 +12,13 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-md bg-[image:var(--gradient-primary)]" />
-              <span className="text-lg font-bold text-foreground">{brandConfig.name}</span>
+              <img
+                src={brandConfig.logoUrl}
+                alt={brandConfig.name}
+                className="h-12 w-auto max-w-[220px] object-contain"
+                width={291}
+                height={80}
+              />
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
               Tienda online para publicar servicios digitales, recibir pedidos y atender clientes
@@ -51,9 +55,7 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
                 <a
-                  href={buildWhatsappContactUrl()}
-                  target="_blank"
-                  rel="noreferrer"
+                  href={`tel:${brandConfig.phone.replace(/\s/g, "")}`}
                   className="hover:text-foreground"
                 >
                   {brandConfig.phone}
