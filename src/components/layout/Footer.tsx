@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, Phone, Instagram } from "lucide-react";
+import { Instagram, Mail, Phone } from "lucide-react";
 import { brandConfig } from "@/config/brand.config";
 import { navigationConfig } from "@/config/navigation.config";
 import { Container } from "./Container";
@@ -16,12 +16,15 @@ export function Footer() {
               <div className="h-8 w-8 rounded-md bg-[image:var(--gradient-primary)]" />
               <span className="text-lg font-bold text-foreground">{brandConfig.name}</span>
             </div>
-            <p className="mt-3 max-w-xs text-sm text-muted-foreground">{brandConfig.description}</p>
+            <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+              Demo comercial de mini e-commerce con catalogo, carrito, checkout, Flow, WhatsApp y
+              backend Supabase.
+            </p>
           </div>
 
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Navegación
+              Navegacion
             </h4>
             <ul className="mt-3 space-y-2 text-sm">
               {navigationConfig.footer.links.map((l) => (

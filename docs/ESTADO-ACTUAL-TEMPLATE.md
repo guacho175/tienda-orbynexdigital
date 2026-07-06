@@ -401,3 +401,30 @@ FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
 ```
 
 Documentacion operativa: `docs/FLOW-FASE-3-RESULTADO-CHECKOUT.md`.
+
+---
+
+## Rediseno publico e-commerce
+
+Estado: implementado a nivel de codigo al 2026-07-06.
+
+El frontend publico deja de presentarse como landing corporativa y pasa a comunicar una tienda demo funcional:
+
+- Home con productos destacados desde Supabase (`fetchActiveProducts`) y limite de 6 productos.
+- Categorias visibles en portada, derivadas desde productos activos con fallback en `home.config.ts`.
+- Seccion de flujo de compra: catalogo, carrito, checkout Flow/WhatsApp y resultado.
+- Seccion comercial "Demo e-commerce" con capacidades del template.
+- Catalogo con filtros por categoria en cliente.
+- Cards de producto con precio destacado, imagen estable y botones "Ver producto" / "Agregar".
+- Componente reutilizable `BackLink` para retornos claros.
+- Retornos agregados en catalogo, detalle, carrito, checkout y resultado de pago.
+- Checkout y resultado de pago mejorados visualmente sin tocar endpoints ni logica de confirmacion.
+
+Documentacion:
+
+- `docs/REDISENO-HOME-ECOMMERCE.md`
+- `docs/SEED-PRODUCTOS-DEMO.md`
+
+No se toco:
+
+- Supabase config, RLS, auth, admin, `ProductForm`, endpoints `api/flow/*`, migraciones, variables de entorno, `payment_url`, WhatsApp checkout, store del carrito ni `src/routes/_authenticated/route.tsx`.

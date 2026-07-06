@@ -17,7 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
-import { Route as CheckoutResultadoRouteImport } from './routes/checkout.resultado'
+import { Route as CheckoutResultadoRouteImport } from './routes/checkout_.resultado'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminNewRouteImport } from './routes/_authenticated/admin.new'
 import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
@@ -62,9 +62,9 @@ const ProductoSlugRoute = ProductoSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutResultadoRoute = CheckoutResultadoRouteImport.update({
-  id: '/resultado',
-  path: '/resultado',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout_/resultado',
+  path: '/checkout/resultado',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
@@ -88,7 +88,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/docs': typeof DocsRoute
   '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
@@ -101,7 +101,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/docs': typeof DocsRoute
   '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
@@ -116,9 +116,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/docs': typeof DocsRoute
-  '/checkout/resultado': typeof CheckoutResultadoRoute
+  '/checkout_/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/_authenticated/admin/new': typeof AuthenticatedAdminNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -160,7 +160,7 @@ export interface FileRouteTypes {
     | '/catalogo'
     | '/checkout'
     | '/docs'
-    | '/checkout/resultado'
+    | '/checkout_/resultado'
     | '/producto/$slug'
     | '/_authenticated/admin/new'
     | '/_authenticated/admin/'
@@ -173,8 +173,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarritoRoute: typeof CarritoRoute
   CatalogoRoute: typeof CatalogoRoute
-  CheckoutRoute: typeof CheckoutRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   DocsRoute: typeof DocsRoute
+  CheckoutResultadoRoute: typeof CheckoutResultadoRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
 }
 
@@ -236,12 +237,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/resultado': {
-      id: '/checkout/resultado'
-      path: '/resultado'
+    '/checkout_/resultado': {
+      id: '/checkout_/resultado'
+      path: '/checkout/resultado'
       fullPath: '/checkout/resultado'
       preLoaderRoute: typeof CheckoutResultadoRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -282,26 +283,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface CheckoutRouteChildren {
-  CheckoutResultadoRoute: typeof CheckoutResultadoRoute
-}
-
-const CheckoutRouteChildren: CheckoutRouteChildren = {
-  CheckoutResultadoRoute: CheckoutResultadoRoute,
-}
-
-const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
-  CheckoutRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CarritoRoute: CarritoRoute,
   CatalogoRoute: CatalogoRoute,
-  CheckoutRoute: CheckoutRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   DocsRoute: DocsRoute,
+  CheckoutResultadoRoute: CheckoutResultadoRoute,
   ProductoSlugRoute: ProductoSlugRoute,
 }
 export const routeTree = rootRouteImport

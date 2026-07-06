@@ -4,6 +4,7 @@ import { CheckCircle2, Clock3, Loader2, RefreshCw, ShoppingBag, XCircle } from "
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { BackLink } from "@/components/ui/BackLink";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
@@ -32,7 +33,7 @@ type OrderStatusResponse = {
 
 type LoadState = "idle" | "loading" | "ready" | "error";
 
-export const Route = createFileRoute("/checkout/resultado")({
+export const Route = createFileRoute("/checkout_/resultado")({
   validateSearch: (search: Record<string, unknown>): CheckoutResultSearch => ({
     commerceOrder: getSearchValue(search.commerceOrder),
     publicLookupToken: getSearchValue(search.publicLookupToken),
@@ -102,16 +103,20 @@ function CheckoutResultPage() {
   const displayStatus = getDisplayStatus(orderStatus?.status);
   const statusCopy = getStatusCopy(displayStatus);
   const StatusIcon = statusCopy.icon;
+  const showCheckoutReturn =
+    loadState === "error" || (loadState === "ready" && displayStatus !== "paid");
 
   return (
     <>
       <PageHeader
         title="Resultado del pago"
-        subtitle="Revisamos el estado confirmado de tu orden en el sistema."
+        subtitle="Consulta el estado confirmado de la orden y decide el siguiente paso."
       />
-      <Container className="py-12">
-        <div className="card-surface mx-auto max-w-2xl p-6 sm:p-8">
-          <div className="flex items-start gap-4">
+      <Container className="py-8 sm:py-12">
+        <BackLink to="/catalogo" label="Volver al catalogo" />
+
+        <div className="card-surface mx-auto mt-8 max-w-2xl p-6 sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className={statusCopy.iconClassName}>
               {loadState === "loading" ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -120,7 +125,7 @@ function CheckoutResultPage() {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium uppercase text-muted-foreground">
+              <p className="text-sm font-semibold uppercase text-muted-foreground">
                 {loadState === "loading" ? "Consultando" : statusCopy.label}
               </p>
               <h2 className="mt-1 text-2xl font-semibold text-foreground">
@@ -147,13 +152,17 @@ function CheckoutResultPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">Estado local</dt>
-                <dd className="mt-1 font-medium text-foreground">{displayStatus}</dd>
+                <dt className="text-muted-foreground">Estado de pago</dt>
+                <dd className="mt-1 font-medium text-foreground">{statusCopy.shortLabel}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Total</dt>
                 <dd className="mt-1">
-                  <Price value={orderStatus.total} currency={orderStatus.currency} />
+                  <Price
+                    value={orderStatus.total}
+                    currency={orderStatus.currency}
+                    className="text-lg text-accent"
+                  />
                 </dd>
               </div>
               <div>
@@ -165,7 +174,7 @@ function CheckoutResultPage() {
             </dl>
           ) : null}
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <Button onClick={loadOrderStatus} disabled={loadState === "loading"}>
               {loadState === "loading" ? (
                 <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -180,6 +189,11 @@ function CheckoutResultPage() {
                 Volver al catalogo
               </Link>
             </Button>
+            {showCheckoutReturn ? (
+              <Button asChild variant="outline" className="sm:col-span-2">
+                <Link to="/checkout">Volver al checkout</Link>
+              </Button>
+            ) : null}
           </div>
         </div>
       </Container>
@@ -205,17 +219,19 @@ function getStatusCopy(status: ReturnType<typeof getDisplayStatus>) {
 
   if (status === "paid") {
     return {
-      label: "Paid",
+      label: "Pagado",
+      shortLabel: "Pagado",
       title: "Pago confirmado",
-      description: "Tu pago fue confirmado. El carrito se limpio automaticamente.",
+      description: "Tu pago fue confirmado. El carrito se limpia automaticamente.",
       icon: CheckCircle2,
-      iconClassName: `${baseIconClassName} bg-emerald-500/10 text-emerald-600`,
+      iconClassName: `${baseIconClassName} bg-emerald-500/10 text-emerald-500`,
     };
   }
 
   if (status === "failed") {
     return {
-      label: "Failed",
+      label: "Fallido",
+      shortLabel: "Fallido",
       title: "Pago rechazado",
       description:
         "La orden no fue pagada. El carrito se mantiene para que puedas intentar otra vez.",
@@ -226,7 +242,8 @@ function getStatusCopy(status: ReturnType<typeof getDisplayStatus>) {
 
   if (status === "cancelled") {
     return {
-      label: "Cancelled",
+      label: "Cancelado",
+      shortLabel: "Cancelado",
       title: "Pago cancelado",
       description: "La orden fue cancelada. El carrito se mantiene sin cambios.",
       icon: XCircle,
@@ -236,7 +253,8 @@ function getStatusCopy(status: ReturnType<typeof getDisplayStatus>) {
 
   if (status === "expired") {
     return {
-      label: "Expired",
+      label: "Expirado",
+      shortLabel: "Expirado",
       title: "Pago expirado",
       description: "La orden expiro antes de completarse. El carrito se mantiene sin cambios.",
       icon: XCircle,
@@ -245,11 +263,12 @@ function getStatusCopy(status: ReturnType<typeof getDisplayStatus>) {
   }
 
   return {
-    label: "Pending",
+    label: "Pendiente",
+    shortLabel: "Pendiente",
     title: "Pago pendiente",
     description:
       "Aun no hay confirmacion definitiva de Flow. Puedes actualizar esta pagina en unos segundos.",
     icon: Clock3,
-    iconClassName: `${baseIconClassName} bg-amber-500/10 text-amber-600`,
+    iconClassName: `${baseIconClassName} bg-amber-500/10 text-amber-500`,
   };
 }

@@ -1,8 +1,9 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ShoppingCart, ExternalLink } from "lucide-react";
+import { ExternalLink, ShoppingCart } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/ui/BackLink";
 import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductImage } from "@/components/product/ProductImage";
@@ -28,11 +29,12 @@ function ProductDetail() {
 
   if (isLoading) {
     return (
-      <Container className="py-16">
-        <Skeleton className="h-8 w-40" />
+      <Container className="py-12 sm:py-16">
+        <Skeleton className="h-10 w-44 rounded-full" />
         <div className="mt-8 grid gap-10 md:grid-cols-2">
           <Skeleton className="aspect-[4/3] w-full rounded-lg" />
           <div className="space-y-4">
+            <Skeleton className="h-8 w-24 rounded-full" />
             <Skeleton className="h-10 w-2/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
@@ -46,24 +48,19 @@ function ProductDetail() {
     return (
       <Container className="py-24 text-center">
         <h1 className="text-2xl font-semibold text-foreground">Producto no encontrado</h1>
-        <p className="mt-2 text-muted-foreground">
-          El producto que buscas no existe o ya no está disponible.
+        <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+          El producto que buscas no existe o ya no esta disponible en el catalogo publico.
         </p>
         <Button asChild className="mt-6" variant="outline">
-          <Link to="/catalogo">Volver al catálogo</Link>
+          <Link to="/catalogo">Volver al catalogo</Link>
         </Button>
       </Container>
     );
   }
 
   return (
-    <Container className="py-12">
-      <Link
-        to="/catalogo"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Volver al catálogo
-      </Link>
+    <Container className="py-8 sm:py-12">
+      <BackLink to="/catalogo" label="Volver al catalogo" />
 
       <div className="mt-8 grid gap-10 md:grid-cols-2">
         <ProductImage
@@ -74,34 +71,32 @@ function ProductDetail() {
           loading="eager"
         />
 
-        <div>
+        <div className="flex flex-col">
           {product.category ? (
-            <span className="inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+            <span className="w-fit rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
               {product.category}
             </span>
           ) : null}
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {product.name}
           </h1>
           {product.short_description ? (
-            <p className="mt-3 text-lg text-muted-foreground">{product.short_description}</p>
+            <p className="mt-4 text-lg text-muted-foreground">{product.short_description}</p>
           ) : null}
           <Price
             value={Number(product.price)}
             currency={product.currency}
-            className="mt-6 block text-3xl"
+            className="mt-6 block text-4xl font-bold text-accent"
           />
 
           {product.description ? (
             <div className="mt-8 border-t border-border/50 pt-6">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                Descripción
-              </h2>
+              <h2 className="text-sm font-semibold uppercase text-muted-foreground">Descripcion</h2>
               <p className="mt-3 whitespace-pre-line text-foreground/90">{product.description}</p>
             </div>
           ) : null}
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <Button
               size="lg"
               className="btn-hero"
@@ -113,20 +108,21 @@ function ProductDetail() {
               <ShoppingCart className="mr-1 h-4 w-4" />
               Agregar al carrito
             </Button>
-            {product.payment_url ? (
-              <Button asChild variant="outline" size="lg">
-                <a href={product.payment_url} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-1 h-4 w-4" />
-                  {product.payment_button_label ?? "Pagar ahora"}
-                </a>
-              </Button>
-            ) : null}
+            <Button asChild variant="outline" size="lg">
+              <Link to="/catalogo">Seguir comprando</Link>
+            </Button>
           </div>
+
+          {product.payment_url ? (
+            <Button asChild variant="outline" size="lg" className="mt-3 w-full sm:w-fit">
+              <a href={product.payment_url} target="_blank" rel="noreferrer">
+                <ExternalLink className="mr-1 h-4 w-4" />
+                {product.payment_button_label ?? "Pagar con link externo"}
+              </a>
+            </Button>
+          ) : null}
         </div>
       </div>
     </Container>
   );
 }
-
-// silence unused import
-void notFound;

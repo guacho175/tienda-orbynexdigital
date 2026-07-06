@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
@@ -10,8 +11,8 @@ export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
 
   return (
-    <div className="card-surface group flex flex-col overflow-hidden transition-transform hover:-translate-y-1">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
+    <article className="card-surface group flex h-full flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-accent/40">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary/40">
         <ProductImage
           src={product.image_url}
           alt={`Imagen de ${product.name}`}
@@ -25,19 +26,26 @@ export function ProductCard({ product }: { product: Product }) {
         ) : null}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-lg font-semibold text-foreground">{product.name}</h3>
+        <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground">
+          {product.name}
+        </h3>
         {product.short_description ? (
-          <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+          <p className="mt-2 line-clamp-3 min-h-[3.75rem] text-sm text-muted-foreground">
             {product.short_description}
           </p>
         ) : null}
-        <div className="mt-4 flex items-center justify-between">
-          <Price value={Number(product.price)} currency={product.currency} className="text-xl" />
+        <div className="mt-5">
+          <Price
+            value={Number(product.price)}
+            currency={product.currency}
+            className="text-2xl font-bold text-accent"
+          />
         </div>
-        <div className="mt-5 flex gap-2">
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
           <Button asChild variant="outline" className="flex-1">
             <Link to="/producto/$slug" params={{ slug: product.slug }}>
-              Ver detalle
+              <Eye className="mr-1 h-4 w-4" />
+              Ver producto
             </Link>
           </Button>
           <Button
@@ -47,10 +55,11 @@ export function ProductCard({ product }: { product: Product }) {
               toast.success("Agregado al carrito", { description: product.name });
             }}
           >
+            <ShoppingCart className="mr-1 h-4 w-4" />
             Agregar
           </Button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

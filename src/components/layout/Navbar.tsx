@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import { brandConfig } from "@/config/brand.config";
 import { navigationConfig } from "@/config/navigation.config";
@@ -12,7 +12,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-md bg-[image:var(--gradient-primary)] shadow-[var(--shadow-glow)]" />
@@ -37,10 +37,11 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <Link
             to="/carrito"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary"
+            className="relative inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border/60 px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             aria-label="Ver carrito"
           >
             <ShoppingCart className="h-5 w-5" />
+            <span className="hidden sm:inline">Carrito</span>
             {count > 0 ? (
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[image:var(--gradient-accent)] px-1 text-xs font-semibold text-background">
                 {count}
@@ -48,9 +49,9 @@ export function Navbar() {
             ) : null}
           </Link>
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
             onClick={() => setOpen((v) => !v)}
-            aria-label="Menú"
+            aria-label="Menu"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>

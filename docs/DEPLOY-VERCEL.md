@@ -99,6 +99,9 @@ En Supabase/Lovable Cloud, configurar:
 7. Confirmar que la imagen carga en `/catalogo`, `/producto/:slug` y `/carrito`.
 8. Probar usuario autenticado sin rol admin: no debe acceder al CRUD ni subir imagenes.
 9. Probar Flow sandbox: crear pago desde `/checkout`, volver a `/checkout/resultado`, revisar `GET /api/flow/order-status` y confirmar que el carrito solo se limpia con `paid`.
+10. Revisar home publico: debe mostrar productos destacados, categorias, flujo de compra y CTAs de tienda.
+11. Revisar retornos: `/catalogo`, `/producto/:slug`, `/carrito`, `/checkout` y `/checkout/resultado`.
+12. Si faltan productos demo, aplicar manualmente el SQL de `docs/SEED-PRODUCTOS-DEMO.md` en Supabase.
 
 ## 7. Fuera de alcance
 
