@@ -359,3 +359,13 @@ Pendientes posteriores:
 - Mantener reset password, SEO avanzado, sitemap/robots y JSON-LD para fases futuras.
 
 **Fin del checkpoint.**
+
+---
+
+## Flow API - Fase 1 DB preparada
+
+Estado: implementada localmente en la rama `feature/flow-api-dynamic-checkout`.
+
+Se agrego la migracion `supabase/migrations/20260705225916_orders_flow_api_phase_1.sql` para preparar `public.orders` y `public.order_items` con constraints, indices, trigger `updated_at`, grants y RLS. La lectura desde cliente queda limitada a ordenes propias o admins; las escrituras directas desde `anon` y `authenticated` quedan cerradas para que futuras Vercel Functions usen `service_role` solo server-side.
+
+`main` sigue usando el flujo estable actual: carrito en `localStorage`, checkout por WhatsApp y `payment_url` externo por producto. No existen endpoints Flow, webhook, ruta de resultado ni cambios de frontend en esta fase.
