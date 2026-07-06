@@ -347,7 +347,7 @@ Seguridad mantenida:
 
 - No se expone `SUPABASE_SERVICE_ROLE_KEY` en frontend.
 - No se vuelve a dar `EXECUTE` publico a `public.has_role`.
-- No se modifican RLS ni policies de `products`.
+- Las policies admin de `products` validan el rol con `EXISTS` directo sobre `public.user_roles`, sin llamar `public.has_role` desde RLS.
 - No se toca `src/routes/_authenticated/route.tsx`.
 - No se implementan Flow API, Mercado Pago API, tabla `orders` ni carrito backend.
 
