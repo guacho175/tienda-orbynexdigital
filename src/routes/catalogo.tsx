@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchActiveProducts } from "@/services/products.service";
 import { Package } from "lucide-react";
+import { brandConfig } from "@/config/brand.config";
 
 export const Route = createFileRoute("/catalogo")({
   head: () => ({
