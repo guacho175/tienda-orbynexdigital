@@ -369,3 +369,35 @@ Estado: implementada localmente en la rama `feature/flow-api-dynamic-checkout`.
 Se agrego la migracion `supabase/migrations/20260705225916_orders_flow_api_phase_1.sql` para preparar `public.orders` y `public.order_items` con constraints, indices, trigger `updated_at`, grants y RLS. La lectura desde cliente queda limitada a ordenes propias o admins; las escrituras directas desde `anon` y `authenticated` quedan cerradas para que futuras Vercel Functions usen `service_role` solo server-side.
 
 `main` sigue usando el flujo estable actual: carrito en `localStorage`, checkout por WhatsApp y `payment_url` externo por producto. No existen endpoints Flow, webhook, ruta de resultado ni cambios de frontend en esta fase.
+
+---
+
+## Flow API - cierre sandbox Vercel
+
+Estado: implementado al 2026-07-06.
+
+El checkout Flow dinamico queda conectado de extremo a extremo para sandbox:
+
+- `/checkout` crea pagos desde `POST /api/flow/create-payment`.
+- `create-payment` recalcula el carrito desde Supabase y no confia en precios del frontend.
+- `create-payment` envia a Flow una return URL por orden:
+
+```text
+https://tienda-orbynexdigital.vercel.app/checkout/resultado?commerceOrder=<ORDEN>&publicLookupToken=<TOKEN_PUBLICO>&lookup=<TOKEN_PUBLICO>
+```
+
+- `/checkout/resultado` consulta `GET /api/flow/order-status`.
+- La pantalla muestra `paid`, `pending`, `failed`, `cancelled` o `expired`.
+- El carrito solo se limpia cuando la orden local vuelve como `paid`.
+- `POST /api/flow/confirm` sigue siendo el unico punto que confirma con Flow server-side y actualiza estado real tras llamar `payment/getStatus`.
+- WhatsApp checkout y `payment_url` externo por producto siguen funcionando.
+
+Variables correctas en Vercel sandbox:
+
+```text
+APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
+FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
+```
+
+Documentacion operativa: `docs/FLOW-FASE-3-RESULTADO-CHECKOUT.md`.

@@ -17,6 +17,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
+import { Route as CheckoutResultadoRouteImport } from './routes/checkout.resultado'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminNewRouteImport } from './routes/_authenticated/admin.new'
 import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
@@ -60,6 +61,11 @@ const ProductoSlugRoute = ProductoSlugRouteImport.update({
   path: '/producto/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutResultadoRoute = CheckoutResultadoRouteImport.update({
+  id: '/resultado',
+  path: '/resultado',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -82,8 +88,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/docs': typeof DocsRoute
+  '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -94,8 +101,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/docs': typeof DocsRoute
+  '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -108,8 +116,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/docs': typeof DocsRoute
+  '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/_authenticated/admin/new': typeof AuthenticatedAdminNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/catalogo'
     | '/checkout'
     | '/docs'
+    | '/checkout/resultado'
     | '/producto/$slug'
     | '/admin/new'
     | '/admin/'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/catalogo'
     | '/checkout'
     | '/docs'
+    | '/checkout/resultado'
     | '/producto/$slug'
     | '/admin/new'
     | '/admin'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/catalogo'
     | '/checkout'
     | '/docs'
+    | '/checkout/resultado'
     | '/producto/$slug'
     | '/_authenticated/admin/new'
     | '/_authenticated/admin/'
@@ -161,7 +173,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarritoRoute: typeof CarritoRoute
   CatalogoRoute: typeof CatalogoRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   DocsRoute: typeof DocsRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
 }
@@ -224,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/resultado': {
+      id: '/checkout/resultado'
+      path: '/resultado'
+      fullPath: '/checkout/resultado'
+      preLoaderRoute: typeof CheckoutResultadoRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
@@ -263,16 +282,38 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface CheckoutRouteChildren {
+  CheckoutResultadoRoute: typeof CheckoutResultadoRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutResultadoRoute: CheckoutResultadoRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CarritoRoute: CarritoRoute,
   CatalogoRoute: CatalogoRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   DocsRoute: DocsRoute,
   ProductoSlugRoute: ProductoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

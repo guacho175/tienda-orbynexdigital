@@ -442,3 +442,33 @@ No tocar:
 - sistema actual `payment_url`
 - Supabase/Lovable como backend principal
 - Mercado Pago
+
+## 15. Cierre sandbox 2026-07-06
+
+Estado: implementado el cierre de Flow API sandbox en Vercel.
+
+Cambios clave:
+
+- `POST /api/flow/create-payment` ahora construye `urlReturn` usando `FLOW_RETURN_URL` y agrega `commerceOrder`, `publicLookupToken` y `lookup`.
+- La return URL exacta enviada a Flow queda:
+
+```text
+https://tienda-orbynexdigital.vercel.app/checkout/resultado?commerceOrder=<ORDEN>&publicLookupToken=<TOKEN_PUBLICO>&lookup=<TOKEN_PUBLICO>
+```
+
+- `GET /api/flow/order-status` acepta `publicLookupToken`, `lookup` o `public_lookup_token`.
+- Se creo `/checkout/resultado`.
+- La ruta de resultado consulta `order-status`, muestra `paid`, `pending`, `failed`, `cancelled` o `expired`, y limpia el carrito solo si `status = paid`.
+- WhatsApp checkout y `payment_url` externo se mantienen sin cambios.
+- No se agregaron tablas, migraciones ni cambios RLS.
+- No se tocaron `ProductForm`, admin ni `src/routes/_authenticated/route.tsx`.
+
+Variables correctas para Vercel sandbox:
+
+```text
+APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
+FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
+```
+
+Si aparece `*.lovable.app` en el retorno, actualizar esas variables en Vercel Environment Variables y hacer redeploy.

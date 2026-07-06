@@ -8,10 +8,7 @@ import {
   sendJson,
 } from "../../src/server/flow/http.js";
 import { getFlowServerEnv } from "../../src/server/flow/env.js";
-import {
-  getFlowPaymentStatus,
-  mapFlowStatusToLocal,
-} from "../../src/server/flow/flow.js";
+import { getFlowPaymentStatus, mapFlowStatusToLocal } from "../../src/server/flow/flow.js";
 import { createSupabaseAdmin, type OrderRow } from "../../src/server/flow/supabase.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
@@ -47,10 +44,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const localStatus = mapFlowStatusToLocal(flowStatus.status);
     const now = new Date().toISOString();
 
-    if (typedOrder.status === "paid") {
+    if (isDuplicateTerminalStatus(typedOrder.status, localStatus)) {
       sendJson(res, 200, {
         ok: true,
-        status: "paid",
+        status: typedOrder.status,
         commerceOrder: typedOrder.commerce_order,
         idempotent: true,
       });
@@ -90,10 +87,14 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 }
 
-function validateFlowStatusMatchesOrder(
-  flowStatus: Record<string, unknown>,
-  order: OrderRow,
-) {
+function isDuplicateTerminalStatus(currentStatus: string, nextStatus: string) {
+  return (
+    currentStatus === nextStatus &&
+    ["paid", "failed", "cancelled", "expired"].includes(currentStatus)
+  );
+}
+
+function validateFlowStatusMatchesOrder(flowStatus: Record<string, unknown>, order: OrderRow) {
   if (
     typeof flowStatus.commerceOrder === "string" &&
     flowStatus.commerceOrder !== order.commerce_order
@@ -105,10 +106,7 @@ function validateFlowStatusMatchesOrder(
     throw new ApiError(409, "Flow currency does not match local order");
   }
 
-  if (
-    flowStatus.amount !== undefined &&
-    Number(flowStatus.amount) !== Number(order.total)
-  ) {
+  if (flowStatus.amount !== undefined && Number(flowStatus.amount) !== Number(order.total)) {
     throw new ApiError(409, "Flow amount does not match local order");
   }
 }

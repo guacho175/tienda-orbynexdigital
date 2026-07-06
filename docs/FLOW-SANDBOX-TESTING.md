@@ -76,7 +76,7 @@ Resultados esperados:
 14. En la pantalla de decision dejar `Aceptar`.
 15. Click en `Continuar`.
 
-Puede retornar a `/checkout/resultado`. Si esa ruta aun no existe, el 404 es esperado y no significa que el pago falle.
+Debe retornar a `/checkout/resultado`. Esa ruta ya existe y consulta `order-status` con `commerceOrder` y `publicLookupToken`.
 
 ## Confirmar Estado
 

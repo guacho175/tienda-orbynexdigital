@@ -43,10 +43,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       throw new ApiError(500, "Could not load products");
     }
 
-    const calculatedOrder = calculateOrder(
-      requestedItems,
-      (products ?? []) as ProductRow[],
-    );
+    const calculatedOrder = calculateOrder(requestedItems, (products ?? []) as ProductRow[]);
     const commerceOrder = buildCommerceOrder();
 
     const { data: order, error: orderError } = await supabase
@@ -95,6 +92,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         currency: calculatedOrder.currency,
         amount: calculatedOrder.total,
         email: body.customer.email,
+        urlReturn: buildOrderReturnUrl(env.flowReturnUrl, commerceOrder, order.public_lookup_token),
         optional: JSON.stringify({
           commerceOrder,
           publicLookupToken: order.public_lookup_token,
@@ -142,4 +140,16 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   } catch (error) {
     await handleApiError(res, error, "Could not create Flow payment");
   }
+}
+
+function buildOrderReturnUrl(
+  flowReturnUrl: string,
+  commerceOrder: string,
+  publicLookupToken: string,
+) {
+  const url = new URL(flowReturnUrl);
+  url.searchParams.set("commerceOrder", commerceOrder);
+  url.searchParams.set("publicLookupToken", publicLookupToken);
+  url.searchParams.set("lookup", publicLookupToken);
+  return url.toString();
 }

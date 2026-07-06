@@ -203,3 +203,23 @@ Integrar el frontend:
 - Redirigir a `redirectUrl`.
 - Crear `/checkout/resultado`.
 - Consultar `order-status` usando `commerceOrder` y `publicLookupToken`.
+
+## Actualizacion 2026-07-06 - cierre sandbox Vercel
+
+Fase 3 de resultado implementada en `docs/FLOW-FASE-3-RESULTADO-CHECKOUT.md`.
+
+Dominio oficial para sandbox:
+
+```text
+APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
+FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
+```
+
+`create-payment` ahora envia a Flow una `urlReturn` especifica por orden:
+
+```text
+https://tienda-orbynexdigital.vercel.app/checkout/resultado?commerceOrder=<ORDEN>&publicLookupToken=<TOKEN_PUBLICO>&lookup=<TOKEN_PUBLICO>
+```
+
+`order-status` acepta `publicLookupToken`, `lookup` o `public_lookup_token` como token publico de consulta.

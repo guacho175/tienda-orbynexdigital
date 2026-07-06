@@ -220,9 +220,9 @@ SUPABASE_SERVICE_ROLE_KEY=<secret key nueva>
 FLOW_API_KEY=<sandbox Flow>
 FLOW_SECRET_KEY=<sandbox Flow>
 FLOW_BASE_URL=https://sandbox.flow.cl/api
-APP_PUBLIC_URL=https://tienda-orbynexdigital.lovable.app
-FLOW_RETURN_URL=https://tienda-orbynexdigital.lovable.app/checkout/resultado
-FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.lovable.app/api/flow/confirm
+APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
+FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
 ```
 
 No crear:
@@ -286,7 +286,7 @@ No probar Flow hasta que:
 Despues probar:
 
 ```bash
-curl -X POST "https://tienda-orbynexdigital.lovable.app/api/flow/create-payment" \
+curl -X POST "https://tienda-orbynexdigital.vercel.app/api/flow/create-payment" \
   -H "Content-Type: application/json" \
   -d '{
     "items": [
@@ -316,4 +316,4 @@ curl -X POST "https://tienda-orbynexdigital.lovable.app/api/flow/create-payment"
 - Actualizar `supabase/config.toml` con `project_id = "frpzanceiaijlbgkabib"` si se decide usar CLI contra la Supabase nueva.
 - Regenerar tipos Supabase si se incorpora `orders/order_items` al cliente TypeScript.
 - Corregir documentacion que aun diga Lovable Cloud como backend final.
-- Cambiar `APP_PUBLIC_URL`, `FLOW_RETURN_URL` y `FLOW_CONFIRMATION_URL` cuando exista el subdominio final.
+- Mantener `APP_PUBLIC_URL`, `FLOW_RETURN_URL` y `FLOW_CONFIRMATION_URL` apuntando al dominio oficial de Vercel, salvo que se configure un dominio productivo definitivo.

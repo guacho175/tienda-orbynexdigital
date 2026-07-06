@@ -47,13 +47,28 @@ Para Flow API dinamico, configurar ademas estas variables server-side en Vercel:
 FLOW_API_KEY=
 FLOW_SECRET_KEY=
 FLOW_BASE_URL=https://sandbox.flow.cl/api
-FLOW_RETURN_URL=https://<dominio>/checkout/resultado
-FLOW_CONFIRMATION_URL=https://<dominio>/api/flow/confirm
-APP_PUBLIC_URL=https://<dominio>
+FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
+FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
+APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
 SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_PUBLISHABLE_KEY=
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` solo debe existir como variable server-side para Vercel Functions. No usar prefijos publicos como `VITE_`, `NEXT_PUBLIC_` o equivalentes para Flow secrets ni service role.
+
+Si alguna variable Flow apunta a `*.lovable.app`, actualizarla en Vercel y hacer redeploy.
+
+Retorno sandbox esperado:
+
+```text
+https://tienda-orbynexdigital.vercel.app/checkout/resultado
+```
+
+Confirmacion sandbox esperada:
+
+```text
+https://tienda-orbynexdigital.vercel.app/api/flow/confirm
+```
 
 ## 4. Dominio propio
 
@@ -83,6 +98,7 @@ En Supabase/Lovable Cloud, configurar:
 6. Confirmar que `products.image_url` queda con una URL publica.
 7. Confirmar que la imagen carga en `/catalogo`, `/producto/:slug` y `/carrito`.
 8. Probar usuario autenticado sin rol admin: no debe acceder al CRUD ni subir imagenes.
+9. Probar Flow sandbox: crear pago desde `/checkout`, volver a `/checkout/resultado`, revisar `GET /api/flow/order-status` y confirmar que el carrito solo se limpia con `paid`.
 
 ## 7. Fuera de alcance
 

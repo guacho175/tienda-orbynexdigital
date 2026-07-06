@@ -52,7 +52,7 @@ Agregar una experiencia de pago Flow para carritos de uno o mas productos:
 - `src/config/commerce.config.ts`
 - `src/components/ui/button.tsx` si hace falta estado loading/disabled consistente.
 - `src/routeTree.gen.ts` si TanStack genera nuevas rutas.
-- Futuro, no en esta correccion si se mantiene fuera de alcance: `src/routes/checkout.resultado.tsx` o equivalente para `/checkout/resultado`.
+- Implementado despues del plan original: `src/routes/checkout.resultado.tsx` para `/checkout/resultado`.
 
 ## Propuesta de UX
 
@@ -185,7 +185,7 @@ Luego completar Webpay sandbox segun:
 - Duplicar CTAs puede confundir si WhatsApp, `payment_url` y Flow aparecen con igual jerarquia.
 - Limpiar carrito antes de confirmar pago puede perder contexto si el usuario abandona Flow.
 - Confiar en el total cliente seria inseguro; backend ya recalcula, mantener esa regla.
-- `FLOW_RETURN_URL` apunta actualmente a `/checkout/resultado`, ruta que aun no existe.
+- `FLOW_RETURN_URL` debe apuntar a `https://tienda-orbynexdigital.vercel.app/checkout/resultado`, ruta ya implementada.
 - Webhook automatico debe revisarse: en pruebas, confirm manual funciono, pero una orden pagada no cambio automaticamente a `paid` sin llamar `/api/flow/confirm`.
 
 ## Orden recomendado
@@ -198,4 +198,4 @@ Luego completar Webpay sandbox segun:
 6. Mantener WhatsApp y `payment_url`.
 7. Probar carrito unitario y multiple.
 8. Probar sandbox Webpay completo.
-9. Solo despues crear `/checkout/resultado` para mostrar estado y limpiar carrito con seguridad.
+9. `/checkout/resultado` ya fue creado para mostrar estado y limpiar carrito solo con `paid`.

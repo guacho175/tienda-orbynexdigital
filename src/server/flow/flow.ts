@@ -43,20 +43,18 @@ export async function createFlowPayment(
   env: FlowServerEnv,
   params: FlowParams,
 ): Promise<FlowCreatePaymentResponse> {
+  const urlReturn = typeof params.urlReturn === "string" ? params.urlReturn : env.flowReturnUrl;
   const payload = signPayload(
     {
       ...params,
       apiKey: env.flowApiKey,
       urlConfirmation: env.flowConfirmationUrl,
-      urlReturn: env.flowReturnUrl,
+      urlReturn,
     },
     env.flowSecretKey,
   );
 
-  return postFlow<FlowCreatePaymentResponse>(
-    `${env.flowBaseUrl}/payment/create`,
-    payload,
-  );
+  return postFlow<FlowCreatePaymentResponse>(`${env.flowBaseUrl}/payment/create`, payload);
 }
 
 export async function getFlowPaymentStatus(
@@ -72,9 +70,7 @@ export async function getFlowPaymentStatus(
   );
   const query = new URLSearchParams(payload);
 
-  return getFlow<FlowPaymentStatus>(
-    `${env.flowBaseUrl}/payment/getStatus?${query.toString()}`,
-  );
+  return getFlow<FlowPaymentStatus>(`${env.flowBaseUrl}/payment/getStatus?${query.toString()}`);
 }
 
 export function buildFlowRedirectUrl(response: FlowCreatePaymentResponse): string {
@@ -92,10 +88,7 @@ export function mapFlowStatusToLocal(status: unknown): LocalOrderStatus {
   return "redirected";
 }
 
-function signPayload(
-  params: FlowParams,
-  secretKey: string,
-): Record<string, string> {
+function signPayload(params: FlowParams, secretKey: string): Record<string, string> {
   const normalized = normalizeFlowParams(params);
   return {
     ...normalized,

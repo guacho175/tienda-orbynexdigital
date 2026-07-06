@@ -16,6 +16,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const commerceOrder = getQueryParam(req, "commerceOrder");
     const publicLookupToken =
       getQueryParam(req, "publicLookupToken") ??
+      getQueryParam(req, "lookup") ??
       getQueryParam(req, "public_lookup_token");
 
     if (!commerceOrder || !publicLookupToken) {
