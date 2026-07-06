@@ -1,8 +1,24 @@
 # Plan de correcciones: carrito y Flow API UI
 
 Fecha: 2026-07-06  
-Estado: pendiente de implementar  
+Estado: implementado en UI local
 Alcance: conectar la UI del carrito/checkout con Flow API dinamico sin romper WhatsApp checkout ni `payment_url`.
+
+## Resultado implementado
+
+- `src/config/commerce.config.ts` agrega `flowCheckout.enabled` y `flowCheckout.label`.
+- `src/routes/carrito.tsx` muestra el total dentro del CTA `Continuar al checkout`.
+- `src/routes/checkout.tsx` agrega `Pagar con Flow` con loading, error visible y redireccion a `redirectUrl`.
+- El payload cliente envia solo `productId`, `quantity` y datos del cliente.
+- WhatsApp checkout y `payment_url` se mantienen como alternativas.
+- El carrito no se limpia al iniciar Flow.
+
+Validacion local:
+
+- `npx eslint src\config\commerce.config.ts src\routes\carrito.tsx src\routes\checkout.tsx`
+- `npm run build`
+
+Nota: `npm run lint` global sigue fallando por finales de linea CRLF existentes en archivos Flow server-side no tocados por esta correccion.
 
 ## Problema
 

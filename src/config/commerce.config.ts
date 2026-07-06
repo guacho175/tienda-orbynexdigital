@@ -6,6 +6,10 @@ export const commerceConfig = {
   enableCart: true,
   enableExternalPaymentLinks: true,
   enableWhatsappCheckout: true,
+  flowCheckout: {
+    enabled: true,
+    label: "Pagar con Flow",
+  },
   // Namespace usado en localStorage para el carrito. Cambia el prefijo al
   // reutilizar el template para otro cliente si quieres aislar el carrito.
   cartStorageKey: "shop_cart_v1",
@@ -20,7 +24,7 @@ export const commerceConfig = {
   },
   legal: {
     termsShort:
-      "Al comprar aceptas nuestros términos. Las compras son coordinadas directamente vía WhatsApp o el link de pago del producto.",
+      "Al comprar aceptas nuestros terminos. Las compras se procesan por Flow, WhatsApp o el link de pago disponible.",
   },
 };
 

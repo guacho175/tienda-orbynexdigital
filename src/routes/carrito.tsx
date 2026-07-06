@@ -121,8 +121,11 @@ function CartPage() {
               <Price value={total} className="text-lg" />
             </div>
           </div>
-          <Button asChild size="lg" className="btn-hero mt-6 w-full">
-            <Link to="/checkout">Finalizar compra</Link>
+          <Button asChild size="lg" className="btn-hero mt-6 h-auto min-h-10 w-full py-3">
+            <Link to="/checkout" className="flex flex-col gap-1">
+              <span>Continuar al checkout</span>
+              <Price value={total} className="text-xs font-semibold text-primary-foreground/90" />
+            </Link>
           </Button>
           <Button asChild variant="outline" className="mt-2 w-full">
             <Link to="/catalogo">Seguir comprando</Link>
