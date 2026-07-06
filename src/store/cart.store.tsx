@@ -59,9 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           const existing = prev.find((it) => it.productId === product.id);
           if (existing) {
             return prev.map((it) =>
-              it.productId === product.id
-                ? { ...it, quantity: it.quantity + quantity }
-                : it,
+              it.productId === product.id ? { ...it, quantity: it.quantity + quantity } : it,
             );
           }
           return [
@@ -73,6 +71,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
               price: Number(product.price),
               currency: product.currency,
               image_url: product.image_url,
+              image_url_thumb: product.image_url_thumb,
+              image_url_card: product.image_url_card,
+              image_url_detail: product.image_url_detail,
               payment_url: product.payment_url,
               payment_button_label: product.payment_button_label,
               quantity,
@@ -86,9 +87,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setItems((prev) =>
           quantity <= 0
             ? prev.filter((it) => it.productId !== productId)
-            : prev.map((it) =>
-                it.productId === productId ? { ...it, quantity } : it,
-              ),
+            : prev.map((it) => (it.productId === productId ? { ...it, quantity } : it)),
         ),
       clear: () => setItems([]),
     };

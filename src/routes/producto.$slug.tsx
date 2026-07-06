@@ -25,6 +25,7 @@ function ProductDetail() {
   } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug),
+    staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {
@@ -65,10 +66,16 @@ function ProductDetail() {
       <div className="mt-8 grid gap-10 md:grid-cols-2">
         <ProductImage
           src={product.image_url}
+          thumbSrc={product.image_url_thumb}
+          cardSrc={product.image_url_card}
+          detailSrc={product.image_url_detail}
           alt={`Imagen de ${product.name}`}
+          variant="detail"
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="card-surface aspect-[4/3]"
           iconClassName="h-24 w-24"
           loading="eager"
+          priority
         />
 
         <div className="flex flex-col">

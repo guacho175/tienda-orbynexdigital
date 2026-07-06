@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/BackLink";
-import { fetchActiveProducts } from "@/services/products.service";
+import { fetchCatalogProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
 import { brandConfig } from "@/config/brand.config";
 
 export const Route = createFileRoute("/catalogo")({
@@ -28,8 +28,9 @@ export const Route = createFileRoute("/catalogo")({
 function CatalogoPage() {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const { data, isLoading, error } = useQuery({
-    queryKey: ["products", "active"],
-    queryFn: fetchActiveProducts,
+    queryKey: ["products", "catalog"],
+    queryFn: fetchCatalogProducts,
+    staleTime: PRODUCTS_STALE_TIME_MS,
   });
 
   const categories = useMemo(() => {

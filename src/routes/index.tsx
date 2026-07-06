@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { homeConfig } from "@/config/home.config";
-import { fetchActiveProducts } from "@/services/products.service";
+import { fetchFeaturedProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -32,11 +32,11 @@ function Home() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["products", "active"],
-    queryFn: fetchActiveProducts,
+    queryKey: ["products", "featured", featuredProducts.limit],
+    queryFn: () => fetchFeaturedProducts(featuredProducts.limit),
+    staleTime: PRODUCTS_STALE_TIME_MS,
   });
 
-  const visibleProducts = (products ?? []).slice(0, featuredProducts.limit);
   const derivedCategories = Array.from(
     new Set((products ?? []).map((product) => product.category).filter(Boolean)),
   ) as string[];
@@ -135,7 +135,7 @@ function Home() {
               title="No pudimos cargar los productos"
               description="Intenta recargar la pagina en unos segundos."
             />
-          ) : visibleProducts.length === 0 ? (
+          ) : (products ?? []).length === 0 ? (
             <EmptyState
               icon={<Package className="h-10 w-10" />}
               title="Aun no hay productos activos"
@@ -148,7 +148,7 @@ function Home() {
             />
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleProducts.map((product) => (
+              {(products ?? []).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

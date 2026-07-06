@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { commerceConfig } from "@/config/commerce.config";
 import { ProductImage } from "@/components/product/ProductImage";
 import {
-  uploadProductImage,
+  uploadProductImageVariants,
   validateProductImage,
   type ProductImageUploadResult,
 } from "@/services/storage.service";
@@ -29,6 +29,9 @@ const schema = z.object({
   currency: z.string().trim().min(3).max(6),
   category: z.string().trim().max(60).optional().or(z.literal("")),
   image_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
+  image_url_thumb: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
+  image_url_card: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
+  image_url_detail: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
   is_active: z.boolean(),
   availability: z.enum(["in_stock", "out_of_stock", "on_demand"]),
   payment_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
@@ -74,6 +77,9 @@ export function ProductForm({
     currency: initial?.currency ?? commerceConfig.currency,
     category: initial?.category ?? "",
     image_url: initial?.image_url ?? "",
+    image_url_thumb: initial?.image_url_thumb ?? "",
+    image_url_card: initial?.image_url_card ?? "",
+    image_url_detail: initial?.image_url_detail ?? "",
     is_active: initial?.is_active ?? true,
     availability: (initial?.availability as ProductInput["availability"]) ?? "in_stock",
     payment_url: initial?.payment_url ?? "",
@@ -91,6 +97,22 @@ export function ProductForm({
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updateManualImageUrl(value: string) {
+    setValues((prev) => ({
+      ...prev,
+      image_url: value,
+      image_url_thumb: "",
+      image_url_card: "",
+      image_url_detail: "",
+    }));
+    setImageUploadError(null);
+    setImageUploadResult(null);
+  }
+
+  const hasLegacyImage =
+    Boolean(values.image_url) &&
+    (!values.image_url_thumb || !values.image_url_card || !values.image_url_detail);
+
   async function handleImageUpload(file: File | undefined) {
     if (!file) return;
 
@@ -107,10 +129,13 @@ export function ProductForm({
     setUploadingImage(true);
 
     try {
-      const result = await uploadProductImage(file, {
+      const result = await uploadProductImageVariants(file, {
         onPhaseChange: setImageUploadPhase,
       });
-      update("image_url", result.publicUrl);
+      update("image_url", result.detailUrl);
+      update("image_url_thumb", result.thumbUrl);
+      update("image_url_card", result.cardUrl);
+      update("image_url_detail", result.detailUrl);
       setImageUploadResult(result);
     } catch (err) {
       setImageUploadError(
@@ -152,6 +177,9 @@ export function ProductForm({
         description: parsed.data.description || null,
         category: parsed.data.category || null,
         image_url: parsed.data.image_url || null,
+        image_url_thumb: parsed.data.image_url_thumb || null,
+        image_url_card: parsed.data.image_url_card || null,
+        image_url_detail: parsed.data.image_url_detail || null,
         payment_url: parsed.data.payment_url || null,
         payment_button_label: parsed.data.payment_button_label || null,
       } as ProductInput;
@@ -278,11 +306,7 @@ export function ProductForm({
         <Input
           id="image_url"
           value={values.image_url ?? ""}
-          onChange={(e) => {
-            update("image_url", e.target.value);
-            setImageUploadError(null);
-            setImageUploadResult(null);
-          }}
+          onChange={(e) => updateManualImageUrl(e.target.value)}
           placeholder="https://..."
         />
         {errors.image_url ? <p className="text-xs text-destructive">{errors.image_url}</p> : null}
@@ -302,20 +326,26 @@ export function ProductForm({
             }}
           />
           <p className="text-xs text-muted-foreground">
-            JPG, PNG o WebP. Original maximo 10 MB. Se guarda como WebP optimizado.
+            JPG, PNG o WebP. Original maximo 10 MB. Se guardan variantes WebP optimizadas.
           </p>
           {imageUploadPhase === "optimizing" ? (
             <p className="text-xs text-accent">Optimizando imagen...</p>
           ) : null}
           {imageUploadPhase === "uploading" ? (
-            <p className="text-xs text-accent">Subiendo imagen optimizada...</p>
+            <p className="text-xs text-accent">Subiendo variantes optimizadas...</p>
           ) : null}
           {imageUploadResult ? (
-            <div className="grid gap-1 rounded-md border border-border/50 bg-secondary/20 p-3 text-xs text-muted-foreground sm:grid-cols-3">
+            <div className="grid gap-1 rounded-md border border-border/50 bg-secondary/20 p-3 text-xs text-muted-foreground sm:grid-cols-2">
               <span>Original: {formatFileSize(imageUploadResult.originalSize)}</span>
-              <span>Optimizada: {formatFileSize(imageUploadResult.optimizedSize)}</span>
-              <span>Formato: WebP</span>
+              <span>Thumb: {formatFileSize(imageUploadResult.thumbSize)}</span>
+              <span>Card: {formatFileSize(imageUploadResult.cardSize)}</span>
+              <span>Detail: {formatFileSize(imageUploadResult.detailSize)}</span>
             </div>
+          ) : null}
+          {hasLegacyImage ? (
+            <p className="rounded-md border border-accent/30 bg-accent/10 p-3 text-xs text-accent">
+              Este producto usa imagen legacy. Re-subir imagen para generar variantes optimizadas.
+            </p>
           ) : null}
           {imageUploadError || errors.image_upload ? (
             <p className="text-xs text-destructive">{imageUploadError ?? errors.image_upload}</p>
@@ -324,7 +354,12 @@ export function ProductForm({
 
         <ProductImage
           src={values.image_url}
+          thumbSrc={values.image_url_thumb}
+          cardSrc={values.image_url_card}
+          detailSrc={values.image_url_detail}
           alt={values.name ? `Imagen de ${values.name}` : "Vista previa del producto"}
+          variant="card"
+          sizes="220px"
           className="aspect-[4/3] rounded-md border border-border/50"
           iconClassName="h-10 w-10"
         />

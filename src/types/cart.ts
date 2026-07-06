@@ -7,6 +7,9 @@ export interface CartItem {
   price: number;
   currency: string;
   image_url: string | null;
+  image_url_thumb?: string | null;
+  image_url_card?: string | null;
+  image_url_detail?: string | null;
   payment_url: string | null;
   payment_button_label: string | null;
   quantity: number;
@@ -20,6 +23,9 @@ export type ProductForCart = Pick<
   | "price"
   | "currency"
   | "image_url"
+  | "image_url_thumb"
+  | "image_url_card"
+  | "image_url_detail"
   | "payment_url"
   | "payment_button_label"
 >;

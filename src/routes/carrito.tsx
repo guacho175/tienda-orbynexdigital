@@ -64,7 +64,12 @@ function CartPage() {
               >
                 <ProductImage
                   src={item.image_url}
+                  thumbSrc={item.image_url_thumb}
+                  cardSrc={item.image_url_card}
+                  detailSrc={item.image_url_detail}
                   alt={`Imagen de ${item.name}`}
+                  variant="thumb"
+                  sizes="8rem"
                   className="aspect-[4/3] w-full rounded-md sm:w-32"
                   iconClassName="h-8 w-8"
                 />

@@ -164,3 +164,42 @@ Riesgos:
 - Si Supabase Storage cambia nombres internos de columnas de `storage.buckets`, revisar `file_size_limit` y `allowed_mime_types`.
 - Si `user_roles` no permite leer el propio rol, las policies de Storage bloquearan uploads admin. En el estado actual si permite `SELECT` propio.
 - Si una imagen con mucho detalle no baja de `450 KB`, el panel la rechaza para proteger performance.
+
+---
+
+## Actualizacion - variantes por contexto
+
+Fecha: 2026-07-06
+
+Estado: implementado a nivel de codigo. Requiere aplicar migracion nueva en Supabase/Lovable Cloud.
+
+El flujo de Storage ahora genera tres archivos WebP por upload:
+
+```text
+products/YYYY/MM/<uuid>-thumb.webp
+products/YYYY/MM/<uuid>-card.webp
+products/YYYY/MM/<uuid>-detail.webp
+```
+
+Columnas nuevas:
+
+- `products.image_url_thumb`
+- `products.image_url_card`
+- `products.image_url_detail`
+
+`products.image_url` se mantiene como fallback legacy y queda apuntando a la variante detail en productos nuevos.
+
+Limites actuales:
+
+- Thumb: 320 px, maximo 50 KB.
+- Card: 480 px, maximo 80 KB.
+- Detail: 1000 px, maximo 220 KB.
+- Maximo absoluto: 250 KB.
+
+Notas operativas:
+
+- No se suben originales.
+- No se eliminan imagenes antiguas.
+- Productos existentes siguen funcionando por fallback.
+- Para maxima optimizacion se deben re-subir imagenes legacy desde admin.
+- Medir cache con Chrome DevTools y `Disable cache` desactivado; si esta activado, todo parecera descargarse de nuevo.

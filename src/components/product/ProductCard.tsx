@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
 import { toast } from "sonner";
-import type { Product } from "@/types/product";
+import type { ProductCardData } from "@/types/product";
 import { ProductImage } from "@/components/product/ProductImage";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem } = useCart();
 
   return (
@@ -15,7 +15,12 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary/40">
         <ProductImage
           src={product.image_url}
+          thumbSrc={product.image_url_thumb}
+          cardSrc={product.image_url_card}
+          detailSrc={product.image_url_detail}
           alt={`Imagen de ${product.name}`}
+          variant="card"
+          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 25vw"
           className="h-full w-full"
           imageClassName="transition-transform duration-500 group-hover:scale-105"
         />

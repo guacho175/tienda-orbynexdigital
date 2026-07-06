@@ -377,6 +377,61 @@ Pendientes posteriores:
 
 ---
 
+## Optimizacion agresiva de imagenes - variantes
+
+Estado: implementado a nivel de codigo al 2026-07-06.
+
+Diagnostico:
+
+- Productos activos medidos via Supabase publico: 15.
+- URLs de imagen unicas: 15.
+- Peso bruto actual por HEAD: 914.5 KB.
+- Rango de imagenes actuales: 35.7 KB a 93.9 KB.
+- Las imagenes actuales son WebP, pero antes todas las vistas usaban una sola `image_url`.
+- Home mostraba 6 productos, pero consultaba todo el catalogo para derivar productos/categorias.
+- El build mantiene warning de chunk cliente grande: `index` ~590 KB minificado (~171.8 KB gzip).
+
+Implementado:
+
+- Migracion `supabase/migrations/20260706160000_product_image_variants.sql`.
+- Nuevas columnas nullable:
+  - `image_url_thumb`
+  - `image_url_card`
+  - `image_url_detail`
+- `image_url` queda como fallback legacy y alias de detail para productos nuevos.
+- Admin genera tres variantes WebP al subir imagen:
+  - thumb: 320 px, maximo 50 KB.
+  - card: 480 px, maximo 80 KB.
+  - detail: 1000 px, maximo 220 KB.
+- `ProductImage` elige variante por contexto, usa fallback legacy, `loading="lazy"` por defecto, `decoding="async"`, `sizes` y `fetchPriority` solo cuando `priority=true`.
+- Home usa `fetchFeaturedProducts(limit)` y maximo 6 productos.
+- Catalogo usa campos necesarios para cards.
+- Detalle usa variante `detail`.
+- Carrito y checkout usan variante `thumb`.
+- Carrito conserva compatibilidad con items antiguos de `localStorage`.
+- Admin muestra pesos finales y aviso de imagen legacy cuando faltan variantes.
+
+Documentacion nueva:
+
+- `docs/AUDITORIA-PERFORMANCE-IMAGENES.md`
+- `docs/IMAGENES-VARIANTES-THUMB-CARD-DETAIL.md`
+
+Validacion:
+
+- `npm run build`: pasa.
+- `npm run lint`: falla por CRLF preexistente en el repo.
+- Lint acotado a archivos tocados: 0 errores, 2 warnings preexistentes en `src/store/cart.store.tsx`.
+
+Pendientes:
+
+- Aplicar migracion en Supabase/Lovable Cloud antes del deploy que use columnas nuevas.
+- Re-subir imagenes legacy desde admin para poblar variantes.
+- Verificar en DevTools que `-card.webp`, `-thumb.webp` y `-detail.webp` se usan en las vistas correctas.
+- Revisar headers de cache reales; la medicion HEAD de imagenes actuales mostro `cache-control: no-cache`.
+- Fase avanzada: `srcset`, CDN transformations, paginacion/load more, blur placeholder, AVIF opcional y code splitting.
+
+---
+
 ## Flow API - Fase 1 DB preparada
 
 Estado: implementada localmente en la rama `feature/flow-api-dynamic-checkout`.

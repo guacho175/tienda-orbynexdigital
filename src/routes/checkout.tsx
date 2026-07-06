@@ -305,7 +305,12 @@ function CheckoutPage() {
                 <li key={it.productId} className="grid grid-cols-[3.5rem_1fr] gap-3">
                   <ProductImage
                     src={it.image_url}
+                    thumbSrc={it.image_url_thumb}
+                    cardSrc={it.image_url_card}
+                    detailSrc={it.image_url_detail}
                     alt={`Imagen de ${it.name}`}
+                    variant="thumb"
+                    sizes="3.5rem"
                     className="aspect-square rounded-md"
                     iconClassName="h-5 w-5"
                   />

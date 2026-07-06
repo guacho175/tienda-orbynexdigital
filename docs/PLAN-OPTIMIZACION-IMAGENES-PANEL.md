@@ -239,3 +239,48 @@ Riesgos y criterios operativos:
 - Imagenes corruptas fallan antes de subir.
 - Si una foto con mucho detalle no baja de `450 KB`, el admin debe usar otra imagen o reducirla antes.
 - No se tocaron Supabase config, RLS, Auth, Flow, carrito, checkout, tablas ni migraciones.
+
+---
+
+## Actualizacion - variantes thumb/card/detail
+
+Fecha: 2026-07-06
+
+Estado: implementado a nivel de codigo y documentacion.
+
+La fase anterior de una sola `image_url` optimizada queda reemplazada por un flujo de variantes por contexto:
+
+- `image_url_thumb`: miniaturas de carrito y checkout.
+- `image_url_card`: cards de home y catalogo.
+- `image_url_detail`: detalle de producto.
+- `image_url`: fallback legacy y alias de detalle para productos nuevos.
+
+Nuevos limites:
+
+- Thumb: 320 px maximo, objetivo 25-35 KB, maximo 50 KB.
+- Card: 480 px maximo, objetivo 40 KB, maximo 80 KB.
+- Detail: 1000 px maximo, objetivo 140 KB, maximo 220 KB.
+- Maximo absoluto por variante: 250 KB.
+
+Archivos principales:
+
+- `src/services/storage.service.ts`
+- `src/components/admin/ProductForm.tsx`
+- `src/components/product/ProductImage.tsx`
+- `src/components/product/ProductCard.tsx`
+- `src/services/products.service.ts`
+- `supabase/migrations/20260706160000_product_image_variants.sql`
+- `docs/AUDITORIA-PERFORMANCE-IMAGENES.md`
+- `docs/IMAGENES-VARIANTES-THUMB-CARD-DETAIL.md`
+
+Validacion:
+
+- `npm run build`: pasa.
+- `npm run lint`: falla por CRLF preexistente en el repo.
+- Lint acotado a archivos tocados: 0 errores, 2 warnings preexistentes en `src/store/cart.store.tsx`.
+
+Pendiente operativo:
+
+- Aplicar la migracion en Supabase/Lovable Cloud.
+- Re-subir imagenes legacy desde admin para poblar variantes.
+- Verificar headers de cache reales en DevTools con `Disable cache` desactivado.
