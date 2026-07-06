@@ -12,6 +12,7 @@ Los precios estan pensados para probar sumas, cantidades, carrito, checkout y Fl
 Ejecutar manualmente en Supabase SQL Editor o desde un entorno con permisos suficientes.
 
 ```sql
+
 INSERT INTO public.products (
   name,
   slug,

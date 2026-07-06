@@ -134,7 +134,7 @@ Grants: `SELECT` a `authenticated`; `ALL` a `service_role`.
 
 **Enum**: `app_role` = `admin | moderator | user`.
 
-**Buckets de Storage**: ninguno todavía (pendiente Fase 3A para upload de imágenes).
+**Buckets de Storage**: `product-images` público para imágenes de producto. El panel admin sube solo WebP optimizado desde navegador; no guarda originales pesados.
 
 ---
 
@@ -232,7 +232,7 @@ Este INSERT hay que ejecutarlo desde una vía con `service_role` (backend / SQL 
 
 ### Fase 3A — crítica (necesaria para uso real por clientes)
 
-1. **Upload de imágenes con Supabase Storage** — bucket público `product-images`, policies (`SELECT` público; `INSERT/UPDATE/DELETE` solo admin), input de archivo en `ProductForm` que sube y setea `image_url`.
+1. **Upload de imágenes con Supabase Storage** — completado. Bucket público `product-images`, policies (`SELECT` público; `INSERT/UPDATE/DELETE` solo admin), input de archivo en `ProductForm`, optimización client-side a WebP y guardado de `image_url`.
 2. **Reset password** — página `/reset-password` para completar el flujo de `supabase.auth.resetPasswordForEmail`. Sin esto, el flujo queda a medias.
 3. **Mejor manejo de carrito vacío en checkout** — ya existe `EmptyState`, revisar que también deshabilite intents desde deep-links y sincronice con navbar.
 4. **Vista previa del producto desde admin** — botón que abre `/producto/:slug` en nueva pestaña desde la lista y el formulario (útil aún cuando `is_active = false` mostrando un fallback).
@@ -325,7 +325,7 @@ Al terminar:
 
 ## Actualizacion - Fase 3A Imagenes con Supabase Storage
 
-Estado: completada a nivel de codigo y migracion. Pendiente operativo: aplicar la migracion en Supabase/Lovable Cloud y validar el flujo con usuarios reales.
+Estado: completada a nivel de codigo y migracion. El flujo admin ahora optimiza imagenes antes de subirlas y evita guardar originales pesados. Pendiente operativo: validar el flujo con usuarios reales en el entorno conectado.
 
 Implementado:
 
@@ -333,9 +333,12 @@ Implementado:
 - Policies de Storage:
   - lectura publica para `anon` y `authenticated`;
   - `INSERT`, `UPDATE` y `DELETE` solo para usuarios autenticados con rol `admin` en `public.user_roles`.
-- Servicio frontend `src/services/storage.service.ts` para validar y subir imagenes sin `service_role`.
+- Servicio frontend `src/services/storage.service.ts` para validar, optimizar y subir imagenes sin `service_role`.
+- Optimizacion client-side con `createImageBitmap`, `canvas` y `canvas.toBlob`.
 - Upload de imagen en `ProductForm`, manteniendo el campo manual `image_url`.
 - Preview de imagen en el formulario.
+- Estados `Optimizando imagen...` y `Subiendo imagen optimizada...`.
+- Metadata visible para admin: peso original, peso optimizado y formato final WebP.
 - Placeholder reutilizable `ProductImage` para catalogo, detalle y carrito.
 - Boton de vista publica desde el listado admin para productos activos.
 - `.env.example` con variables publicas reales del proyecto.
@@ -350,6 +353,18 @@ Seguridad mantenida:
 - Las policies admin de `products` validan el rol con `EXISTS` directo sobre `public.user_roles`, sin llamar `public.has_role` desde RLS.
 - No se toca `src/routes/_authenticated/route.tsx`.
 - No se implementan Flow API, Mercado Pago API, tabla `orders` ni carrito backend.
+- No se tocaron Supabase config, RLS, Auth, endpoints Flow, checkout, tablas ni migraciones para la optimizacion de imagenes.
+
+Limites de imagen configurados:
+
+- Entrada permitida: JPG, PNG y WebP.
+- Original maximo: `10 MB`.
+- Salida obligatoria: WebP (`image/webp`).
+- Dimension maxima: `1200 x 1200 px`, manteniendo aspect ratio y sin agrandar imagenes pequenas.
+- Calidad inicial: `0.82`.
+- Peso objetivo: menor a `250 KB`.
+- Peso maximo final permitido: `450 KB`.
+- Cache Storage: `31536000`.
 
 Pendientes posteriores:
 

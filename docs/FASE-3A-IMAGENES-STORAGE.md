@@ -1,6 +1,6 @@
 # Fase 3A - Imagenes con Supabase Storage
 
-Estado: completada a nivel de codigo y migracion. Falta aplicar la migracion en el proyecto Supabase/Lovable Cloud y validar con usuarios reales.
+Estado: completada a nivel de codigo y migracion. El panel admin ahora optimiza las imagenes en navegador antes de subirlas, por lo que no guarda originales pesados en Storage.
 
 ## Bucket
 
@@ -13,10 +13,12 @@ Estado: completada a nivel de codigo y migracion. Falta aplicar la migracion en 
   - `image/webp`
   - `image/gif`
 
+Nota: la configuracion historica del bucket puede permitir GIF, pero el flujo del panel admin bloquea GIF y sube siempre WebP optimizado.
+
 Las rutas internas se generan como:
 
 ```text
-products/YYYY/MM/uuid.extension
+products/YYYY/MM/uuid.webp
 ```
 
 En `products.image_url` se guarda la URL publica devuelta por Supabase Storage.
@@ -48,9 +50,23 @@ src/services/storage.service.ts
 
 Funciones:
 
-- `validateProductImage(file)`: valida MIME y tamano.
-- `uploadProductImage(file)`: sube al bucket y devuelve URL publica.
+- `validateProductImage(file)`: valida MIME y tamano del original.
+- `optimizeProductImage(file)`: convierte a WebP con APIs nativas del navegador.
+- `uploadProductImage(file)`: optimiza internamente, sube solo el WebP final y devuelve URL publica junto con metadata de peso/dimensiones.
 - `getProductImagePublicUrl(path)`: obtiene URL publica desde un path de Storage.
+
+Limites configurados:
+
+- Formatos de entrada aceptados desde el panel: JPG, PNG y WebP.
+- Original maximo: `10 MB`.
+- Salida: `image/webp`.
+- Dimension maxima: `1200 x 1200 px`.
+- No se agrandan imagenes pequenas.
+- Calidad inicial: `0.82`.
+- Peso objetivo: menor a `250 KB`.
+- Peso maximo final permitido: `450 KB`.
+- `cacheControl`: `31536000`.
+- `contentType` de subida: `image/webp`.
 
 ## Uso desde admin
 
@@ -59,8 +75,11 @@ En el formulario de producto:
 1. El campo `URL de imagen` sigue editable.
 2. El admin puede pegar una URL externa manualmente.
 3. El admin puede usar `Subir imagen`.
-4. Si la subida funciona, `image_url` se actualiza automaticamente.
-5. Si la subida falla, el formulario muestra error y no guarda silenciosamente.
+4. Al seleccionar archivo, el formulario muestra `Optimizando imagen...`.
+5. Luego muestra `Subiendo imagen optimizada...`.
+6. Si la subida funciona, `image_url` se actualiza automaticamente con la URL publica del WebP final.
+7. El formulario muestra peso original, peso optimizado y formato final WebP.
+8. Si la optimizacion o subida falla, el formulario muestra error y no permite guardar hasta corregir.
 
 ## Placeholder publico
 
@@ -113,6 +132,7 @@ Revisar:
 - No volver a dar `EXECUTE` publico a `public.has_role`.
 - No permitir escritura publica en Storage.
 - La UI admin ayuda, pero la defensa real es la policy de Storage.
+- El frontend nunca sube la imagen original seleccionada; sube solo el archivo WebP optimizado.
 
 ## Reporte de cambios
 
@@ -140,6 +160,7 @@ Criterios responsive y visuales:
 
 Riesgos:
 
-- La migracion debe aplicarse en Supabase/Lovable Cloud antes de probar upload real.
+- La migracion debe estar aplicada en Supabase/Lovable Cloud antes de probar upload real.
 - Si Supabase Storage cambia nombres internos de columnas de `storage.buckets`, revisar `file_size_limit` y `allowed_mime_types`.
 - Si `user_roles` no permite leer el propio rol, las policies de Storage bloquearan uploads admin. En el estado actual si permite `SELECT` propio.
+- Si una imagen con mucho detalle no baja de `450 KB`, el panel la rechaza para proteger performance.

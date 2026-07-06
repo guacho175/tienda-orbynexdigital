@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { commerceConfig } from "@/config/commerce.config";
 import { ProductImage } from "@/components/product/ProductImage";
-import { uploadProductImage, validateProductImage } from "@/services/storage.service";
+import {
+  uploadProductImage,
+  validateProductImage,
+  type ProductImageUploadResult,
+} from "@/services/storage.service";
 import type { Product } from "@/types/product";
 import type { ProductInput } from "@/services/products.service";
 
@@ -43,6 +47,11 @@ function slugify(v: string) {
     .replace(/-+/g, "-");
 }
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export interface ProductFormProps {
   initial?: Product | null;
   submitLabel?: string;
@@ -74,7 +83,9 @@ export function ProductForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadPhase, setImageUploadPhase] = useState<"optimizing" | "uploading" | null>(null);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const [imageUploadResult, setImageUploadResult] = useState<ProductImageUploadResult | null>(null);
 
   function update<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -86,15 +97,21 @@ export function ProductForm({
     const validationError = validateProductImage(file);
     if (validationError) {
       setImageUploadError(validationError);
+      setImageUploadResult(null);
       return;
     }
 
     setImageUploadError(null);
+    setImageUploadResult(null);
+    setImageUploadPhase("optimizing");
     setUploadingImage(true);
 
     try {
-      const publicUrl = await uploadProductImage(file);
-      update("image_url", publicUrl);
+      const result = await uploadProductImage(file, {
+        onPhaseChange: setImageUploadPhase,
+      });
+      update("image_url", result.publicUrl);
+      setImageUploadResult(result);
     } catch (err) {
       setImageUploadError(
         err instanceof Error
@@ -103,6 +120,7 @@ export function ProductForm({
       );
     } finally {
       setUploadingImage(false);
+      setImageUploadPhase(null);
     }
   }
 
@@ -263,6 +281,7 @@ export function ProductForm({
           onChange={(e) => {
             update("image_url", e.target.value);
             setImageUploadError(null);
+            setImageUploadResult(null);
           }}
           placeholder="https://..."
         />
@@ -275,7 +294,7 @@ export function ProductForm({
           <Input
             id="product_image_upload"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp"
             disabled={uploadingImage || submitting}
             onChange={(e) => {
               void handleImageUpload(e.target.files?.[0]);
@@ -283,9 +302,21 @@ export function ProductForm({
             }}
           />
           <p className="text-xs text-muted-foreground">
-            JPG, PNG, WebP o GIF. Maximo 5 MB. Tambien puedes pegar una URL manual arriba.
+            JPG, PNG o WebP. Original maximo 10 MB. Se guarda como WebP optimizado.
           </p>
-          {uploadingImage ? <p className="text-xs text-accent">Subiendo imagen...</p> : null}
+          {imageUploadPhase === "optimizing" ? (
+            <p className="text-xs text-accent">Optimizando imagen...</p>
+          ) : null}
+          {imageUploadPhase === "uploading" ? (
+            <p className="text-xs text-accent">Subiendo imagen optimizada...</p>
+          ) : null}
+          {imageUploadResult ? (
+            <div className="grid gap-1 rounded-md border border-border/50 bg-secondary/20 p-3 text-xs text-muted-foreground sm:grid-cols-3">
+              <span>Original: {formatFileSize(imageUploadResult.originalSize)}</span>
+              <span>Optimizada: {formatFileSize(imageUploadResult.optimizedSize)}</span>
+              <span>Formato: WebP</span>
+            </div>
+          ) : null}
           {imageUploadError || errors.image_upload ? (
             <p className="text-xs text-destructive">{imageUploadError ?? errors.image_upload}</p>
           ) : null}
