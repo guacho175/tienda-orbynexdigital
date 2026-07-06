@@ -1,16 +1,33 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Package, Shield } from "lucide-react";
+import { LogOut, Package, Shield, Plus, Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchAllProductsAdmin } from "@/services/products.service";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  deleteProduct,
+  fetchAllProductsAdmin,
+  toggleProductActive,
+} from "@/services/products.service";
 import { Price } from "@/components/ui-common/Price";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminPage,
 });
 
@@ -37,6 +54,24 @@ function AdminPage() {
     queryKey: ["admin-products"],
     queryFn: fetchAllProductsAdmin,
     enabled: isAdmin === true,
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      toggleProductActive(id, isActive),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+    },
+    onError: (err: Error) => toast.error(err.message ?? "Error"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      toast.success("Producto eliminado");
+    },
+    onError: (err: Error) => toast.error(err.message ?? "Error al eliminar"),
   });
 
   async function handleSignOut() {
@@ -84,6 +119,11 @@ function AdminPage() {
             {products?.length ?? 0} productos en total
           </div>
           <div className="flex gap-2">
+            <Button asChild className="btn-hero">
+              <Link to="/admin/new">
+                <Plus className="mr-1 h-4 w-4" /> Nuevo producto
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/">Ver sitio</Link>
             </Button>
@@ -101,26 +141,68 @@ function AdminPage() {
                 <th className="px-4 py-3">Categoría</th>
                 <th className="px-4 py-3">Precio</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {(products ?? []).map((p) => (
                 <tr key={p.id} className="border-t border-border/50">
-                  <td className="px-4 py-3 font-medium text-foreground">{p.name}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">
+                    <div>{p.name}</div>
+                    <div className="text-xs text-muted-foreground">/{p.slug}</div>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.category ?? "—"}</td>
                   <td className="px-4 py-3">
                     <Price value={Number(p.price)} currency={p.currency} />
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={p.is_active ? "default" : "secondary"}>
-                      {p.is_active ? "Activo" : "Inactivo"}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={p.is_active}
+                        onCheckedChange={(v) =>
+                          toggleMutation.mutate({ id: p.id, isActive: v })
+                        }
+                      />
+                      <Badge variant={p.is_active ? "default" : "secondary"}>
+                        {p.is_active ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link to="/admin/edit/$id" params={{ id: p.id }}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción no se puede deshacer. Se eliminará "{p.name}" permanentemente.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteMutation.mutate(p.id)}>
+                              Eliminar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </td>
                 </tr>
               ))}
               {(products ?? []).length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
                     No hay productos aún.
                   </td>
                 </tr>
@@ -130,7 +212,7 @@ function AdminPage() {
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          El CRUD completo (crear / editar / activar) se entregará en la Fase 2.
+          Documentación del template en <Link to="/docs" className="underline hover:text-foreground">/docs</Link>.
         </p>
       </Container>
     </>
