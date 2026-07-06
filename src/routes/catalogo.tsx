@@ -11,7 +11,7 @@ import { Package } from "lucide-react";
 export const Route = createFileRoute("/catalogo")({
   head: () => ({
     meta: [
-      { title: "Catálogo — Orbynex Digital" },
+      { title: `Catálogo — ${brandConfig.name}` },
       {
         name: "description",
         content: "Servicios digitales: sitios web, automatización y soporte técnico.",
