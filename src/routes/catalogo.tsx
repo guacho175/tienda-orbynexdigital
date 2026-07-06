@@ -18,7 +18,7 @@ export const Route = createFileRoute("/catalogo")({
       { title: `Catalogo de productos - ${brandConfig.name}` },
       {
         name: "description",
-        content: "Catalogo de productos digitales con carrito, checkout, Flow y WhatsApp.",
+        content: "Catalogo de servicios digitales con carrito, pago online y WhatsApp.",
       },
     ],
   }),
@@ -47,8 +47,8 @@ function CatalogoPage() {
     <>
       <PageHeader
         eyebrow="Catalogo"
-        title="Catalogo de productos"
-        subtitle="Explora productos digitales, revisa detalles y agrega al carrito para probar el checkout."
+        title="Catalogo de servicios"
+        subtitle="Explora servicios digitales, revisa detalles y agrega al carrito para avanzar con tu pedido."
       />
       <Container className="py-8 sm:py-12">
         <BackLink to="/" label="Inicio" />
@@ -93,7 +93,7 @@ function CatalogoPage() {
             <EmptyState
               icon={<Package className="h-10 w-10" />}
               title="Aun no hay productos"
-              description="Cuando publiques productos activos desde el admin apareceran en esta grilla."
+              description="Cuando publiques productos activos desde el panel apareceran en esta grilla."
               action={
                 <Button asChild className="btn-hero">
                   <Link to="/">Volver al inicio</Link>

@@ -49,16 +49,16 @@ function CheckoutPage() {
     return (
       <>
         <PageHeader
-          title="Checkout"
-          subtitle="Necesitas productos en el carrito antes de iniciar el pago."
+          title="Finalizar compra"
+          subtitle="Necesitas servicios en el carrito antes de iniciar el pago."
         />
         <Container className="py-8 sm:py-12">
           <BackLink to="/carrito" label="Volver al carrito" />
           <div className="mt-8">
             <EmptyState
               icon={<ShoppingBag className="h-10 w-10" />}
-              title="No hay productos en tu carrito"
-              description="Vuelve al catalogo, agrega productos y regresa para probar Flow o WhatsApp."
+              title="No hay servicios en tu carrito"
+              description="Vuelve al catalogo, agrega servicios y regresa para elegir como confirmar tu pedido."
               action={
                 <Button asChild className="btn-hero">
                   <Link to="/catalogo">Ir al catalogo</Link>
@@ -133,16 +133,16 @@ function CheckoutPage() {
       const payload = (await response.json().catch(() => ({}))) as FlowPaymentResponse;
 
       if (!response.ok) {
-        throw new Error(payload.error || "No se pudo crear el pago en Flow");
+        throw new Error(payload.error || "No se pudo crear el pago online");
       }
 
       if (!payload.redirectUrl) {
-        throw new Error("Flow no devolvio una URL de pago");
+        throw new Error("El proveedor de pago no devolvio una URL valida");
       }
 
       window.location.assign(payload.redirectUrl);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No se pudo crear el pago en Flow";
+      const message = error instanceof Error ? error.message : "No se pudo crear el pago online";
       setFlowError(message);
       toast.error("No se pudo iniciar el pago", {
         description: message,
@@ -160,7 +160,7 @@ function CheckoutPage() {
     <>
       <PageHeader
         title="Finalizar compra"
-        subtitle="Completa tus datos y elige Flow, WhatsApp o link externo cuando este disponible."
+        subtitle="Completa tus datos y elige pago online, WhatsApp o pago externo cuando este disponible."
       />
       <Container className="py-8 sm:py-12">
         <BackLink to="/carrito" label="Volver al carrito" />
@@ -228,7 +228,8 @@ function CheckoutPage() {
               <div>
                 <h3 className="text-base font-semibold text-foreground">Opciones de pago</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Flow procesa el carrito completo. WhatsApp queda como alternativa de coordinacion.
+                  El pago online procesa el carrito completo. WhatsApp queda como alternativa de
+                  coordinacion.
                 </p>
               </div>
 
@@ -290,7 +291,7 @@ function CheckoutPage() {
               ) : items.some((i) => i.payment_url) ? (
                 <p className="rounded-md border border-border/60 bg-secondary/40 p-3 text-sm text-muted-foreground">
                   Los links externos quedan disponibles por producto individual. Para este carrito
-                  completo usa Flow o WhatsApp.
+                  completo usa pago online o WhatsApp.
                 </p>
               ) : null}
 

@@ -25,11 +25,15 @@ function EditProductPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["admin-product", id] });
-      toast.success("Producto actualizado");
+      toast.success("Producto actualizado", {
+        description: "Los cambios quedaron guardados en el catalogo.",
+      });
       navigate({ to: "/admin" });
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Error al actualizar");
+      toast.error("No se pudo actualizar el producto", {
+        description: err.message || "Revisa los campos e intenta nuevamente.",
+      });
     },
   });
 

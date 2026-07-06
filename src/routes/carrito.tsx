@@ -25,7 +25,7 @@ function CartPage() {
       <>
         <PageHeader
           title="Tu carrito"
-          subtitle="Agrega productos desde el catalogo para probar el flujo de compra."
+          subtitle="Agrega servicios desde el catalogo y revisa tu pedido antes de pagar."
         />
         <Container className="py-8 sm:py-12">
           <BackLink to="/catalogo" label="Seguir comprando" />
@@ -33,7 +33,7 @@ function CartPage() {
             <EmptyState
               icon={<ShoppingBag className="h-10 w-10" />}
               title="Tu carrito esta vacio"
-              description="Explora productos digitales y agregalos para revisar el checkout."
+              description="Explora servicios digitales y agregalos para preparar tu pedido."
               action={
                 <Button asChild className="btn-hero">
                   <Link to="/catalogo">Ir al catalogo</Link>
@@ -50,7 +50,7 @@ function CartPage() {
     <>
       <PageHeader
         title="Tu carrito"
-        subtitle="Revisa productos, cantidades y total antes de continuar al checkout."
+        subtitle="Revisa servicios, cantidades y total antes de continuar al pago."
       />
       <Container className="py-8 sm:py-12">
         <BackLink to="/catalogo" label="Seguir comprando" />
@@ -150,7 +150,7 @@ function CartPage() {
             </div>
             <Button asChild size="lg" className="btn-hero mt-6 h-auto min-h-10 w-full py-3">
               <Link to="/checkout" className="flex flex-col gap-1">
-                <span>Continuar al checkout</span>
+                <span>Continuar al pago</span>
                 <Price value={total} className="text-xs font-semibold text-primary-foreground/90" />
               </Link>
             </Button>

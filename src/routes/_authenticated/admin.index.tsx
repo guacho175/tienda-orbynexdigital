@@ -14,7 +14,9 @@ import {
 import { Price } from "@/components/ui-common/Price";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ProductImage } from "@/components/product/ProductImage";
 import { toast } from "sonner";
+import type { Product } from "@/types/product";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,16 +64,24 @@ function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     },
-    onError: (err: Error) => toast.error(err.message ?? "Error"),
+    onError: (err: Error) =>
+      toast.error("No se pudo cambiar el estado", {
+        description: err.message || "Revisa tu conexion e intenta nuevamente.",
+      }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-      toast.success("Producto eliminado");
+      toast.success("Producto eliminado", {
+        description: "El catalogo se actualizo correctamente.",
+      });
     },
-    onError: (err: Error) => toast.error(err.message ?? "Error al eliminar"),
+    onError: (err: Error) =>
+      toast.error("No se pudo eliminar el producto", {
+        description: err.message || "Revisa permisos, dependencias o intenta nuevamente.",
+      }),
   });
 
   async function handleSignOut() {
@@ -79,6 +89,65 @@ function AdminPage() {
     queryClient.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
+  }
+
+  function renderProductActions(p: Product) {
+    return (
+      <div className="flex justify-end gap-1">
+        {p.slug ? (
+          p.is_active ? (
+            <Button asChild variant="ghost" size="sm">
+              <a
+                href={`/producto/${p.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Ver producto ${p.name}`}
+              >
+                <Eye className="h-4 w-4" />
+                <span className="sr-only">Ver producto</span>
+              </a>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled
+              title="Producto inactivo; no visible publicamente"
+            >
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">Ver producto</span>
+            </Button>
+          )
+        ) : null}
+        <Button asChild variant="ghost" size="sm">
+          <Link to="/admin/edit/$id" params={{ id: p.id }}>
+            <Pencil className="h-4 w-4" />
+          </Link>
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminar producto?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta accion no se puede deshacer. Se eliminara "{p.name}" permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteMutation.mutate(p.id)}>
+                Eliminar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
   }
 
   if (isAdmin === null) {
@@ -132,8 +201,59 @@ function AdminPage() {
           </div>
         </div>
 
-        <div className="card-surface overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="space-y-4 md:hidden">
+          {(products ?? []).map((p) => (
+            <article key={p.id} className="card-surface p-4">
+              <div className="grid grid-cols-[4.5rem_1fr] gap-4">
+                <ProductImage
+                  src={p.image_url}
+                  thumbSrc={p.image_url_thumb}
+                  cardSrc={p.image_url_card}
+                  detailSrc={p.image_url_detail}
+                  alt={`Miniatura de ${p.name}`}
+                  variant="thumb"
+                  sizes="4.5rem"
+                  className="aspect-square rounded-xl"
+                  iconClassName="h-6 w-6"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h2 className="line-clamp-2 font-semibold text-foreground">{p.name}</h2>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">/{p.slug}</p>
+                    </div>
+                    <Badge variant={p.is_active ? "default" : "secondary"}>
+                      {p.is_active ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        {p.category ?? "Sin categoria"}
+                      </p>
+                      <Price value={Number(p.price)} currency={p.currency} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={p.is_active}
+                        onCheckedChange={(v) => toggleMutation.mutate({ id: p.id, isActive: v })}
+                      />
+                      {renderProductActions(p)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+          {(products ?? []).length === 0 ? (
+            <div className="card-surface px-4 py-10 text-center text-muted-foreground">
+              No hay productos aun.
+            </div>
+          ) : null}
+        </div>
+
+        <div className="card-surface hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[760px] text-sm">
             <thead className="bg-secondary/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">Producto</th>
@@ -147,8 +267,23 @@ function AdminPage() {
               {(products ?? []).map((p) => (
                 <tr key={p.id} className="border-t border-border/50">
                   <td className="px-4 py-3 font-medium text-foreground">
-                    <div>{p.name}</div>
-                    <div className="text-xs text-muted-foreground">/{p.slug}</div>
+                    <div className="grid grid-cols-[3.75rem_1fr] items-center gap-3">
+                      <ProductImage
+                        src={p.image_url}
+                        thumbSrc={p.image_url_thumb}
+                        cardSrc={p.image_url_card}
+                        detailSrc={p.image_url_detail}
+                        alt={`Miniatura de ${p.name}`}
+                        variant="thumb"
+                        sizes="3.75rem"
+                        className="aspect-square rounded-xl"
+                        iconClassName="h-5 w-5"
+                      />
+                      <div className="min-w-0">
+                        <div className="line-clamp-2">{p.name}</div>
+                        <div className="truncate text-xs text-muted-foreground">/{p.slug}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.category ?? "—"}</td>
                   <td className="px-4 py-3">

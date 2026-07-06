@@ -18,17 +18,25 @@ function NewProductPage() {
     mutationFn: createProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
-      toast.success("Producto creado");
+      toast.success("Producto creado", {
+        description: "Ya esta disponible para gestionar en el panel.",
+      });
       navigate({ to: "/admin" });
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Error al crear producto");
+      toast.error("No se pudo crear el producto", {
+        description: err.message || "Revisa los campos e intenta nuevamente.",
+      });
     },
   });
 
   return (
     <>
-      <PageHeader eyebrow="Admin" title="Nuevo producto" subtitle="Crea un producto para el catálogo." />
+      <PageHeader
+        eyebrow="Admin"
+        title="Nuevo producto"
+        subtitle="Crea un producto para el catálogo."
+      />
       <Container className="py-8">
         <ProductForm
           submitLabel="Crear producto"

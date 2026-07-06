@@ -109,7 +109,9 @@ function ProductDetail() {
               className="btn-hero"
               onClick={() => {
                 addItem(product, 1);
-                toast.success("Agregado al carrito", { description: product.name });
+                toast.success("Agregado al carrito", {
+                  description: `${product.name} quedo listo para revisar el pedido.`,
+                });
               }}
             >
               <ShoppingCart className="mr-1 h-4 w-4" />

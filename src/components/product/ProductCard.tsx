@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Eye, ShoppingCart } from "lucide-react";
+import { ArrowRight, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
@@ -11,7 +11,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem } = useCart();
 
   return (
-    <article className="card-surface group flex h-full flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-accent/40">
+    <article className="card-surface group flex h-full flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-accent/45 hover:shadow-[0_20px_55px_-34px_oklch(0.82_0.15_200/0.9)] focus-within:border-accent/50">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-secondary/40">
         <ProductImage
           src={product.image_url}
@@ -25,10 +25,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           imageClassName="transition-transform duration-500 group-hover:scale-105"
         />
         {product.category ? (
-          <span className="absolute left-3 top-3 rounded-full bg-background/80 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
+          <span className="absolute left-3 top-3 rounded-full border border-border/40 bg-background/85 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
             {product.category}
           </span>
         ) : null}
+        <span className="absolute bottom-3 right-3 rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-xs font-semibold text-accent backdrop-blur">
+          Disponible online
+        </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
         <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground">
@@ -39,29 +42,36 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             {product.short_description}
           </p>
         ) : null}
-        <div className="mt-5">
+        <div className="mt-auto pt-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Precio
+          </p>
           <Price
             value={Number(product.price)}
             currency={product.currency}
-            className="text-2xl font-bold text-accent"
+            className="mt-1 block text-2xl font-bold text-accent"
           />
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           <Button asChild variant="outline" className="flex-1">
             <Link to="/producto/$slug" params={{ slug: product.slug }}>
               <Eye className="mr-1 h-4 w-4" />
-              Ver producto
+              Detalles
             </Link>
           </Button>
           <Button
             className="btn-hero flex-1"
+            aria-label={`Agregar ${product.name} al carrito`}
             onClick={() => {
               addItem(product, 1);
-              toast.success("Agregado al carrito", { description: product.name });
+              toast.success("Agregado al carrito", {
+                description: `${product.name} quedo listo para revisar el pedido.`,
+              });
             }}
           >
             <ShoppingCart className="mr-1 h-4 w-4" />
             Agregar
+            <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
       </div>

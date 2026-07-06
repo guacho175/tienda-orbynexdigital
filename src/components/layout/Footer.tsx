@@ -17,8 +17,8 @@ export function Footer() {
               <span className="text-lg font-bold text-foreground">{brandConfig.name}</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-              Demo comercial de mini e-commerce con catalogo, carrito, checkout, Flow, WhatsApp y
-              backend Supabase.
+              Tienda online para publicar servicios digitales, recibir pedidos y atender clientes
+              con una experiencia clara.
             </p>
           </div>
 

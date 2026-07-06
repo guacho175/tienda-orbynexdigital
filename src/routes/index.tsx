@@ -5,18 +5,24 @@ import {
   CheckCircle2,
   CreditCard,
   Layers,
+  MessageCircle,
   Package,
+  ReceiptText,
+  ShieldCheck,
   ShoppingCart,
   Sparkles,
 } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductImage } from "@/components/product/ProductImage";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-common/EmptyState";
+import { Price } from "@/components/ui-common/Price";
 import { homeConfig } from "@/config/home.config";
 import { fetchFeaturedProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
+import { buildWhatsappContactUrl } from "@/utils/whatsapp";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -42,12 +48,23 @@ function Home() {
   ) as string[];
   const visibleCategories =
     derivedCategories.length > 0 ? derivedCategories : homeConfig.categoriesFallback;
+  const previewProduct = products?.[0] ?? null;
 
   return (
     <>
-      <section className="border-b border-border/50 py-16 sm:py-20 lg:py-24">
+      <section className="relative overflow-hidden border-b border-border/50 py-14 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,oklch(1_0_0/0.04)_1px,transparent_1px),linear-gradient(0deg,oklch(1_0_0/0.035)_1px,transparent_1px)] bg-[size:72px_72px]" />
         <Container className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="text-center lg:text-left">
+            <div className="mb-5 inline-flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 px-4 py-3 shadow-[0_18px_60px_-28px_oklch(0.82_0.15_200/0.7)] backdrop-blur">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[image:var(--gradient-primary)] text-base font-black text-primary-foreground">
+                O
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold leading-none text-foreground">orbynex.digital</p>
+                <p className="mt-1 text-xs text-muted-foreground">commerce para servicios</p>
+              </div>
+            </div>
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1 text-xs font-semibold uppercase text-accent">
               <Sparkles className="h-3.5 w-3.5" />
               {hero.eyebrow}
@@ -66,41 +83,111 @@ function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/carrito">
-                  <ShoppingCart className="mr-1 h-4 w-4" />
+                <a href={buildWhatsappContactUrl()} target="_blank" rel="noreferrer">
+                  <MessageCircle className="mr-1 h-4 w-4" />
                   {hero.secondaryCta.label}
-                </Link>
+                </a>
               </Button>
             </div>
-          </div>
-
-          <div className="card-surface overflow-hidden p-5">
-            <div className="flex items-center justify-between border-b border-border/50 pb-4">
-              <div>
-                <p className="text-xs font-semibold uppercase text-accent">Flujo demo</p>
-                <h2 className="mt-1 text-xl font-semibold text-foreground">Compra online real</h2>
-              </div>
-              <div className="rounded-full bg-[image:var(--gradient-accent)] p-3 text-background">
-                <ShoppingCart className="h-5 w-5" />
-              </div>
-            </div>
-            <div className="mt-5 space-y-3">
-              {["Catalogo", "Carrito", "Checkout", "Resultado Flow"].map((item, index) => (
+            <div className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+              {["Pagos online", "Pedidos por WhatsApp", "Catalogo editable"].map((item) => (
                 <div
                   key={item}
-                  className="flex items-center justify-between rounded-lg border border-border/50 bg-background/35 px-4 py-3"
+                  className="rounded-2xl border border-border/50 bg-background/35 px-4 py-3"
                 >
-                  <span className="font-medium text-foreground">{item}</span>
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/15 text-sm font-semibold text-accent">
-                    {index + 1}
-                  </span>
+                  {item}
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-lg border border-accent/30 bg-accent/10 p-4">
+          </div>
+
+          <div className="card-surface overflow-hidden rounded-3xl border-accent/20 bg-background/70 p-4 shadow-[0_28px_90px_-42px_oklch(0.82_0.15_200/0.8)] backdrop-blur">
+            <div className="flex items-center justify-between border-b border-border/50 pb-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+                  Vista de tienda
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-foreground">Pedido comercial</h2>
+              </div>
+              <div className="rounded-2xl bg-[image:var(--gradient-accent)] p-3 text-background">
+                <ReceiptText className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-[0.88fr_1fr]">
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/75">
+                <ProductImage
+                  src={previewProduct?.image_url}
+                  thumbSrc={previewProduct?.image_url_thumb}
+                  cardSrc={previewProduct?.image_url_card}
+                  detailSrc={previewProduct?.image_url_detail}
+                  alt={previewProduct ? `Imagen de ${previewProduct.name}` : "Producto destacado"}
+                  variant="card"
+                  sizes="(max-width: 640px) 90vw, 18rem"
+                  className="aspect-[4/3]"
+                  imageClassName="transition-transform duration-500 hover:scale-105"
+                  loading="eager"
+                  priority
+                />
+                <div className="p-4">
+                  <p className="text-xs font-semibold uppercase text-accent">
+                    {previewProduct?.category ?? "Servicio digital"}
+                  </p>
+                  <h3 className="mt-2 line-clamp-2 font-semibold text-foreground">
+                    {previewProduct?.name ?? "Pack de presencia online"}
+                  </h3>
+                  <div className="mt-3">
+                    {previewProduct ? (
+                      <Price
+                        value={Number(previewProduct.price)}
+                        currency={previewProduct.currency}
+                        className="text-2xl font-bold text-accent"
+                      />
+                    ) : (
+                      <span className="text-2xl font-bold text-accent">Cotizable</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    icon: Layers,
+                    title: "Elige el servicio",
+                    copy: "Categoria, imagen y precio claro",
+                  },
+                  {
+                    icon: ShoppingCart,
+                    title: "Revisa el pedido",
+                    copy: "Carrito ordenado antes de pagar",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Compra o conversa",
+                    copy: "Pago online y WhatsApp disponibles",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="flex gap-3 rounded-2xl border border-border/50 bg-background/35 p-4"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground">{item.title}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{item.copy}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-accent/30 bg-accent/10 p-4">
               <p className="text-sm font-medium text-foreground">
-                Productos destacados visibles desde el inicio y checkout conectado a Flow, WhatsApp
-                o payment_url.
+                La tienda muestra valor, precio y siguiente paso sin obligar al cliente a preguntar
+                por informacion basica.
               </p>
             </div>
           </div>
@@ -139,7 +226,7 @@ function Home() {
             <EmptyState
               icon={<Package className="h-10 w-10" />}
               title="Aun no hay productos activos"
-              description="Cuando publiques productos en Supabase apareceran destacados en la portada."
+              description="Cuando publiques productos activos apareceran destacados en la portada."
               action={
                 <Button asChild className="btn-hero">
                   <Link to="/catalogo">Ir al catalogo</Link>
@@ -169,9 +256,13 @@ function Home() {
             <Link
               key={category}
               to="/catalogo"
-              className="rounded-lg border border-border/60 bg-card/70 px-5 py-4 text-center font-semibold text-foreground transition-colors hover:border-accent/50 hover:bg-secondary"
+              className="group rounded-2xl border border-border/60 bg-card/70 px-5 py-5 text-center font-semibold text-foreground transition duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              {category}
+              <span className="block">{category}</span>
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
+                Ver servicios
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
             </Link>
           ))}
         </div>
@@ -197,10 +288,10 @@ function Home() {
       <Section className="pt-0">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Como funciona la compra
+            Como compra tu cliente
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Un flujo de tienda pensado para probar catalogo, carrito, pago y confirmacion.
+            Una secuencia simple para elegir, revisar y confirmar sin perder contexto.
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -258,7 +349,10 @@ function Home() {
               <Link to="/catalogo">{finalCta.primaryCta.label}</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/carrito">{finalCta.secondaryCta.label}</Link>
+              <a href={buildWhatsappContactUrl()} target="_blank" rel="noreferrer">
+                <MessageCircle className="mr-1 h-4 w-4" />
+                {finalCta.secondaryCta.label}
+              </a>
             </Button>
           </div>
         </div>
