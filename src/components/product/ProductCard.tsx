@@ -4,7 +4,7 @@ import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
-import { Package } from "lucide-react";
+import { ProductImage } from "@/components/product/ProductImage";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -12,18 +12,12 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="card-surface group flex flex-col overflow-hidden transition-transform hover:-translate-y-1">
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-secondary/40">
-        {product.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground/50">
-            <Package className="h-12 w-12" />
-          </div>
-        )}
+        <ProductImage
+          src={product.image_url}
+          alt={`Imagen de ${product.name}`}
+          className="h-full w-full"
+          imageClassName="transition-transform duration-500 group-hover:scale-105"
+        />
         {product.category ? (
           <span className="absolute left-3 top-3 rounded-full bg-background/80 px-3 py-1 text-xs font-medium text-foreground backdrop-blur">
             {product.category}

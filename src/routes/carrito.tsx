@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
+import { ProductImage } from "@/components/product/ProductImage";
 import { useCart } from "@/store/cart.store";
 import { brandConfig } from "@/config/brand.config";
 
@@ -44,16 +45,16 @@ function CartPage() {
       <Container className="grid gap-8 py-12 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
           {items.map((item) => (
-            <div key={item.productId} className="card-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-              <div className="h-24 w-full shrink-0 overflow-hidden rounded-md bg-secondary/40 sm:w-32">
-                {item.image_url ? (
-                  <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
-                    <ShoppingBag className="h-8 w-8" />
-                  </div>
-                )}
-              </div>
+            <div
+              key={item.productId}
+              className="card-surface flex flex-col gap-4 p-4 sm:flex-row sm:items-center"
+            >
+              <ProductImage
+                src={item.image_url}
+                alt={`Imagen de ${item.name}`}
+                className="h-24 w-full shrink-0 rounded-md sm:w-32"
+                iconClassName="h-8 w-8"
+              />
               <div className="flex-1">
                 <Link
                   to="/producto/$slug"
@@ -63,7 +64,11 @@ function CartPage() {
                   {item.name}
                 </Link>
                 <div className="mt-1">
-                  <Price value={item.price} currency={item.currency} className="text-sm text-muted-foreground" />
+                  <Price
+                    value={item.price}
+                    currency={item.currency}
+                    className="text-sm text-muted-foreground"
+                  />
                 </div>
               </div>
               <div className="flex items-center gap-2">

@@ -39,7 +39,7 @@ Detalle completo en [`AUDITORIA-FASE-2.md`](./AUDITORIA-FASE-2.md).
 
 Correcciones aplicadas:
 
-- **Seguridad crítica**: `REVOKE EXECUTE ON has_role(...) FROM PUBLIC, anon, authenticated;` + `GRANT ... TO service_role`. Corrige el warn *Signed-In Users Can Execute SECURITY DEFINER Function*.
+- **Seguridad crítica**: `REVOKE EXECUTE ON has_role(...) FROM PUBLIC, anon, authenticated;` + `GRANT ... TO service_role`. Corrige el warn _Signed-In Users Can Execute SECURITY DEFINER Function_.
 - Títulos `<title>` de `catalogo`, `carrito`, `checkout` migrados a `brandConfig.name`.
 - `STORAGE_KEY` del carrito movido a `commerceConfig.cartStorageKey`.
 
@@ -64,36 +64,36 @@ Correcciones aplicadas:
 
 ### Rutas públicas
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/` | `src/routes/index.tsx` | Home con hero, beneficios y CTA |
-| `/catalogo` | `src/routes/catalogo.tsx` | Grilla de productos activos |
-| `/producto/:slug` | `src/routes/producto.$slug.tsx` | Ficha de producto |
-| `/carrito` | `src/routes/carrito.tsx` | Carrito editable |
-| `/checkout` | `src/routes/checkout.tsx` | Datos + WhatsApp / link de pago |
-| `/auth` | `src/routes/auth.tsx` | Login / signup admin |
-| `/docs` | `src/routes/docs.tsx` | Documentación in-app (`noindex`) |
+| Ruta              | Archivo                         | Descripción                      |
+| ----------------- | ------------------------------- | -------------------------------- |
+| `/`               | `src/routes/index.tsx`          | Home con hero, beneficios y CTA  |
+| `/catalogo`       | `src/routes/catalogo.tsx`       | Grilla de productos activos      |
+| `/producto/:slug` | `src/routes/producto.$slug.tsx` | Ficha de producto                |
+| `/carrito`        | `src/routes/carrito.tsx`        | Carrito editable                 |
+| `/checkout`       | `src/routes/checkout.tsx`       | Datos + WhatsApp / link de pago  |
+| `/auth`           | `src/routes/auth.tsx`           | Login / signup admin             |
+| `/docs`           | `src/routes/docs.tsx`           | Documentación in-app (`noindex`) |
 
 ### Rutas admin (bajo `_authenticated/`)
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/admin` | `_authenticated/admin.index.tsx` | Lista + toggle + delete |
-| `/admin/new` | `_authenticated/admin.new.tsx` | Crear producto |
-| `/admin/edit/:id` | `_authenticated/admin.edit.$id.tsx` | Editar producto |
+| Ruta              | Archivo                             | Descripción             |
+| ----------------- | ----------------------------------- | ----------------------- |
+| `/admin`          | `_authenticated/admin.index.tsx`    | Lista + toggle + delete |
+| `/admin/new`      | `_authenticated/admin.new.tsx`      | Crear producto          |
+| `/admin/edit/:id` | `_authenticated/admin.edit.$id.tsx` | Editar producto         |
 
 El layout `_authenticated/route.tsx` (managed por integración) usa `ssr:false`, valida sesión con `supabase.auth.getUser()` y redirige a `/auth` si no hay sesión. **No editar ese archivo.**
 
 ### Configuración centralizada — `src/config/`
 
-| Archivo | Contenido |
-|---------|-----------|
-| `app.config.ts` | Punto de entrada (re-exporta todo) |
-| `brand.config.ts` | Nombre, tagline, email, teléfono, WhatsApp, redes, moneda, locale |
-| `theme.config.ts` | Referencia a tokens semánticos |
-| `commerce.config.ts` | Moneda, WhatsApp checkout, links externos, `cartStorageKey`, `legal.termsShort` |
-| `home.config.ts` | Textos del hero, beneficios, CTA |
-| `navigation.config.ts` | Links del navbar y footer |
+| Archivo                | Contenido                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `app.config.ts`        | Punto de entrada (re-exporta todo)                                              |
+| `brand.config.ts`      | Nombre, tagline, email, teléfono, WhatsApp, redes, moneda, locale               |
+| `theme.config.ts`      | Referencia a tokens semánticos                                                  |
+| `commerce.config.ts`   | Moneda, WhatsApp checkout, links externos, `cartStorageKey`, `legal.termsShort` |
+| `home.config.ts`       | Textos del hero, beneficios, CTA                                                |
+| `navigation.config.ts` | Links del navbar y footer                                                       |
 
 ### Carrito y localStorage
 
@@ -109,6 +109,7 @@ El layout `_authenticated/route.tsx` (managed por integración) usa `ssr:false`,
 Campos: `id`, `name`, `slug`, `short_description`, `description`, `price`, `currency`, `category`, `image_url`, `is_active`, `availability`, `payment_url`, `payment_button_label`, `display_order`, `created_at`, `updated_at`.
 
 Policies:
+
 - `Public can view active products` — SELECT anon/authenticated con `is_active = true`.
 - `Admins can view all products` — SELECT autenticados con `has_role(auth.uid(), 'admin')`.
 - `Admins can insert / update / delete products` — mismas guardas.
@@ -120,6 +121,7 @@ Grants: `SELECT` a `anon` y `authenticated`; `INSERT/UPDATE/DELETE` a `authentic
 Campos: `id`, `user_id` (FK → `auth.users`), `role` (`app_role`), `created_at`. `UNIQUE (user_id, role)`.
 
 Policies:
+
 - `Users can view their own roles` — SELECT `auth.uid() = user_id`.
 - `INSERT / UPDATE / DELETE` denegados desde el cliente (solo backend / SQL).
 
@@ -256,7 +258,7 @@ Este INSERT hay que ejecutarlo desde una vía con `service_role` (backend / SQL 
 ## 6. Advertencias importantes
 
 - **No exponer secretos en frontend.** `SUPABASE_SERVICE_ROLE_KEY` solo vive en `src/integrations/supabase/client.server.ts` y no debe importarse desde componentes ni desde `.functions.ts` a nivel de módulo. Los archivos auto-generados de la integración (`client.ts`, `client.server.ts`, `auth-middleware.ts`, `auth-attacher.ts`, `types.ts`, `.env`) **no se editan**.
-- **No volver a dar `EXECUTE` público a `has_role`.** El fix de la auditoría es lo que cierra el finding *Signed-In Users Can Execute SECURITY DEFINER Function*. Si algún día se necesita llamarla desde el cliente, crear una función wrapper `SECURITY INVOKER` que valide `auth.uid()` en su body.
+- **No volver a dar `EXECUTE` público a `has_role`.** El fix de la auditoría es lo que cierra el finding _Signed-In Users Can Execute SECURITY DEFINER Function_. Si algún día se necesita llamarla desde el cliente, crear una función wrapper `SECURITY INVOKER` que valide `auth.uid()` en su body.
 - **No implementar Flow / Mercado Pago / Stripe con API directa desde React.** Requeriría exponer credenciales de merchant en el bundle. El modelo del template es: **link de pago externo por producto** (`payment_url` + `payment_button_label`) generado en la consola de la pasarela y guardado en la tabla `products`.
 - Los links de pago externos **deben seguir usando `payment_url`**. No agregar iframes ni SDKs de pasarelas de tarjetas al frontend.
 - No editar `src/routes/_authenticated/route.tsx` (managed por integración).
@@ -318,5 +320,42 @@ Al terminar:
 ```
 
 ---
+
+---
+
+## Actualizacion - Fase 3A Imagenes con Supabase Storage
+
+Estado: completada a nivel de codigo y migracion. Pendiente operativo: aplicar la migracion en Supabase/Lovable Cloud y validar el flujo con usuarios reales.
+
+Implementado:
+
+- Bucket publico `product-images` mediante migracion SQL.
+- Policies de Storage:
+  - lectura publica para `anon` y `authenticated`;
+  - `INSERT`, `UPDATE` y `DELETE` solo para usuarios autenticados con rol `admin` en `public.user_roles`.
+- Servicio frontend `src/services/storage.service.ts` para validar y subir imagenes sin `service_role`.
+- Upload de imagen en `ProductForm`, manteniendo el campo manual `image_url`.
+- Preview de imagen en el formulario.
+- Placeholder reutilizable `ProductImage` para catalogo, detalle y carrito.
+- Boton de vista publica desde el listado admin para productos activos.
+- `.env.example` con variables publicas reales del proyecto.
+- Documentacion:
+  - `docs/FASE-3A-IMAGENES-STORAGE.md`
+  - `docs/DEPLOY-VERCEL.md`
+
+Seguridad mantenida:
+
+- No se expone `SUPABASE_SERVICE_ROLE_KEY` en frontend.
+- No se vuelve a dar `EXECUTE` publico a `public.has_role`.
+- No se modifican RLS ni policies de `products`.
+- No se toca `src/routes/_authenticated/route.tsx`.
+- No se implementan Flow API, Mercado Pago API, tabla `orders` ni carrito backend.
+
+Pendientes posteriores:
+
+- Aplicar migracion en Supabase/Lovable Cloud.
+- Probar upload como admin real.
+- Probar bloqueo de upload como usuario autenticado sin rol admin.
+- Mantener reset password, SEO avanzado, sitemap/robots y JSON-LD para fases futuras.
 
 **Fin del checkpoint.**

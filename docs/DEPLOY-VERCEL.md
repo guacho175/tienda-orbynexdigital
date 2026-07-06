@@ -1,0 +1,81 @@
+# Deploy en Vercel
+
+Esta guia deja el minimo necesario para publicar el frontend en Vercel manteniendo Supabase/Lovable Cloud como backend.
+
+## 1. Preparar local
+
+```bash
+bun install
+bun run dev
+bun run build
+```
+
+Scripts detectados en `package.json`:
+
+- `dev`: `vite dev`
+- `build`: `vite build`
+- `build:dev`: `vite build --mode development`
+- `preview`: `vite preview`
+- `lint`: `eslint .`
+
+No hay script `typecheck` definido.
+
+## 2. Importar en Vercel
+
+1. En Vercel, importar el repositorio.
+2. Framework preset: Vite o configuracion detectada automaticamente por Vercel.
+3. Build command: `bun run build`.
+4. Install command: `bun install`.
+5. Output/runtime: usar la configuracion actual del proyecto, sin cambiar TanStack Start ni rutas.
+
+## 3. Variables de entorno
+
+Configurar en Vercel las variables publicas que usa el cliente Supabase actual:
+
+```bash
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_PROJECT_ID=
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+```
+
+No configurar `SUPABASE_SERVICE_ROLE_KEY` para el frontend. Este template no necesita exponer esa clave para subir imagenes; las policies de Supabase Storage validan el rol admin con la sesion del usuario.
+
+## 4. Dominio propio
+
+1. Agregar el dominio en Vercel desde Project Settings > Domains.
+2. Apuntar los DNS segun indique Vercel.
+3. Esperar emision del certificado SSL.
+4. Probar `https://tu-dominio.com/catalogo`.
+
+## 5. Supabase Auth
+
+En Supabase/Lovable Cloud, configurar:
+
+- Site URL: `https://tu-dominio.com`
+- Redirect URLs:
+  - `https://tu-dominio.com/auth`
+  - `https://tu-dominio.com/admin`
+  - `https://tu-dominio.com/*`
+  - URL local de desarrollo si se usa para pruebas, por ejemplo `http://localhost:5173/*`
+
+## 6. Checklist post deploy
+
+1. Abrir `/auth` y validar login.
+2. Abrir `/admin` con usuario admin.
+3. Abrir `/catalogo` como publico.
+4. Crear o editar producto desde admin.
+5. Subir imagen desde el formulario de producto.
+6. Confirmar que `products.image_url` queda con una URL publica.
+7. Confirmar que la imagen carga en `/catalogo`, `/producto/:slug` y `/carrito`.
+8. Probar usuario autenticado sin rol admin: no debe acceder al CRUD ni subir imagenes.
+
+## 7. Fuera de alcance
+
+- No se implementa Cloudflare.
+- No se migra Supabase.
+- No se implementa Flow API.
+- No se implementa Mercado Pago API.
+- Los pagos siguen usando `products.payment_url`.

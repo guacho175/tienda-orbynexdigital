@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { commerceConfig } from "@/config/commerce.config";
+import { ProductImage } from "@/components/product/ProductImage";
+import { uploadProductImage, validateProductImage } from "@/services/storage.service";
 import type { Product } from "@/types/product";
 import type { ProductInput } from "@/services/products.service";
 
@@ -25,13 +27,7 @@ const schema = z.object({
   image_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
   is_active: z.boolean(),
   availability: z.enum(["in_stock", "out_of_stock", "on_demand"]),
-  payment_url: z
-    .string()
-    .trim()
-    .url("URL inválida")
-    .max(500)
-    .optional()
-    .or(z.literal("")),
+  payment_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
   payment_button_label: z.string().trim().max(60).optional().or(z.literal("")),
   display_order: z.coerce.number().int().min(0).default(0),
 });
@@ -54,7 +50,12 @@ export interface ProductFormProps {
   onCancel?: () => void;
 }
 
-export function ProductForm({ initial, submitLabel = "Guardar", onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({
+  initial,
+  submitLabel = "Guardar",
+  onSubmit,
+  onCancel,
+}: ProductFormProps) {
   const [values, setValues] = useState<ProductInput>({
     name: initial?.name ?? "",
     slug: initial?.slug ?? "",
@@ -72,14 +73,46 @@ export function ProductForm({ initial, submitLabel = "Guardar", onSubmit, onCanc
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   function update<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
+  async function handleImageUpload(file: File | undefined) {
+    if (!file) return;
+
+    const validationError = validateProductImage(file);
+    if (validationError) {
+      setImageUploadError(validationError);
+      return;
+    }
+
+    setImageUploadError(null);
+    setUploadingImage(true);
+
+    try {
+      const publicUrl = await uploadProductImage(file);
+      update("image_url", publicUrl);
+    } catch (err) {
+      setImageUploadError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo subir la imagen. Revisa permisos de Storage.",
+      );
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrors({});
+    if (uploadingImage) {
+      setErrors({ image_upload: "Espera a que termine la subida de imagen." });
+      return;
+    }
     const parsed = schema.safeParse(values);
     if (!parsed.success) {
       const flat: Record<string, string> = {};
@@ -87,6 +120,10 @@ export function ProductForm({ initial, submitLabel = "Guardar", onSubmit, onCanc
         flat[issue.path.join(".")] = issue.message;
       }
       setErrors(flat);
+      return;
+    }
+    if (imageUploadError) {
+      setErrors({ image_upload: "Corrige la subida de imagen antes de guardar." });
       return;
     }
     setSubmitting(true);
@@ -223,10 +260,43 @@ export function ProductForm({ initial, submitLabel = "Guardar", onSubmit, onCanc
         <Input
           id="image_url"
           value={values.image_url ?? ""}
-          onChange={(e) => update("image_url", e.target.value)}
+          onChange={(e) => {
+            update("image_url", e.target.value);
+            setImageUploadError(null);
+          }}
           placeholder="https://..."
         />
         {errors.image_url ? <p className="text-xs text-destructive">{errors.image_url}</p> : null}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
+        <div className="space-y-2">
+          <Label htmlFor="product_image_upload">Subir imagen</Label>
+          <Input
+            id="product_image_upload"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={uploadingImage || submitting}
+            onChange={(e) => {
+              void handleImageUpload(e.target.files?.[0]);
+              e.currentTarget.value = "";
+            }}
+          />
+          <p className="text-xs text-muted-foreground">
+            JPG, PNG, WebP o GIF. Maximo 5 MB. Tambien puedes pegar una URL manual arriba.
+          </p>
+          {uploadingImage ? <p className="text-xs text-accent">Subiendo imagen...</p> : null}
+          {imageUploadError || errors.image_upload ? (
+            <p className="text-xs text-destructive">{imageUploadError ?? errors.image_upload}</p>
+          ) : null}
+        </div>
+
+        <ProductImage
+          src={values.image_url}
+          alt={values.name ? `Imagen de ${values.name}` : "Vista previa del producto"}
+          className="aspect-[4/3] rounded-md border border-border/50"
+          iconClassName="h-10 w-10"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -270,7 +340,7 @@ export function ProductForm({ initial, submitLabel = "Guardar", onSubmit, onCanc
             Cancelar
           </Button>
         ) : null}
-        <Button type="submit" disabled={submitting} className="btn-hero">
+        <Button type="submit" disabled={submitting || uploadingImage} className="btn-hero">
           {submitting ? "Guardando..." : submitLabel}
         </Button>
       </div>

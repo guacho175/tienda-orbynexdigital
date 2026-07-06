@@ -1,10 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Package, ShoppingCart, ExternalLink } from "lucide-react";
+import { ArrowLeft, ShoppingCart, ExternalLink } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductImage } from "@/components/product/ProductImage";
 import { fetchProductBySlug } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
 import { toast } from "sonner";
@@ -16,7 +17,11 @@ export const Route = createFileRoute("/producto/$slug")({
 function ProductDetail() {
   const { slug } = Route.useParams();
   const { addItem } = useCart();
-  const { data: product, isLoading, error } = useQuery({
+  const {
+    data: product,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug),
   });
@@ -61,19 +66,13 @@ function ProductDetail() {
       </Link>
 
       <div className="mt-8 grid gap-10 md:grid-cols-2">
-        <div className="card-surface aspect-[4/3] overflow-hidden">
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
-              <Package className="h-24 w-24" />
-            </div>
-          )}
-        </div>
+        <ProductImage
+          src={product.image_url}
+          alt={`Imagen de ${product.name}`}
+          className="card-surface aspect-[4/3]"
+          iconClassName="h-24 w-24"
+          loading="eager"
+        />
 
         <div>
           {product.category ? (
@@ -87,7 +86,11 @@ function ProductDetail() {
           {product.short_description ? (
             <p className="mt-3 text-lg text-muted-foreground">{product.short_description}</p>
           ) : null}
-          <Price value={Number(product.price)} currency={product.currency} className="mt-6 block text-3xl" />
+          <Price
+            value={Number(product.price)}
+            currency={product.currency}
+            className="mt-6 block text-3xl"
+          />
 
           {product.description ? (
             <div className="mt-8 border-t border-border/50 pt-6">

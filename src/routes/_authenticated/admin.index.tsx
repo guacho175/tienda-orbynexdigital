@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Package, Shield, Plus, Pencil, Trash2 } from "lucide-react";
+import { Eye, LogOut, Package, Shield, Plus, Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
@@ -82,9 +82,7 @@ function AdminPage() {
   }
 
   if (isAdmin === null) {
-    return (
-      <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>
-    );
+    return <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>;
   }
 
   if (isAdmin === false) {
@@ -94,8 +92,9 @@ function AdminPage() {
           <Shield className="mx-auto h-10 w-10 text-accent" />
           <h1 className="mt-4 text-2xl font-bold text-foreground">Acceso restringido</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Tu cuenta ({email}) no tiene el rol <code className="rounded bg-secondary px-1">admin</code>.
-            Solicita al administrador que te asigne el rol para acceder al panel.
+            Tu cuenta ({email}) no tiene el rol{" "}
+            <code className="rounded bg-secondary px-1">admin</code>. Solicita al administrador que
+            te asigne el rol para acceder al panel.
           </p>
           <Button onClick={handleSignOut} variant="outline" className="mt-6">
             <LogOut className="mr-1 h-4 w-4" /> Cerrar sesión
@@ -159,9 +158,7 @@ function AdminPage() {
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={p.is_active}
-                        onCheckedChange={(v) =>
-                          toggleMutation.mutate({ id: p.id, isActive: v })
-                        }
+                        onCheckedChange={(v) => toggleMutation.mutate({ id: p.id, isActive: v })}
                       />
                       <Badge variant={p.is_active ? "default" : "secondary"}>
                         {p.is_active ? "Activo" : "Inactivo"}
@@ -170,6 +167,32 @@ function AdminPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
+                      {p.slug ? (
+                        p.is_active ? (
+                          <Button asChild variant="ghost" size="sm">
+                            <a
+                              href={`/producto/${p.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              aria-label={`Ver producto ${p.name}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Ver producto</span>
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            disabled
+                            title="Producto inactivo; no visible publicamente"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">Ver producto</span>
+                          </Button>
+                        )
+                      ) : null}
                       <Button asChild variant="ghost" size="sm">
                         <Link to="/admin/edit/$id" params={{ id: p.id }}>
                           <Pencil className="h-4 w-4" />
@@ -177,7 +200,11 @@ function AdminPage() {
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
@@ -185,7 +212,8 @@ function AdminPage() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Esta acción no se puede deshacer. Se eliminará "{p.name}" permanentemente.
+                              Esta acción no se puede deshacer. Se eliminará "{p.name}"
+                              permanentemente.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -212,7 +240,11 @@ function AdminPage() {
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Documentación del template en <Link to="/docs" className="underline hover:text-foreground">/docs</Link>.
+          Documentación del template en{" "}
+          <Link to="/docs" className="underline hover:text-foreground">
+            /docs
+          </Link>
+          .
         </p>
       </Container>
     </>
