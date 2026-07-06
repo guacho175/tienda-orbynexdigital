@@ -1,0 +1,7 @@
+interface:
+  display_name: "Orbynex Commerce Polish"
+  short_description: "Pulir tienda Orbynex y admin"
+  brand_color: "#1463FF"
+  default_prompt: "Use $orbynex-commerce-polish to polish the mini-commerce storefront, admin product table, toasts, and responsive Orbynex brand experience."
+policy:
+  allow_implicit_invocation: true
