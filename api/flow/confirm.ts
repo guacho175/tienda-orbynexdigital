@@ -1,4 +1,4 @@
-import type { ApiRequest, ApiResponse } from "../../src/server/flow/http";
+import type { ApiRequest, ApiResponse } from "../../src/server/flow/http.js";
 import {
   ApiError,
   assertMethod,
@@ -6,13 +6,13 @@ import {
   handleApiError,
   parseFormBody,
   sendJson,
-} from "../../src/server/flow/http";
-import { getFlowServerEnv } from "../../src/server/flow/env";
+} from "../../src/server/flow/http.js";
+import { getFlowServerEnv } from "../../src/server/flow/env.js";
 import {
   getFlowPaymentStatus,
   mapFlowStatusToLocal,
-} from "../../src/server/flow/flow";
-import { createSupabaseAdmin, type OrderRow } from "../../src/server/flow/supabase";
+} from "../../src/server/flow/flow.js";
+import { createSupabaseAdmin, type OrderRow } from "../../src/server/flow/supabase.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {

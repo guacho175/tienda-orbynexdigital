@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { FlowServerEnv } from "./env";
+import type { FlowServerEnv } from "./env.js";
 
 export interface ProductRow {
   id: string;

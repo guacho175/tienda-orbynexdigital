@@ -1,28 +1,28 @@
-import type { ApiRequest, ApiResponse } from "../../src/server/flow/http";
+import type { ApiRequest, ApiResponse } from "../../src/server/flow/http.js";
 import {
   ApiError,
   assertMethod,
   handleApiError,
   parseJsonBody,
   sendJson,
-} from "../../src/server/flow/http";
-import { getFlowServerEnv } from "../../src/server/flow/env";
+} from "../../src/server/flow/http.js";
+import { getFlowServerEnv } from "../../src/server/flow/env.js";
 import {
   buildCommerceOrder,
   calculateOrder,
   aggregateRequestedItems,
   parseCreatePaymentBody,
-} from "../../src/server/flow/checkout";
+} from "../../src/server/flow/checkout.js";
 import {
   buildFlowRedirectUrl,
   createFlowPayment,
   type FlowCreatePaymentResponse,
-} from "../../src/server/flow/flow";
+} from "../../src/server/flow/flow.js";
 import {
   createSupabaseAdmin,
   getAuthenticatedUserId,
   type ProductRow,
-} from "../../src/server/flow/supabase";
+} from "../../src/server/flow/supabase.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {

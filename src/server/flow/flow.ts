@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
-import { ApiError } from "./http";
-import type { FlowServerEnv } from "./env";
+import { ApiError } from "./http.js";
+import type { FlowServerEnv } from "./env.js";
 
 type FlowParamValue = string | number | boolean | null | undefined;
 type FlowParams = Record<string, FlowParamValue>;

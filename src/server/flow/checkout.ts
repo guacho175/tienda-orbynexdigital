@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { ApiError } from "./http";
-import type { ProductRow } from "./supabase";
+import { ApiError } from "./http.js";
+import type { ProductRow } from "./supabase.js";
 
 export const createPaymentBodySchema = z.object({
   items: z
