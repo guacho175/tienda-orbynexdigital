@@ -54,7 +54,7 @@ function CatalogoPage() {
         <BackLink to="/" label="Inicio" />
 
         {!isLoading && !error && data && data.length > 0 ? (
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-8 flex flex-wrap justify-center gap-2 lg:justify-start">
             {categories.map((category) => (
               <button
                 key={category}
@@ -62,8 +62,8 @@ function CatalogoPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={
                   selectedCategory === category
-                    ? "rounded-full border border-accent/50 bg-accent/15 px-4 py-2 text-sm font-semibold text-accent transition-colors"
-                    : "rounded-full border border-border/60 bg-background/40 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-accent/40 hover:text-foreground"
+                    ? "rounded-full border border-accent/40 bg-accent/15 px-4 py-2 text-sm font-semibold text-accent transition-colors"
+                    : "rounded-full border border-white/10 bg-white/4 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-accent/30 hover:text-foreground"
                 }
               >
                 {category}
@@ -95,7 +95,7 @@ function CatalogoPage() {
               title="Aun no hay productos"
               description="Cuando publiques productos activos desde el panel apareceran en esta grilla."
               action={
-                <Button asChild className="btn-hero">
+                <Button asChild className="btn-hero rounded-full">
                   <Link to="/">Volver al inicio</Link>
                 </Button>
               }

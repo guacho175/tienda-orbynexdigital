@@ -5,9 +5,9 @@
 export const brandConfig = {
   name: "Orbynex Digital",
   shortName: "Orbynex",
-  tagline: "Menos tareas manuales. Más procesos inteligentes.",
+  tagline: "Menos tareas manuales. Mas procesos inteligentes.",
   description:
-    "Sitios web, automatización y soluciones digitales para negocios que necesitan avanzar.",
+    "Sitios web, automatizacion y soluciones digitales para negocios que necesitan avanzar.",
   email: "orbynex.digital@gmail.com",
   phone: "+56 9 5788 5679",
   whatsapp: "+56957885679", // Formato E.164 sin espacios ni +

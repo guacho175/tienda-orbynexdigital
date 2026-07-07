@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, ShoppingCart } from "lucide-react";
+import { ProductImage } from "@/components/product/ProductImage";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/BackLink";
 import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ProductImage } from "@/components/product/ProductImage";
 import { fetchProductBySlug } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ function ProductDetail() {
       <Container className="py-12 sm:py-16">
         <Skeleton className="h-10 w-44 rounded-full" />
         <div className="mt-8 grid gap-10 md:grid-cols-2">
-          <Skeleton className="aspect-[4/3] w-full rounded-lg" />
+          <Skeleton className="aspect-[4/3] w-full rounded-[1.5rem]" />
           <div className="space-y-4">
             <Skeleton className="h-8 w-24 rounded-full" />
             <Skeleton className="h-10 w-2/3" />
@@ -52,7 +52,7 @@ function ProductDetail() {
         <p className="mx-auto mt-2 max-w-md text-muted-foreground">
           El producto que buscas no existe o ya no esta disponible en el catalogo publico.
         </p>
-        <Button asChild className="mt-6" variant="outline">
+        <Button asChild className="mt-6 rounded-full" variant="outline">
           <Link to="/catalogo">Volver al catalogo</Link>
         </Button>
       </Container>
@@ -64,23 +64,26 @@ function ProductDetail() {
       <BackLink to="/catalogo" label="Volver al catalogo" />
 
       <div className="mt-8 grid gap-10 md:grid-cols-2">
-        <ProductImage
-          src={product.image_url}
-          thumbSrc={product.image_url_thumb}
-          cardSrc={product.image_url_card}
-          detailSrc={product.image_url_detail}
-          alt={`Imagen de ${product.name}`}
-          variant="detail"
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="card-surface aspect-[4/3]"
-          iconClassName="h-24 w-24"
-          loading="eager"
-          priority
-        />
+        <div data-interactive-card data-card-tilt="true" className="card-surface aspect-[4/3]">
+          <div className="card-glow" aria-hidden="true" />
+          <ProductImage
+            src={product.image_url}
+            thumbSrc={product.image_url_thumb}
+            cardSrc={product.image_url_card}
+            detailSrc={product.image_url_detail}
+            alt={`Imagen de ${product.name}`}
+            variant="detail"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="h-full w-full"
+            iconClassName="h-24 w-24"
+            loading="eager"
+            priority
+          />
+        </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col text-center md:text-left">
           {product.category ? (
-            <span className="w-fit rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
+            <span className="mx-auto w-fit rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent md:mx-0">
               {product.category}
             </span>
           ) : null}
@@ -88,7 +91,9 @@ function ProductDetail() {
             {product.name}
           </h1>
           {product.short_description ? (
-            <p className="mt-4 text-lg text-muted-foreground">{product.short_description}</p>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground md:mx-0">
+              {product.short_description}
+            </p>
           ) : null}
           <Price
             value={Number(product.price)}
@@ -97,8 +102,10 @@ function ProductDetail() {
           />
 
           {product.description ? (
-            <div className="mt-8 border-t border-border/50 pt-6">
-              <h2 className="text-sm font-semibold uppercase text-muted-foreground">Descripcion</h2>
+            <div className="mt-8 border-t border-white/8 pt-6 text-left">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Descripcion
+              </h2>
               <p className="mt-3 whitespace-pre-line text-foreground/90">{product.description}</p>
             </div>
           ) : null}
@@ -106,7 +113,7 @@ function ProductDetail() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <Button
               size="lg"
-              className="btn-hero"
+              className="btn-hero rounded-full"
               onClick={() => {
                 addItem(product, 1);
                 toast.success("Agregado al carrito", {
@@ -117,13 +124,18 @@ function ProductDetail() {
               <ShoppingCart className="mr-1 h-4 w-4" />
               Agregar al carrito
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" className="rounded-full">
               <Link to="/catalogo">Seguir comprando</Link>
             </Button>
           </div>
 
           {product.payment_url ? (
-            <Button asChild variant="outline" size="lg" className="mt-3 w-full sm:w-fit">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="mt-3 w-full rounded-full sm:w-fit"
+            >
               <a href={product.payment_url} target="_blank" rel="noreferrer">
                 <ExternalLink className="mr-1 h-4 w-4" />
                 {product.payment_button_label ?? "Pagar con link externo"}

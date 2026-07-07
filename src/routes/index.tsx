@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Sparkles,
 } from "lucide-react";
+import { HeroFloaters } from "@/components/brand/BrandEffects";
 import { Container } from "@/components/layout/Container";
 import { Section } from "@/components/layout/Section";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -19,8 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Price } from "@/components/ui-common/Price";
-import { homeConfig } from "@/config/home.config";
 import { brandConfig } from "@/config/brand.config";
+import { homeConfig } from "@/config/home.config";
 import {
   fetchActiveProductCategories,
   fetchFeaturedProducts,
@@ -57,14 +58,19 @@ function Home() {
 
   const visibleCategories = activeCategories ?? [];
   const previewProduct = products?.[0] ?? null;
+  const heroAccent = "profesional";
+  const heroTitleStart = hero.title.endsWith(heroAccent)
+    ? hero.title.slice(0, -heroAccent.length).trimEnd()
+    : hero.title;
 
   return (
     <>
-      <section className="relative overflow-hidden border-b border-border/50 py-14 sm:py-20 lg:py-24">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,oklch(1_0_0/0.04)_1px,transparent_1px),linear-gradient(0deg,oklch(1_0_0/0.035)_1px,transparent_1px)] bg-[size:72px_72px]" />
-        <Container className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="relative overflow-hidden border-b border-white/8 py-14 sm:py-20 lg:py-24">
+        <HeroFloaters />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,oklch(0.84_0.11_214/0.15),transparent_0_34%),radial-gradient(circle_at_78%_20%,oklch(0.72_0.18_320/0.14),transparent_0_24%)]" />
+        <Container className="relative z-10 grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="text-center lg:text-left">
-            <div className="mb-5 inline-flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 px-4 py-3 shadow-[0_18px_60px_-28px_oklch(0.82_0.15_200/0.7)] backdrop-blur">
+            <div className="mb-5 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-3 shadow-[0_18px_60px_-28px_oklch(0.82_0.15_200/0.7)] backdrop-blur">
               <img
                 src={brandConfig.logoUrl}
                 alt={brandConfig.name}
@@ -73,27 +79,28 @@ function Home() {
                 height={80}
               />
             </div>
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1 text-xs font-semibold uppercase text-accent">
+            <p className="eyebrow-tech mb-4 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase text-accent">
               <Sparkles className="h-3.5 w-3.5" />
               {hero.eyebrow}
             </p>
             <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:mx-0">
-              {hero.title}
+              <span>{heroTitleStart} </span>
+              <span className="text-gradient">{heroAccent}</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground lg:mx-0">
               {hero.subtitle}
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-              <Button asChild size="lg" className="btn-hero">
+              <Button asChild size="lg" className="btn-hero rounded-full px-7">
                 <Link to="/catalogo">
                   {hero.primaryCta.label}
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
+              <Button asChild size="lg" variant="outline" className="rounded-full bg-white/3">
                 <a href={hero.secondaryCta.href}>
                   {hero.secondaryCta.label}
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
             </div>
@@ -101,18 +108,25 @@ function Home() {
               {["Pagos online", "Pedidos claros", "Catalogo editable"].map((item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-border/50 bg-background/35 px-4 py-3"
+                  data-interactive-card
+                  className="card-surface flex items-center justify-center px-4 py-3 text-center"
                 >
+                  <div className="card-glow" aria-hidden="true" />
                   {item}
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="card-surface overflow-hidden rounded-3xl border-accent/20 bg-background/70 p-4 shadow-[0_28px_90px_-42px_oklch(0.82_0.15_200/0.8)] backdrop-blur">
-            <div className="flex items-center justify-between border-b border-border/50 pb-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+          <div
+            data-interactive-card
+            data-card-tilt="true"
+            className="hero-panel card-surface section-sheen overflow-hidden rounded-[1.75rem] border-accent/15 p-4 shadow-[0_28px_90px_-42px_oklch(0.82_0.15_200/0.8)]"
+          >
+            <div className="card-glow" aria-hidden="true" />
+            <div className="flex items-center justify-between gap-4 border-b border-white/8 pb-4">
+              <div className="text-center sm:text-left">
+                <p className="eyebrow-tech text-xs font-semibold uppercase text-accent">
                   Vista de tienda
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-foreground">Pedido comercial</h2>
@@ -122,7 +136,7 @@ function Home() {
               </div>
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-[0.88fr_1fr]">
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/75">
+              <div className="overflow-hidden rounded-2xl border border-white/8 bg-card/75">
                 <ProductImage
                   src={previewProduct?.image_url}
                   thumbSrc={previewProduct?.image_url_thumb}
@@ -136,8 +150,8 @@ function Home() {
                   loading="eager"
                   priority
                 />
-                <div className="p-4">
-                  <p className="text-xs font-semibold uppercase text-accent">
+                <div className="p-4 text-center sm:text-left">
+                  <p className="eyebrow-tech text-xs font-semibold uppercase text-accent">
                     {previewProduct?.category ?? "Servicio digital"}
                   </p>
                   <h3 className="mt-2 line-clamp-2 font-semibold text-foreground">
@@ -178,8 +192,10 @@ function Home() {
                   return (
                     <div
                       key={item.title}
-                      className="flex gap-3 rounded-2xl border border-border/50 bg-background/35 p-4"
+                      data-interactive-card
+                      className="card-surface flex gap-3 rounded-2xl p-4 text-left"
                     >
+                      <div className="card-glow" aria-hidden="true" />
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
                         <Icon className="h-5 w-5" />
                       </div>
@@ -192,7 +208,7 @@ function Home() {
                 })}
               </div>
             </div>
-            <div className="mt-4 rounded-2xl border border-accent/30 bg-accent/10 p-4">
+            <div className="mt-4 rounded-2xl border border-accent/20 bg-accent/10 p-4 text-center sm:text-left">
               <p className="text-sm font-medium text-foreground">
                 La tienda muestra valor, precio y siguiente paso sin obligar al cliente a preguntar
                 por informacion basica.
@@ -203,17 +219,19 @@ function Home() {
       </section>
 
       <Section>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-6 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
           <div>
-            <p className="text-sm font-semibold uppercase text-accent">
+            <p className="eyebrow-tech text-sm font-semibold uppercase text-accent">
               {featuredProducts.eyebrow}
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {featuredProducts.title}
             </h2>
-            <p className="mt-3 max-w-2xl text-muted-foreground">{featuredProducts.subtitle}</p>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground sm:mx-0">
+              {featuredProducts.subtitle}
+            </p>
           </div>
-          <Button asChild variant="outline" className="self-center sm:self-auto">
+          <Button asChild variant="outline" className="self-center rounded-full sm:self-auto">
             <Link to="/catalogo">{featuredProducts.cta.label}</Link>
           </Button>
         </div>
@@ -222,7 +240,7 @@ function Home() {
           {isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-[430px] w-full rounded-lg" />
+                <Skeleton key={i} className="h-[430px] w-full rounded-[1.25rem]" />
               ))}
             </div>
           ) : error ? (
@@ -236,7 +254,7 @@ function Home() {
               title="Aun no hay productos activos"
               description="Cuando publiques productos activos apareceran destacados en la portada."
               action={
-                <Button asChild className="btn-hero">
+                <Button asChild className="btn-hero rounded-full">
                   <Link to="/catalogo">Ir al catalogo</Link>
                 </Button>
               }
@@ -251,9 +269,11 @@ function Home() {
         </div>
       </Section>
 
-      <Section className="border-y border-border/50 bg-background/25">
+      <Section className="border-y border-white/8 bg-white/2">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase text-accent">{categories.eyebrow}</p>
+          <p className="eyebrow-tech text-sm font-semibold uppercase text-accent">
+            {categories.eyebrow}
+          </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {categories.title}
           </h2>
@@ -262,7 +282,7 @@ function Home() {
         {isLoadingCategories ? (
           <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-[92px] rounded-2xl" />
+              <Skeleton key={index} className="h-[92px] rounded-[1.25rem]" />
             ))}
           </div>
         ) : categoriesError ? (
@@ -285,10 +305,12 @@ function Home() {
               <Link
                 key={category}
                 to="/catalogo"
-                className="group rounded-2xl border border-border/60 bg-card/70 px-5 py-5 text-center font-semibold text-foreground transition duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                data-interactive-card
+                className="card-surface group flex flex-col items-center justify-center gap-2 rounded-[1.25rem] px-5 py-5 text-center font-semibold text-foreground transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
+                <div className="card-glow" aria-hidden="true" />
                 <span className="block">{category}</span>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
                   Ver servicios
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </span>
@@ -303,8 +325,13 @@ function Home() {
           {storeHighlights.map((item, index) => {
             const Icon = HIGHLIGHT_ICONS[index % HIGHLIGHT_ICONS.length];
             return (
-              <div key={item.title} className="card-surface p-6">
-                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[image:var(--gradient-primary)] text-primary-foreground">
+              <div
+                key={item.title}
+                data-interactive-card
+                className="card-surface section-sheen p-6 text-center md:text-left"
+              >
+                <div className="card-glow" aria-hidden="true" />
+                <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[image:var(--gradient-primary)] text-primary-foreground">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
@@ -326,8 +353,13 @@ function Home() {
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {howItWorks.map((step) => (
-            <div key={step.step} className="card-surface p-6">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">
+            <div
+              key={step.step}
+              data-interactive-card
+              className="card-surface p-6 text-center sm:text-left"
+            >
+              <div className="card-glow" aria-hidden="true" />
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">
                 {step.step}
               </div>
               <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
@@ -337,19 +369,21 @@ function Home() {
         </div>
       </Section>
 
-      <Section className="border-y border-border/50 bg-background/25">
+      <Section className="border-y border-white/8 bg-white/2">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div className="text-center lg:text-left">
-            <p className="text-sm font-semibold uppercase text-accent">{demoSection.eyebrow}</p>
+            <p className="eyebrow-tech text-sm font-semibold uppercase text-accent">
+              {demoSection.eyebrow}
+            </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {demoSection.title}
             </h2>
             <p className="mt-4 text-muted-foreground">{demoSection.description}</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <Button asChild className="btn-hero">
+              <Button asChild className="btn-hero rounded-full">
                 <Link to="/catalogo">{demoSection.cta.label}</Link>
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="rounded-full bg-white/3">
                 <Link to="/checkout">{demoSection.secondaryCta.label}</Link>
               </Button>
             </div>
@@ -358,8 +392,10 @@ function Home() {
             {demoSection.items.map((item) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/70 px-4 py-3"
+                data-interactive-card
+                className="card-surface flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-left"
               >
+                <div className="card-glow" aria-hidden="true" />
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-accent" />
                 <span className="text-sm font-medium text-foreground">{item}</span>
               </div>
@@ -369,16 +405,20 @@ function Home() {
       </Section>
 
       <Section>
-        <div className="mx-auto max-w-3xl text-center">
+        <div
+          data-interactive-card
+          className="card-surface section-sheen mx-auto max-w-4xl px-6 py-10 text-center sm:px-10"
+        >
+          <div className="card-glow" aria-hidden="true" />
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {finalCta.title}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{finalCta.subtitle}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" className="btn-hero">
+            <Button asChild size="lg" className="btn-hero rounded-full px-7">
               <Link to="/catalogo">{finalCta.primaryCta.label}</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg" variant="outline" className="rounded-full bg-white/3">
               <Link to="/catalogo">{finalCta.secondaryCta.label}</Link>
             </Button>
           </div>

@@ -10,13 +10,14 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
-import { CartProvider } from "@/store/cart.store";
-import { Navbar } from "@/components/layout/Navbar";
+import { GlobalBrandEffects } from "@/components/brand/BrandEffects";
 import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { brandConfig } from "@/config/brand.config";
 import { supabase } from "@/integrations/supabase/client";
+import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CartProvider } from "@/store/cart.store";
 
 function NotFoundComponent() {
   return (
@@ -43,6 +44,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -83,21 +85,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${brandConfig.name} — ${brandConfig.tagline}` },
+      { title: `${brandConfig.name} - ${brandConfig.tagline}` },
       { name: "description", content: brandConfig.description },
       { name: "author", content: brandConfig.name },
-      { property: "og:title", content: `${brandConfig.name} — ${brandConfig.tagline}` },
+      { property: "og:title", content: `${brandConfig.name} - ${brandConfig.tagline}` },
       { property: "og:description", content: brandConfig.description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Tienda.OrbynexDigital" },
-      { property: "og:title", content: "Tienda.OrbynexDigital" },
-      { name: "twitter:title", content: "Tienda.OrbynexDigital" },
-      { name: "description", content: "tienda con carrito de pago" },
-      { property: "og:description", content: "tienda con carrito de pago" },
-      { name: "twitter:description", content: "tienda con carrito de pago" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png" },
+      { name: "twitter:title", content: `${brandConfig.name} - ${brandConfig.tagline}` },
+      { name: "twitter:description", content: brandConfig.description },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png",
+      },
     ],
     links: [
       {
@@ -115,11 +121,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
       <body>
+        <GlobalBrandEffects />
         {children}
         <Scripts />
       </body>
@@ -135,16 +142,19 @@ function RootComponent() {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
         router.invalidate();
-        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+        if (event !== "SIGNED_OUT") {
+          queryClient.invalidateQueries();
+        }
       }
     });
+
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <div className="flex min-h-screen flex-col">
+        <div className="app-shell flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">
             <Outlet />

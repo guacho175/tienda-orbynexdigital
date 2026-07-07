@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { CreditCard, ExternalLink, Loader2, ShoppingBag } from "lucide-react";
+import { ProductImage } from "@/components/product/ProductImage";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
-import { ProductImage } from "@/components/product/ProductImage";
 import { useCart } from "@/store/cart.store";
 import { commerceConfig } from "@/config/commerce.config";
 import { brandConfig } from "@/config/brand.config";
@@ -58,7 +58,7 @@ function CheckoutPage() {
               title="No hay servicios en tu carrito"
               description="Vuelve al catalogo, agrega servicios y regresa para elegir como confirmar tu pedido."
               action={
-                <Button asChild className="btn-hero">
+                <Button asChild className="btn-hero rounded-full">
                   <Link to="/catalogo">Ir al catalogo</Link>
                 </Button>
               }
@@ -88,7 +88,9 @@ function CheckoutPage() {
   async function handleFlowPayment() {
     setFlowError(null);
     const parsed = validate();
-    if (!parsed) return;
+    if (!parsed) {
+      return;
+    }
 
     setIsCreatingFlowPayment(true);
 
@@ -132,7 +134,9 @@ function CheckoutPage() {
   }
 
   function handleExternalPayment() {
-    if (!singleItemWithLink?.payment_url) return;
+    if (!singleItemWithLink?.payment_url) {
+      return;
+    }
     window.open(singleItemWithLink.payment_url, "_blank", "noopener,noreferrer");
   }
 
@@ -198,13 +202,13 @@ function CheckoutPage() {
                   id="comment"
                   value={form.comment}
                   onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                  placeholder="Cuéntanos brevemente sobre tu proyecto"
+                  placeholder="Cuentanos brevemente sobre tu proyecto"
                   rows={4}
                 />
               </div>
             </div>
 
-            <div className="mt-8 space-y-4 border-t border-border/50 pt-6">
+            <div className="mt-8 space-y-4 border-t border-white/8 pt-6">
               <div>
                 <h3 className="text-base font-semibold text-foreground">Opciones de pago</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -217,7 +221,7 @@ function CheckoutPage() {
                   <Button
                     onClick={handleFlowPayment}
                     size="lg"
-                    className="btn-hero h-auto min-h-10 w-full py-3"
+                    className="btn-hero h-auto min-h-10 w-full rounded-[1rem] py-3"
                     disabled={isCreatingFlowPayment}
                   >
                     {isCreatingFlowPayment ? (
@@ -250,14 +254,14 @@ function CheckoutPage() {
                   onClick={handleExternalPayment}
                   variant="outline"
                   size="lg"
-                  className="w-full"
+                  className="w-full rounded-[1rem]"
                   disabled={isCreatingFlowPayment}
                 >
                   <ExternalLink className="mr-1 h-4 w-4" />
                   {singleItemWithLink.payment_button_label ?? "Pagar con link externo"}
                 </Button>
-              ) : items.some((i) => i.payment_url) ? (
-                <p className="rounded-md border border-border/60 bg-secondary/40 p-3 text-sm text-muted-foreground">
+              ) : items.some((item) => item.payment_url) ? (
+                <p className="rounded-md border border-white/10 bg-secondary/40 p-3 text-sm text-muted-foreground">
                   Los links externos quedan disponibles por producto individual. Para este carrito
                   completo usa pago online.
                 </p>
@@ -267,17 +271,18 @@ function CheckoutPage() {
             </div>
           </div>
 
-          <aside className="card-surface h-fit p-6">
+          <aside data-interactive-card className="card-surface h-fit p-6">
+            <div className="card-glow" aria-hidden="true" />
             <h3 className="text-lg font-semibold text-foreground">Resumen del pedido</h3>
             <ul className="mt-4 space-y-4 text-sm">
-              {items.map((it) => (
-                <li key={it.productId} className="grid grid-cols-[3.5rem_1fr] gap-3">
+              {items.map((item) => (
+                <li key={item.productId} className="grid grid-cols-[3.5rem_1fr] gap-3">
                   <ProductImage
-                    src={it.image_url}
-                    thumbSrc={it.image_url_thumb}
-                    cardSrc={it.image_url_card}
-                    detailSrc={it.image_url_detail}
-                    alt={`Imagen de ${it.name}`}
+                    src={item.image_url}
+                    thumbSrc={item.image_url_thumb}
+                    cardSrc={item.image_url_card}
+                    detailSrc={item.image_url_detail}
+                    alt={`Imagen de ${item.name}`}
                     variant="thumb"
                     sizes="3.5rem"
                     className="aspect-square rounded-md"
@@ -286,19 +291,19 @@ function CheckoutPage() {
                   <div className="min-w-0">
                     <div className="flex justify-between gap-3">
                       <span className="line-clamp-2 text-muted-foreground">
-                        {it.name} <span className="text-foreground/70">x{it.quantity}</span>
+                        {item.name} <span className="text-foreground/70">x{item.quantity}</span>
                       </span>
-                      <Price value={it.price * it.quantity} currency={it.currency} />
+                      <Price value={item.price * item.quantity} currency={item.currency} />
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
-            <div className="mt-5 flex justify-between border-t border-border/50 pt-4 text-base font-semibold">
+            <div className="mt-5 flex justify-between border-t border-white/8 pt-4 text-base font-semibold">
               <span>Total</span>
               <Price value={total} className="text-2xl text-accent" />
             </div>
-            <Button asChild variant="outline" className="mt-5 w-full">
+            <Button asChild variant="outline" className="mt-5 w-full rounded-[1rem]">
               <Link to="/catalogo">Seguir comprando</Link>
             </Button>
           </aside>

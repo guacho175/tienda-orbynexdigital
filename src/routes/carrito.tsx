@@ -60,8 +60,10 @@ function CartPage() {
             {items.map((item) => (
               <div
                 key={item.productId}
-                className="card-surface grid gap-4 p-4 sm:grid-cols-[8rem_1fr_auto] sm:items-center"
+                data-interactive-card
+                className="card-surface grid gap-4 p-4 text-center sm:grid-cols-[8rem_1fr_auto] sm:items-center sm:text-left"
               >
+                <div className="card-glow" aria-hidden="true" />
                 <ProductImage
                   src={item.image_url}
                   thumbSrc={item.image_url_thumb}
@@ -90,7 +92,7 @@ function CartPage() {
                     <span className="text-xs text-muted-foreground">Cantidad {item.quantity}</span>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -136,7 +138,8 @@ function CartPage() {
             </div>
           </div>
 
-          <aside className="card-surface h-fit p-6">
+          <aside data-interactive-card className="card-surface h-fit p-6">
+            <div className="card-glow" aria-hidden="true" />
             <h3 className="text-lg font-semibold text-foreground">Resumen de compra</h3>
             <div className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between text-muted-foreground">
@@ -148,13 +151,17 @@ function CartPage() {
                 <Price value={total} className="text-2xl text-accent" />
               </div>
             </div>
-            <Button asChild size="lg" className="btn-hero mt-6 h-auto min-h-10 w-full py-3">
+            <Button
+              asChild
+              size="lg"
+              className="btn-hero mt-6 h-auto min-h-10 w-full rounded-[1rem] py-3"
+            >
               <Link to="/checkout" className="flex flex-col gap-1">
                 <span>Continuar al pago</span>
                 <Price value={total} className="text-xs font-semibold text-primary-foreground/90" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="mt-2 w-full">
+            <Button asChild variant="outline" className="mt-2 w-full rounded-[1rem]">
               <Link to="/catalogo">Seguir comprando</Link>
             </Button>
           </aside>

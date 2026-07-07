@@ -12,9 +12,9 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/85 backdrop-blur-md">
-      <Container className="flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 border-b border-white/8 bg-[oklch(0.12_0.03_256/0.74)] backdrop-blur-xl">
+      <Container className="flex h-[4.5rem] items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-2 rounded-full px-2 py-1">
           <img
             src={brandConfig.logoUrl}
             alt={brandConfig.name}
@@ -24,13 +24,15 @@ export function Navbar() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-3 rounded-full border border-white/8 bg-white/4 px-3 py-2 md:flex">
           {navigationConfig.primary.map((item) => (
             <Link
               key={item.href}
               to={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              activeProps={{ className: "text-foreground" }}
+              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-white/6 hover:text-foreground"
+              activeProps={{
+                className: "bg-white/8 text-foreground shadow-[inset_0_0_0_1px_oklch(1_0_0/0.06)]",
+              }}
             >
               {item.label}
             </Link>
@@ -40,7 +42,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <Link
             to="/carrito"
-            className="relative inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border/60 px-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="relative inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             aria-label="Ver carrito"
           >
             <ShoppingCart className="h-5 w-5" />
@@ -52,7 +54,7 @@ export function Navbar() {
             ) : null}
           </Link>
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground transition-colors hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label="Menu"
           >
@@ -61,14 +63,19 @@ export function Navbar() {
         </div>
       </Container>
 
-      <div className={cn("border-t border-border/50 md:hidden", open ? "block" : "hidden")}>
-        <Container className="flex flex-col gap-1 py-3">
+      <div
+        className={cn(
+          "border-t border-white/8 bg-[oklch(0.12_0.03_256/0.9)] md:hidden",
+          open ? "block" : "hidden",
+        )}
+      >
+        <Container className="flex flex-col items-center gap-2 py-4 text-center">
           {navigationConfig.primary.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="w-full max-w-sm rounded-full border border-white/6 bg-white/4 px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/8 hover:text-foreground"
             >
               {item.label}
             </Link>
