@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { ProductImage } from "@/components/product/ProductImage";
 import { toast } from "sonner";
 import type { Product } from "@/types/product";
+import { isLowStock, isSoldOut } from "@/utils/inventory";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -150,6 +151,23 @@ function AdminPage() {
     );
   }
 
+  function renderStockBadge(p: Product) {
+    if (!p.track_inventory) {
+      return <Badge variant="secondary">Sin control de stock</Badge>;
+    }
+    if (isSoldOut(p)) {
+      return (
+        <Badge variant="destructive">
+          {p.out_of_stock_behavior === "hide_product" ? "Oculto por stock" : "Agotado"}
+        </Badge>
+      );
+    }
+    if (isLowStock(p)) {
+      return <Badge variant="outline">Pocas unidades: {p.stock_quantity}</Badge>;
+    }
+    return <Badge variant="outline">Stock: {p.stock_quantity}</Badge>;
+  }
+
   if (isAdmin === null) {
     return <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>;
   }
@@ -232,6 +250,7 @@ function AdminPage() {
                         {p.category ?? "Sin categoria"}
                       </p>
                       <Price value={Number(p.price)} currency={p.currency} />
+                      <div className="mt-2">{renderStockBadge(p)}</div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch
@@ -259,6 +278,7 @@ function AdminPage() {
                 <th className="px-4 py-3">Producto</th>
                 <th className="px-4 py-3">Categoría</th>
                 <th className="px-4 py-3">Precio</th>
+                <th className="px-4 py-3">Stock</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
@@ -289,6 +309,7 @@ function AdminPage() {
                   <td className="px-4 py-3">
                     <Price value={Number(p.price)} currency={p.currency} />
                   </td>
+                  <td className="px-4 py-3">{renderStockBadge(p)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Switch
@@ -365,7 +386,7 @@ function AdminPage() {
               ))}
               {(products ?? []).length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
                     No hay productos aún.
                   </td>
                 </tr>

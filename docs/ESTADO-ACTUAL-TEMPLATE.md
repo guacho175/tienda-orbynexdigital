@@ -498,3 +498,24 @@ Documentacion:
 No se toco:
 
 - Supabase config, RLS, auth, admin, `ProductForm`, endpoints `api/flow/*`, migraciones, variables de entorno, `payment_url`, WhatsApp checkout, store del carrito ni `src/routes/_authenticated/route.tsx`.
+
+---
+
+## Inventario de productos
+
+Estado: implementado a nivel de codigo y migracion al 2026-07-07.
+
+Se agrego control de stock configurable por producto:
+
+- Nuevas columnas en `products`: `stock_quantity`, `track_inventory`, `allow_backorder`, `low_stock_threshold`, `out_of_stock_behavior`.
+- Productos existentes quedan con `track_inventory = false` para no romper catalogo ni servicios digitales.
+- Home/catalogo ocultan automaticamente productos agotados configurados como `hide_product`.
+- Productos agotados con `show_sold_out` siguen visibles con badge `Agotado` y compra bloqueada.
+- Detalle muestra stock, pocas unidades o agotado.
+- Carrito y checkout consultan productos frescos para bloquear stock insuficiente antes de Flow o `payment_url`.
+- `api/flow/create-payment` valida stock server-side antes de crear pago.
+- `api/flow/confirm` descuenta stock solo cuando Flow confirma pago exitoso.
+- RPC `public.confirm_order_and_decrement_stock(...)` procesa orden y descuento dentro de una transaccion e impide stock negativo.
+- Admin permite configurar inventario y muestra badges de estado de stock.
+
+Documentacion operativa: [`INVENTARIO-PRODUCTOS.md`](./INVENTARIO-PRODUCTOS.md).

@@ -13,6 +13,11 @@ export interface Product {
   image_url_detail: string | null;
   is_active: boolean;
   availability: string;
+  stock_quantity: number;
+  track_inventory: boolean;
+  allow_backorder: boolean;
+  low_stock_threshold: number;
+  out_of_stock_behavior: "show_sold_out" | "hide_product";
   payment_url: string | null;
   payment_button_label: string | null;
   display_order: number;
@@ -33,6 +38,12 @@ export type ProductCardData = Pick<
   | "image_url_thumb"
   | "image_url_card"
   | "image_url_detail"
+  | "availability"
+  | "stock_quantity"
+  | "track_inventory"
+  | "allow_backorder"
+  | "low_stock_threshold"
+  | "out_of_stock_behavior"
   | "payment_url"
   | "payment_button_label"
 >;

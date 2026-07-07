@@ -4,7 +4,10 @@ import type { Product, ProductCardData } from "@/types/product";
 export type ProductInput = Omit<Product, "id" | "created_at" | "updated_at">;
 
 const PRODUCT_CARD_SELECT =
-  "id,name,slug,short_description,price,currency,category,image_url,image_url_thumb,image_url_card,image_url_detail,payment_url,payment_button_label";
+  "id,name,slug,short_description,price,currency,category,image_url,image_url_thumb,image_url_card,image_url_detail,availability,stock_quantity,track_inventory,allow_backorder,low_stock_threshold,out_of_stock_behavior,payment_url,payment_button_label";
+
+const PUBLIC_INVENTORY_FILTER =
+  "track_inventory.eq.false,stock_quantity.gt.0,allow_backorder.eq.true,out_of_stock_behavior.eq.show_sold_out";
 
 export const PRODUCTS_STALE_TIME_MS = 5 * 60 * 1000;
 
@@ -13,6 +16,7 @@ export async function fetchActiveProducts(): Promise<Product[]> {
     .from("products")
     .select("*")
     .eq("is_active", true)
+    .or(PUBLIC_INVENTORY_FILTER)
     .order("display_order", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Product[];
@@ -23,6 +27,7 @@ export async function fetchFeaturedProducts(limit = 6): Promise<ProductCardData[
     .from("products")
     .select(PRODUCT_CARD_SELECT)
     .eq("is_active", true)
+    .or(PUBLIC_INVENTORY_FILTER)
     .order("display_order", { ascending: true })
     .limit(limit);
   if (error) throw error;
@@ -34,6 +39,7 @@ export async function fetchActiveProductCategories(): Promise<string[]> {
     .from("products")
     .select("category")
     .eq("is_active", true)
+    .or(PUBLIC_INVENTORY_FILTER)
     .order("display_order", { ascending: true });
   if (error) throw error;
 
@@ -47,6 +53,7 @@ export async function fetchCatalogProducts(): Promise<ProductCardData[]> {
     .from("products")
     .select(PRODUCT_CARD_SELECT)
     .eq("is_active", true)
+    .or(PUBLIC_INVENTORY_FILTER)
     .order("display_order", { ascending: true });
   if (error) throw error;
   return (data ?? []) as ProductCardData[];
@@ -58,6 +65,7 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .select("*")
     .eq("slug", slug)
     .eq("is_active", true)
+    .or(PUBLIC_INVENTORY_FILTER)
     .maybeSingle();
   if (error) throw error;
   return (data as Product) ?? null;
@@ -76,6 +84,13 @@ export async function fetchProductByIdAdmin(id: string): Promise<Product | null>
   const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return (data as Product) ?? null;
+}
+
+export async function fetchProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("products").select("*").in("id", ids);
+  if (error) throw error;
+  return (data ?? []) as Product[];
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {

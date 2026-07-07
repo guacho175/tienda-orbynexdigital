@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -7,8 +9,10 @@ import { BackLink } from "@/components/ui/BackLink";
 import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { ProductImage } from "@/components/product/ProductImage";
+import { fetchProductsByIds, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
 import { brandConfig } from "@/config/brand.config";
+import { canPurchase, getCartInventoryIssues } from "@/utils/inventory";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({
@@ -19,6 +23,19 @@ export const Route = createFileRoute("/carrito")({
 
 function CartPage() {
   const { items, updateQuantity, removeItem, subtotal, total, clear } = useCart();
+  const productIds = useMemo(() => items.map((item) => item.productId).sort(), [items]);
+  const { data: latestProducts } = useQuery({
+    queryKey: ["cart-products", productIds],
+    queryFn: () => fetchProductsByIds(productIds),
+    staleTime: PRODUCTS_STALE_TIME_MS,
+    enabled: productIds.length > 0,
+  });
+  const latestProductsById = useMemo(
+    () => new Map((latestProducts ?? []).map((product) => [product.id, product])),
+    [latestProducts],
+  );
+  const inventoryIssues = getCartInventoryIssues(items, latestProducts);
+  const issuesByProductId = new Map(inventoryIssues.map((issue) => [issue.productId, issue]));
 
   if (items.length === 0) {
     return (
@@ -106,6 +123,10 @@ function CartPage() {
                     <Button
                       variant="outline"
                       size="icon"
+                      disabled={
+                        latestProductsById.has(item.productId) &&
+                        !canPurchase(latestProductsById.get(item.productId)!, item.quantity + 1)
+                      }
                       onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                       aria-label={`Aumentar cantidad de ${item.name}`}
                     >
@@ -127,6 +148,27 @@ function CartPage() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
+                  {issuesByProductId.has(item.productId) ? (
+                    <div className="basis-full rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive sm:col-start-2">
+                      <p>{issuesByProductId.get(item.productId)?.message}</p>
+                      {issuesByProductId.get(item.productId)?.canAdjust ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() =>
+                            updateQuantity(
+                              item.productId,
+                              issuesByProductId.get(item.productId)?.availableQuantity ?? 1,
+                            )
+                          }
+                        >
+                          Ajustar al maximo disponible
+                        </Button>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -151,16 +193,29 @@ function CartPage() {
                 <Price value={total} className="text-2xl text-accent" />
               </div>
             </div>
-            <Button
-              asChild
-              size="lg"
-              className="btn-hero mt-6 h-auto min-h-10 w-full rounded-[1rem] py-3"
-            >
-              <Link to="/checkout" className="flex flex-col gap-1">
-                <span>Continuar al pago</span>
-                <Price value={total} className="text-xs font-semibold text-primary-foreground/90" />
-              </Link>
-            </Button>
+            {inventoryIssues.length > 0 ? (
+              <Button
+                size="lg"
+                className="mt-6 h-auto min-h-10 w-full rounded-[1rem] py-3"
+                disabled
+              >
+                Corrige el stock para continuar
+              </Button>
+            ) : (
+              <Button
+                asChild
+                size="lg"
+                className="btn-hero mt-6 h-auto min-h-10 w-full rounded-[1rem] py-3"
+              >
+                <Link to="/checkout" className="flex flex-col gap-1">
+                  <span>Continuar al pago</span>
+                  <Price
+                    value={total}
+                    className="text-xs font-semibold text-primary-foreground/90"
+                  />
+                </Link>
+              </Button>
+            )}
             <Button asChild variant="outline" className="mt-2 w-full rounded-[1rem]">
               <Link to="/catalogo">Seguir comprando</Link>
             </Button>

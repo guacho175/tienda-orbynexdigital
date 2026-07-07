@@ -9,6 +9,11 @@ export interface ProductRow {
   currency: string;
   is_active: boolean;
   availability: string;
+  stock_quantity: number;
+  track_inventory: boolean;
+  allow_backorder: boolean;
+  low_stock_threshold: number;
+  out_of_stock_behavior: string;
 }
 
 export interface OrderRow {
@@ -26,6 +31,11 @@ export interface OrderRow {
   failed_at: string | null;
   expires_at: string | null;
   created_at: string;
+}
+
+export interface ConfirmOrderStockResult {
+  success: boolean;
+  message: string;
 }
 
 export function createSupabaseAdmin(env: FlowServerEnv) {

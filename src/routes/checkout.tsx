@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { CreditCard, ExternalLink, Loader2, ShoppingBag } from "lucide-react";
 import { ProductImage } from "@/components/product/ProductImage";
@@ -13,8 +14,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Price } from "@/components/ui-common/Price";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { useCart } from "@/store/cart.store";
+import { fetchProductsByIds, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
 import { commerceConfig } from "@/config/commerce.config";
 import { brandConfig } from "@/config/brand.config";
+import { getCartInventoryIssues } from "@/utils/inventory";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
@@ -38,6 +41,14 @@ type FlowPaymentResponse = {
 
 function CheckoutPage() {
   const { items, total } = useCart();
+  const productIds = useMemo(() => items.map((item) => item.productId).sort(), [items]);
+  const { data: latestProducts } = useQuery({
+    queryKey: ["checkout-products", productIds],
+    queryFn: () => fetchProductsByIds(productIds),
+    staleTime: PRODUCTS_STALE_TIME_MS,
+    enabled: productIds.length > 0,
+  });
+  const inventoryIssues = getCartInventoryIssues(items, latestProducts);
   const [form, setForm] = useState({ name: "", email: "", phone: "", comment: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [flowError, setFlowError] = useState<string | null>(null);
@@ -69,7 +80,8 @@ function CheckoutPage() {
     );
   }
 
-  const singleItemWithLink = items.length === 1 && items[0].payment_url ? items[0] : null;
+  const singleItemWithLink =
+    items.length === 1 && items[0].payment_url && inventoryIssues.length === 0 ? items[0] : null;
 
   function validate() {
     const result = customerSchema.safeParse(form);
@@ -87,6 +99,14 @@ function CheckoutPage() {
 
   async function handleFlowPayment() {
     setFlowError(null);
+    if (inventoryIssues.length > 0) {
+      const message = inventoryIssues[0]?.message ?? "Hay productos sin stock suficiente.";
+      setFlowError(message);
+      toast.error("Revisa el stock del carrito", {
+        description: message,
+      });
+      return;
+    }
     const parsed = validate();
     if (!parsed) {
       return;
@@ -216,13 +236,24 @@ function CheckoutPage() {
                 </p>
               </div>
 
+              {inventoryIssues.length > 0 ? (
+                <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {inventoryIssues.map((issue) => (
+                    <p key={issue.productId}>{issue.message}</p>
+                  ))}
+                  <Button asChild variant="outline" size="sm" className="mt-1">
+                    <Link to="/carrito">Corregir carrito</Link>
+                  </Button>
+                </div>
+              ) : null}
+
               {commerceConfig.flowCheckout.enabled ? (
                 <>
                   <Button
                     onClick={handleFlowPayment}
                     size="lg"
                     className="btn-hero h-auto min-h-10 w-full rounded-[1rem] py-3"
-                    disabled={isCreatingFlowPayment}
+                    disabled={isCreatingFlowPayment || inventoryIssues.length > 0}
                   >
                     {isCreatingFlowPayment ? (
                       <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -255,12 +286,12 @@ function CheckoutPage() {
                   variant="outline"
                   size="lg"
                   className="w-full rounded-[1rem]"
-                  disabled={isCreatingFlowPayment}
+                  disabled={isCreatingFlowPayment || inventoryIssues.length > 0}
                 >
                   <ExternalLink className="mr-1 h-4 w-4" />
                   {singleItemWithLink.payment_button_label ?? "Pagar con link externo"}
                 </Button>
-              ) : items.some((item) => item.payment_url) ? (
+              ) : inventoryIssues.length === 0 && items.some((item) => item.payment_url) ? (
                 <p className="rounded-md border border-white/10 bg-secondary/40 p-3 text-sm text-muted-foreground">
                   Los links externos quedan disponibles por producto individual. Para este carrito
                   completo usa pago online.

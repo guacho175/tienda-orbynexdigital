@@ -102,6 +102,10 @@ En Supabase/Lovable Cloud, configurar:
 10. Revisar home publico: debe mostrar productos destacados, categorias, flujo de compra y CTAs de tienda.
 11. Revisar retornos: `/catalogo`, `/producto/:slug`, `/carrito`, `/checkout` y `/checkout/resultado`.
 12. Si faltan productos demo, aplicar manualmente el SQL de `docs/SEED-PRODUCTOS-DEMO.md` en Supabase.
+13. Aplicar la migracion de inventario antes del deploy que use esos campos.
+14. Crear o editar un producto con `track_inventory = true`, `stock_quantity = 0` y probar `show_sold_out` vs `hide_product`.
+15. Probar Flow sandbox con stock insuficiente y confirmar que `create-payment` rechaza el carrito.
+16. Probar una confirmacion pagada y revisar que `public.confirm_order_and_decrement_stock` descuenta stock sin dejar valores negativos.
 
 ## 7. Fuera de alcance
 

@@ -9,6 +9,8 @@ import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchProductBySlug } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
+import { buildWhatsappContactUrl } from "@/utils/whatsapp";
+import { canPurchase, isLowStock, isSoldOut } from "@/utils/inventory";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/producto/$slug")({
@@ -59,6 +61,10 @@ function ProductDetail() {
     );
   }
 
+  const soldOut = isSoldOut(product);
+  const lowStock = isLowStock(product);
+  const purchaseAvailable = canPurchase(product);
+
   return (
     <Container className="py-8 sm:py-12">
       <BackLink to="/catalogo" label="Volver al catalogo" />
@@ -101,6 +107,24 @@ function ProductDetail() {
             className="mt-6 block text-4xl font-bold text-accent"
           />
 
+          {product.track_inventory ? (
+            <div
+              className={
+                soldOut
+                  ? "mt-5 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+                  : lowStock
+                    ? "mt-5 rounded-lg border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100"
+                    : "mt-5 rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-accent"
+              }
+            >
+              {soldOut
+                ? "Agotado"
+                : lowStock
+                  ? `Ultimas unidades: ${product.stock_quantity} disponibles`
+                  : `Stock disponible: ${product.stock_quantity}`}
+            </div>
+          ) : null}
+
           {product.description ? (
             <div className="mt-8 border-t border-white/8 pt-6 text-left">
               <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -114,7 +138,14 @@ function ProductDetail() {
             <Button
               size="lg"
               className="btn-hero rounded-full"
+              disabled={!purchaseAvailable}
               onClick={() => {
+                if (!purchaseAvailable) {
+                  toast.error("Producto agotado", {
+                    description: `${product.name} no esta disponible para agregar al carrito.`,
+                  });
+                  return;
+                }
                 addItem(product, 1);
                 openDrawer();
                 toast.success("Agregado al carrito", {
@@ -130,7 +161,26 @@ function ProductDetail() {
             </Button>
           </div>
 
-          {product.payment_url ? (
+          {soldOut ? (
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="mt-3 w-full rounded-full sm:w-fit"
+            >
+              <a
+                href={buildWhatsappContactUrl(
+                  `Hola, quiero consultar por disponibilidad de ${product.name}.`,
+                )}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Consultar por WhatsApp
+              </a>
+            </Button>
+          ) : null}
+
+          {product.payment_url && purchaseAvailable ? (
             <Button
               asChild
               variant="outline"

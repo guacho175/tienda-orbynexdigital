@@ -10,6 +10,7 @@ import { Price } from "@/components/ui-common/Price";
 import { cn } from "@/lib/utils";
 import { fetchFeaturedProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
+import { canPurchase, isSoldOut } from "@/utils/inventory";
 
 export function CartDrawer() {
   const { items, count, total, drawerOpen, setDrawerOpen, closeDrawer, addItem, updateQuantity } =
@@ -44,7 +45,9 @@ export function CartDrawer() {
 
   const recommendations = useMemo(() => {
     const selected = new Set(items.map((item) => item.productId));
-    return featuredProducts.filter((product) => !selected.has(product.id)).slice(0, 2);
+    return featuredProducts
+      .filter((product) => !selected.has(product.id) && canPurchase(product))
+      .slice(0, 2);
   }, [featuredProducts, items]);
 
   return (
@@ -204,7 +207,9 @@ export function CartDrawer() {
                     <Button
                       size="sm"
                       className="btn-hero mt-3 h-9 w-full rounded-lg text-xs"
+                      disabled={isSoldOut(product)}
                       onClick={() => {
+                        if (!canPurchase(product)) return;
                         addItem(product, 1);
                         toast.success("Agregado al carrito", {
                           description: `${product.name} quedo listo para revisar el pedido.`,

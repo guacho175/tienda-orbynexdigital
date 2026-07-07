@@ -36,7 +36,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     const { data: products, error: productsError } = await supabase
       .from("products")
-      .select("id,name,slug,price,currency,is_active,availability")
+      .select(
+        "id,name,slug,price,currency,is_active,availability,stock_quantity,track_inventory,allow_backorder,low_stock_threshold,out_of_stock_behavior",
+      )
       .in("id", Array.from(requestedItems.keys()));
 
     if (productsError) {

@@ -9,7 +9,11 @@ import {
 } from "../../src/server/flow/http.js";
 import { getFlowServerEnv } from "../../src/server/flow/env.js";
 import { getFlowPaymentStatus, mapFlowStatusToLocal } from "../../src/server/flow/flow.js";
-import { createSupabaseAdmin, type OrderRow } from "../../src/server/flow/supabase.js";
+import {
+  createSupabaseAdmin,
+  type ConfirmOrderStockResult,
+  type OrderRow,
+} from "../../src/server/flow/supabase.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
@@ -54,6 +58,43 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       return;
     }
 
+    if (localStatus === "paid") {
+      const { data: stockResult, error: stockError } = await supabase.rpc(
+        "confirm_order_and_decrement_stock",
+        {
+          p_order_id: typedOrder.id,
+          p_flow_status: flowStatus,
+          p_flow_status_text: String(flowStatus.status ?? ""),
+        },
+      );
+
+      if (stockError) {
+        throw new ApiError(500, "Could not confirm order inventory");
+      }
+
+      const result = Array.isArray(stockResult)
+        ? (stockResult[0] as ConfirmOrderStockResult | undefined)
+        : (stockResult as ConfirmOrderStockResult | undefined);
+
+      if (!result?.success) {
+        sendJson(res, 200, {
+          ok: false,
+          status: "failed",
+          commerceOrder: typedOrder.commerce_order,
+          inventoryConflict: true,
+          message: result?.message ?? "Order stock could not be confirmed",
+        });
+        return;
+      }
+
+      sendJson(res, 200, {
+        ok: true,
+        status: "paid",
+        commerceOrder: typedOrder.commerce_order,
+      });
+      return;
+    }
+
     const updatePayload: Record<string, unknown> = {
       status: localStatus,
       flow_status: String(flowStatus.status ?? ""),
@@ -61,9 +102,6 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       confirmed_at: now,
     };
 
-    if (localStatus === "paid") {
-      updatePayload.paid_at = now;
-    }
     if (localStatus === "failed") {
       updatePayload.failed_at = now;
     }

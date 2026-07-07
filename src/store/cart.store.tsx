@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CartItem, ProductForCart } from "@/types/cart";
 import { commerceConfig } from "@/config/commerce.config";
+import { canPurchase } from "@/utils/inventory";
 
 const STORAGE_KEY = commerceConfig.cartStorageKey;
 
@@ -64,6 +65,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       closeDrawer: () => setDrawerOpen(false),
       setDrawerOpen,
       addItem: (product, quantity = 1) => {
+        if (!canPurchase(product, quantity)) return;
         setItems((prev) => {
           const existing = prev.find((it) => it.productId === product.id);
           if (existing) {
@@ -85,6 +87,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
               image_url_detail: product.image_url_detail,
               short_description: product.short_description,
               category: product.category,
+              availability: product.availability,
+              stock_quantity: product.stock_quantity,
+              track_inventory: product.track_inventory,
+              allow_backorder: product.allow_backorder,
+              low_stock_threshold: product.low_stock_threshold,
+              out_of_stock_behavior: product.out_of_stock_behavior,
               payment_url: product.payment_url,
               payment_button_label: product.payment_button_label,
               quantity,

@@ -22,16 +22,22 @@ export type Database = {
           image_url_detail: string | null;
           image_url_thumb: string | null;
           is_active: boolean;
+          allow_backorder: boolean;
+          low_stock_threshold: number;
           name: string;
+          out_of_stock_behavior: string;
           payment_button_label: string | null;
           payment_url: string | null;
           price: number;
           short_description: string | null;
           slug: string;
+          stock_quantity: number;
+          track_inventory: boolean;
           updated_at: string;
         };
         Insert: {
           availability?: string;
+          allow_backorder?: boolean;
           category?: string | null;
           created_at?: string;
           currency?: string;
@@ -43,16 +49,21 @@ export type Database = {
           image_url_detail?: string | null;
           image_url_thumb?: string | null;
           is_active?: boolean;
+          low_stock_threshold?: number;
           name: string;
+          out_of_stock_behavior?: string;
           payment_button_label?: string | null;
           payment_url?: string | null;
           price?: number;
           short_description?: string | null;
           slug: string;
+          stock_quantity?: number;
+          track_inventory?: boolean;
           updated_at?: string;
         };
         Update: {
           availability?: string;
+          allow_backorder?: boolean;
           category?: string | null;
           created_at?: string;
           currency?: string;
@@ -64,12 +75,16 @@ export type Database = {
           image_url_detail?: string | null;
           image_url_thumb?: string | null;
           is_active?: boolean;
+          low_stock_threshold?: number;
           name?: string;
+          out_of_stock_behavior?: string;
           payment_button_label?: string | null;
           payment_url?: string | null;
           price?: number;
           short_description?: string | null;
           slug?: string;
+          stock_quantity?: number;
+          track_inventory?: boolean;
           updated_at?: string;
         };
         Relationships: [];
@@ -100,6 +115,17 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      confirm_order_and_decrement_stock: {
+        Args: {
+          p_flow_status: Json;
+          p_flow_status_text?: string;
+          p_order_id: string;
+        };
+        Returns: {
+          message: string;
+          success: boolean;
+        }[];
+      };
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"];

@@ -34,6 +34,11 @@ const schema = z.object({
   image_url_detail: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
   is_active: z.boolean(),
   availability: z.enum(["in_stock", "out_of_stock", "on_demand"]),
+  stock_quantity: z.coerce.number().int().min(0, "El stock no puede ser negativo"),
+  track_inventory: z.boolean(),
+  allow_backorder: z.boolean(),
+  low_stock_threshold: z.coerce.number().int().min(0, "El umbral no puede ser negativo"),
+  out_of_stock_behavior: z.enum(["show_sold_out", "hide_product"]),
   payment_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
   payment_button_label: z.string().trim().max(60).optional().or(z.literal("")),
   display_order: z.coerce.number().int().min(0).default(0),
@@ -82,6 +87,11 @@ export function ProductForm({
     image_url_detail: initial?.image_url_detail ?? "",
     is_active: initial?.is_active ?? true,
     availability: (initial?.availability as ProductInput["availability"]) ?? "in_stock",
+    stock_quantity: initial?.stock_quantity ?? 0,
+    track_inventory: initial?.track_inventory ?? false,
+    allow_backorder: initial?.allow_backorder ?? false,
+    low_stock_threshold: initial?.low_stock_threshold ?? 3,
+    out_of_stock_behavior: initial?.out_of_stock_behavior ?? "show_sold_out",
     payment_url: initial?.payment_url ?? "",
     payment_button_label: initial?.payment_button_label ?? "",
     display_order: initial?.display_order ?? 0,
@@ -215,6 +225,107 @@ export function ProductForm({
           {errors.slug ? <p className="text-xs text-destructive">{errors.slug}</p> : null}
         </div>
       </div>
+
+      <section className="rounded-md border border-border/50 bg-secondary/20 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Inventario</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Define si este producto descuenta stock o funciona como servicio sin limite.
+            </p>
+          </div>
+          <Switch
+            id="track_inventory"
+            checked={values.track_inventory}
+            onCheckedChange={(v) => update("track_inventory", v)}
+          />
+        </div>
+        <Label htmlFor="track_inventory" className="mt-3 block cursor-pointer text-sm">
+          Controlar inventario
+        </Label>
+
+        {!values.track_inventory ? (
+          <p className="mt-4 rounded-md border border-accent/20 bg-accent/10 p-3 text-xs text-accent">
+            Este producto no controla stock. Util para servicios digitales o productos sin limite de
+            unidades.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="stock_quantity">Stock disponible</Label>
+                <Input
+                  id="stock_quantity"
+                  type="number"
+                  min={0}
+                  value={values.stock_quantity}
+                  onChange={(e) => update("stock_quantity", Number(e.target.value))}
+                />
+                {errors.stock_quantity ? (
+                  <p className="text-xs text-destructive">{errors.stock_quantity}</p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="low_stock_threshold">Umbral de pocas unidades</Label>
+                <Input
+                  id="low_stock_threshold"
+                  type="number"
+                  min={0}
+                  value={values.low_stock_threshold}
+                  onChange={(e) => update("low_stock_threshold", Number(e.target.value))}
+                />
+                {errors.low_stock_threshold ? (
+                  <p className="text-xs text-destructive">{errors.low_stock_threshold}</p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-md border border-border/50 bg-background/40 p-3">
+              <Switch
+                id="allow_backorder"
+                checked={values.allow_backorder}
+                onCheckedChange={(v) => update("allow_backorder", v)}
+              />
+              <Label htmlFor="allow_backorder" className="cursor-pointer">
+                Permitir venta sin stock
+              </Label>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="out_of_stock_behavior">Cuando no haya stock</Label>
+              <select
+                id="out_of_stock_behavior"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={values.out_of_stock_behavior}
+                onChange={(e) =>
+                  update(
+                    "out_of_stock_behavior",
+                    e.target.value as ProductInput["out_of_stock_behavior"],
+                  )
+                }
+              >
+                <option value="show_sold_out">Mostrar como agotado</option>
+                <option value="hide_product">Ocultar del catalogo</option>
+              </select>
+            </div>
+
+            {values.stock_quantity === 0 ? (
+              <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+                Producto agotado.
+              </p>
+            ) : null}
+            {values.out_of_stock_behavior === "hide_product" ? (
+              <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100">
+                Cuando el stock llegue a 0, este producto dejara de mostrarse en catalogo y home.
+              </p>
+            ) : (
+              <p className="rounded-md border border-accent/20 bg-accent/10 p-3 text-xs text-accent">
+                Cuando el stock llegue a 0, seguira visible como agotado.
+              </p>
+            )}
+          </div>
+        )}
+      </section>
 
       <div className="space-y-2">
         <Label htmlFor="short_description">Descripción corta</Label>
