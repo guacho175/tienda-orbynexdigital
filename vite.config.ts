@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
   resolve: {
@@ -47,6 +48,9 @@ export default defineConfig({
           specifiers: ["server-only"]
         }
       }
+    }),
+    nitro({
+      preset: "vercel"
     }),
     react()
   ]

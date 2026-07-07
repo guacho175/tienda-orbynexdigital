@@ -62,12 +62,11 @@ Se completó una purga sistemática de las referencias al entorno de Lovable. El
 - **Inyección de Código**: Confirmado que se eliminó el script cliente de reporte de errores en `src/lib/lovable-error-reporting.ts` y todas sus importaciones en `src/routes/__root.tsx`.
 - **Mensajes de Supabase**: Los archivos de inicialización del cliente en `src/integrations/supabase/` no contienen referencias a "Lovable Cloud", arrojando mensajes de error genéricos y limpios sobre variables de entorno.
 
----
-
 ## 3. Resultados de Compilación y Validación
 
-- **Instalación y Dependencias (`npm install`)**: Completado con éxito en 2.0s. Reportó 0 vulnerabilidades en los 403 paquetes instalados.
-- **Compilación de Producción (`npm run build`)**: Ejecutado de manera exitosa tras la eliminación de la carpeta `.lovable` y el archivo `bun.lock`. El bundler generó los activos de cliente y el SSR correctamente:
-  - **Client Build**: Compilado exitosamente en 1.45 segundos (generando activos CSS y JS optimizados bajo `dist/client/`).
-  - **SSR Build**: Compilado exitosamente en 0.94 segundos (empaquetando el servidor Nitro en `dist/server/`).
-  - **Resultado**: Cero errores de TypeScript, cero advertencias de compilación y total independencia técnica. El sitio web está listo para desplegar en Vercel sin dependencias de Lovable. El deploy en Vercel es 100% independiente.
+- **Instalación y Dependencias (`npm install`)**: Completado con éxito. Reportó 0 vulnerabilidades en los 403 paquetes instalados.
+- **Diagnóstico y Corrección de Deploy en Vercel (Error 404)**: Tras la remoción del wrapper de Lovable en el commit `da24800`, el despliegue automático en Vercel comenzó a fallar con error 404 porque no se registraba el plugin de Nitro (`nitro/vite`) en `vite.config.ts`. Sin este plugin, Nitro no se integraba al pipeline de Vite en el build y no generaba el directorio `.vercel/output`. Esto causaba que Vercel no encontrara las Serverless Functions ni los estáticos del enrutador de TanStack Start.
+- **Resolución**: Se integró manualmente el plugin `nitro` importado de `nitro/vite` en `vite.config.ts` configurado con `preset: "vercel"`.
+- **Compilación de Producción (`npm run build`)**: Ejecutada de manera exitosa tras la integración del plugin. El compilador de Nitro procesó y generó la estructura oficial del Vercel Build Output API:
+  - **Client & SSR Build**: Nitro compiló para el preset de Vercel (preset: vercel, compatibility: 2026-07-02) y colocó los activos estáticos del cliente en `.vercel/output/static` y las Serverless Functions del servidor en `.vercel/output/functions/__server.func/`.
+  - **Resultado**: Cero errores de TypeScript y total compatibilidad nativa. El sitio web compila y despliega ahora de forma 100% independiente y funcional en Vercel.
