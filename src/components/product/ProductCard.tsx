@@ -8,7 +8,7 @@ import { useCart } from "@/store/cart.store";
 import type { ProductCardData } from "@/types/product";
 
 export function ProductCard({ product }: { product: ProductCardData }) {
-  const { addItem } = useCart();
+  const { addItem, openDrawer } = useCart();
 
   return (
     <article
@@ -69,6 +69,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             aria-label={`Agregar ${product.name} al carrito`}
             onClick={() => {
               addItem(product, 1);
+              openDrawer();
               toast.success("Agregado al carrito", {
                 description: `${product.name} quedo listo para revisar el pedido.`,
               });

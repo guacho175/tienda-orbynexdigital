@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { GlobalBrandEffects } from "@/components/brand/BrandEffects";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import { Toaster } from "@/components/ui/sonner";
@@ -174,6 +175,7 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
+        <CartDrawer />
         <Toaster />
       </CartProvider>
     </QueryClientProvider>

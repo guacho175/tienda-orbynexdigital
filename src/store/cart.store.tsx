@@ -9,6 +9,10 @@ interface CartContextValue {
   count: number;
   subtotal: number;
   total: number;
+  drawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  setDrawerOpen: (open: boolean) => void;
   addItem: (product: ProductForCart, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -32,6 +36,7 @@ function loadInitialItems(): CartItem[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     setItems(loadInitialItems());
@@ -54,6 +59,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       count: items.reduce((acc, it) => acc + it.quantity, 0),
       subtotal,
       total: subtotal,
+      drawerOpen,
+      openDrawer: () => setDrawerOpen(true),
+      closeDrawer: () => setDrawerOpen(false),
+      setDrawerOpen,
       addItem: (product, quantity = 1) => {
         setItems((prev) => {
           const existing = prev.find((it) => it.productId === product.id);
@@ -74,6 +83,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
               image_url_thumb: product.image_url_thumb,
               image_url_card: product.image_url_card,
               image_url_detail: product.image_url_detail,
+              short_description: product.short_description,
+              category: product.category,
               payment_url: product.payment_url,
               payment_button_label: product.payment_button_label,
               quantity,
@@ -91,7 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items, hydrated]);
+  }, [items, drawerOpen]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

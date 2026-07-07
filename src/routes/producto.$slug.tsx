@@ -17,7 +17,7 @@ export const Route = createFileRoute("/producto/$slug")({
 
 function ProductDetail() {
   const { slug } = Route.useParams();
-  const { addItem } = useCart();
+  const { addItem, openDrawer } = useCart();
   const {
     data: product,
     isLoading,
@@ -116,6 +116,7 @@ function ProductDetail() {
               className="btn-hero rounded-full"
               onClick={() => {
                 addItem(product, 1);
+                openDrawer();
                 toast.success("Agregado al carrito", {
                   description: `${product.name} quedo listo para revisar el pedido.`,
                 });

@@ -8,7 +8,7 @@ import { Container } from "./Container";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const { count } = useCart();
+  const { count, openDrawer } = useCart();
   const [open, setOpen] = useState(false);
 
   return (
@@ -40,10 +40,11 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link
-            to="/carrito"
+          <button
+            type="button"
             className="relative inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             aria-label="Ver carrito"
+            onClick={openDrawer}
           >
             <ShoppingCart className="h-5 w-5" />
             <span className="hidden sm:inline">Carrito</span>
@@ -52,7 +53,7 @@ export function Navbar() {
                 {count}
               </span>
             ) : null}
-          </Link>
+          </button>
           <button
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground transition-colors hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
             onClick={() => setOpen((v) => !v)}
