@@ -86,16 +86,17 @@ El carrito consulta productos frescos desde Supabase para validar el snapshot lo
 
 Esta validacion es solo UX. La validacion real ocurre en servidor y base de datos.
 
-## Flow
+## Flow y reservas
 
 `POST /api/flow/create-payment` recalcula productos desde Supabase antes de crear el pago:
 
 - Valida que el producto exista.
 - Valida que este activo.
 - Valida `availability`.
-- Valida `track_inventory`, `allow_backorder` y `stock_quantity`.
-- Rechaza cantidad mayor al stock con mensaje claro.
+- Valida `track_inventory`, `allow_backorder`, `stock_quantity` y reservas activas.
+- Rechaza cantidad mayor al stock vendible con mensaje claro.
 - Sigue recalculando precio y total server-side.
+- Crea la orden, los items y las reservas temporales con `public.create_order_with_stock_reservation(...)`.
 
 Segun la documentacion oficial de Flow, la confirmacion llega por POST con un token y el backend debe consultar `payment/getStatus` antes de marcar pagado.
 
@@ -103,23 +104,44 @@ Segun la documentacion oficial de Flow, la confirmacion llega por POST con un to
 
 No se descuenta stock al iniciar el pago.
 
+Cuando se inicia un pago Flow, los productos con `track_inventory = true` y `allow_backorder = false` quedan reservados temporalmente en `public.stock_reservations`.
+
 Cuando Flow confirma pago exitoso, `api/flow/confirm.ts` llama el RPC:
 
 ```sql
-public.confirm_order_and_decrement_stock(order_id, flow_status, flow_status_text)
+public.confirm_order_payment_and_capture_stock(order_id, flow_status, flow_status_text)
 ```
 
 Ese RPC:
 
 - Bloquea la orden con `FOR UPDATE`.
 - Es idempotente si la orden ya esta `paid`.
-- Bloquea productos de `order_items` con `FOR UPDATE`.
-- Revalida stock antes de descontar.
-- Descuenta stock dentro de la transaccion.
+- Bloquea reservas y productos con `FOR UPDATE`.
+- Revalida que la reserva siga activa y vigente.
+- Descuenta stock dentro de la transaccion solo al capturar una reserva vigente.
+- Marca reservas como `confirmed`.
 - Marca la orden como `paid`.
-- Si no hay stock suficiente al confirmar, marca la orden como `failed` y deja detalle en `flow_raw_status`.
+- Si la reserva vencio antes de confirmar el pago, marca `requires_manual_review` y no descuenta stock.
+- Si capturar stock dejaria stock negativo, marca `stock_conflict` y no descuenta stock.
+
+El RPC anterior `public.confirm_order_and_decrement_stock(...)` queda como wrapper de compatibilidad hacia la confirmacion nueva.
 
 `EXECUTE` del RPC queda revocado para `PUBLIC`, `anon` y `authenticated`, y concedido solo a `service_role`.
+
+## Reservas temporales
+
+La tabla `public.stock_reservations` guarda reservas por orden y producto:
+
+- `active`: reserva vigente.
+- `confirmed`: reserva capturada como venta.
+- `released`: reserva liberada por fallo/cancelacion/expiracion de Flow.
+- `expired`: reserva vencida por tiempo.
+
+`public.expire_stock_reservations()` libera reservas vencidas de forma idempotente y marca ordenes pendientes como `reservation_expired`.
+
+`public.release_order_stock_reservations(...)` libera reservas activas cuando `payment/create` falla o cuando Flow reporta `failed`, `cancelled` o `expired`.
+
+Mas detalle: `docs/INVENTARIO-RESERVAS-STOCK.md`.
 
 ## WhatsApp y payment_url
 
@@ -131,12 +153,11 @@ No hay un boton WhatsApp checkout activo en la pantalla actual de checkout. El h
 
 Pendientes de inventario avanzado:
 
-- Reservas temporales de stock al iniciar pago.
-- Expiracion automatica de reservas.
 - Historial de movimientos de inventario.
 - Auditoria por usuario/admin.
 - Notificaciones por bajo stock.
-- Estado separado para pagos exitosos sin stock al confirmar, en vez de reutilizar `failed`.
 - Reposicion y ajustes manuales con motivo.
+- Cron programado para expirar reservas sin depender de trafico nuevo.
+- Vista/admin de conciliacion para `requires_manual_review` y `stock_conflict`.
 
-La decision actual evita descontar stock por pagos abandonados, pero todavia existe una ventana de competencia entre iniciar pago y confirmar. El RPC evita stock negativo al confirmar, pero no reserva unidades durante el pago.
+La decision actual evita descontar stock por pagos abandonados y cierra la ventana de competencia del checkout Flow con reservas activas. La expiracion existe de forma opportunistic; un cron programado queda pendiente para liberacion aunque no haya trafico nuevo.

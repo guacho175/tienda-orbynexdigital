@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle2, Clock3, Loader2, RefreshCw, ShoppingBag, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock3,
+  Loader2,
+  RefreshCw,
+  ShoppingBag,
+  XCircle,
+} from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -211,6 +219,9 @@ function getDisplayStatus(status: string | undefined) {
   if (status === "failed") return "failed";
   if (status === "cancelled") return "cancelled";
   if (status === "expired") return "expired";
+  if (status === "reservation_expired") return "reservation_expired";
+  if (status === "stock_conflict") return "stock_conflict";
+  if (status === "requires_manual_review") return "requires_manual_review";
   return "pending";
 }
 
@@ -259,6 +270,29 @@ function getStatusCopy(status: ReturnType<typeof getDisplayStatus>) {
       description: "La orden expiro antes de completarse. El carrito se mantiene sin cambios.",
       icon: XCircle,
       iconClassName: `${baseIconClassName} bg-destructive/10 text-destructive`,
+    };
+  }
+
+  if (status === "reservation_expired") {
+    return {
+      label: "Reserva expirada",
+      shortLabel: "Reserva expirada",
+      title: "Tu reserva expiro antes de confirmar el pago",
+      description:
+        "La orden no descontara stock automaticamente. Contactaremos al cliente para resolver.",
+      icon: AlertTriangle,
+      iconClassName: `${baseIconClassName} bg-amber-500/10 text-amber-500`,
+    };
+  }
+
+  if (status === "stock_conflict" || status === "requires_manual_review") {
+    return {
+      label: "Revision manual",
+      shortLabel: "Revision manual",
+      title: "Pago recibido, pero el stock requiere revision manual",
+      description: "Contactaremos al cliente para resolver la disponibilidad del pedido.",
+      icon: AlertTriangle,
+      iconClassName: `${baseIconClassName} bg-amber-500/10 text-amber-500`,
     };
   }
 

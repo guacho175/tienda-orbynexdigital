@@ -36,6 +36,16 @@ export interface OrderRow {
 export interface ConfirmOrderStockResult {
   success: boolean;
   message: string;
+  status?: string;
+}
+
+export interface CreateOrderWithReservationResult {
+  order_id: string;
+  commerce_order: string;
+  public_lookup_token: string;
+  subtotal: number | string;
+  total: number | string;
+  currency: string;
 }
 
 export function createSupabaseAdmin(env: FlowServerEnv) {

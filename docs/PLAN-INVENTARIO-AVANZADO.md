@@ -6,7 +6,9 @@ Fecha: 2026-07-07
 
 Estandarizar el flujo de stock para evitar overselling, mantener trazabilidad y separar correctamente los estados de pago, reserva, descuento y problemas operativos.
 
-El estado actual es correcto como primera fase: no descuenta stock al iniciar pago, valida en `create-payment`, revalida en `confirm` y descuenta atomicamente con RPC. La brecha restante es que no existe reserva entre el inicio del pago y la confirmacion de Flow.
+Estado actualizado: las Fases 1 a 5 estan implementadas. El checkout Flow ahora crea reservas temporales antes de redirigir a Flow, captura stock solo al confirmar pago exitoso y expira/libera reservas sin descontar stock por pagos abandonados.
+
+Documento operativo: `docs/INVENTARIO-RESERVAS-STOCK.md`.
 
 ## Principio recomendado
 
@@ -46,6 +48,8 @@ Esta fase sirve para una tienda pequena o con bajo volumen, pero no es el flujo 
 
 ## Fase 1 - Estados de orden mas expresivos
 
+Estado: implementado.
+
 Objetivo: dejar de reutilizar `failed` para casos de pago exitoso sin stock.
 
 Cambios de datos:
@@ -70,6 +74,8 @@ Ventaja:
 - El problema queda como operacion/inventario, no como fallo de pago.
 
 ## Fase 2 - Tabla de reservas de stock
+
+Estado: implementado.
 
 Objetivo: reservar unidades al crear el pago para cerrar la ventana de competencia.
 
@@ -113,17 +119,13 @@ Importante:
 
 ## Fase 3 - RPC atomico para crear orden y reservar stock
 
+Estado: implementado.
+
 Objetivo: que `create-payment` no haga lectura y escritura separadas para stock.
 
 Crear RPC:
 
-```sql
-create_order_with_stock_reservation(
-  p_customer jsonb,
-  p_items jsonb,
-  p_reservation_minutes integer default 15
-)
-```
+RPC implementado: `public.create_order_with_stock_reservation(p_user_id, p_commerce_order, p_customer, p_items, p_reservation_minutes)`.
 
 Debe:
 
@@ -146,6 +148,8 @@ Debe:
 - Si Flow falla, liberar reservas.
 
 ## Fase 4 - Confirmacion Flow con reserva
+
+Estado: implementado.
 
 Objetivo: confirmar pago y convertir reserva en venta.
 
@@ -178,6 +182,8 @@ Si Flow falla/cancela:
 - liberar reservas `active`
 
 ## Fase 5 - Expiracion automatica de reservas
+
+Estado: implementado como expiracion opportunistic. Cron programado queda pendiente.
 
 Objetivo: liberar reservas abandonadas.
 

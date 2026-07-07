@@ -48,7 +48,27 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const localStatus = mapFlowStatusToLocal(flowStatus.status);
     const now = new Date().toISOString();
 
+    if (typedOrder.status === "paid") {
+      sendJson(res, 200, {
+        ok: true,
+        status: "paid",
+        commerceOrder: typedOrder.commerce_order,
+        idempotent: true,
+      });
+      return;
+    }
+
     if (isDuplicateTerminalStatus(typedOrder.status, localStatus)) {
+      sendJson(res, 200, {
+        ok: true,
+        status: typedOrder.status,
+        commerceOrder: typedOrder.commerce_order,
+        idempotent: true,
+      });
+      return;
+    }
+
+    if (isOperationalTerminalStatus(typedOrder.status) && localStatus !== "paid") {
       sendJson(res, 200, {
         ok: true,
         status: typedOrder.status,
@@ -60,7 +80,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     if (localStatus === "paid") {
       const { data: stockResult, error: stockError } = await supabase.rpc(
-        "confirm_order_and_decrement_stock",
+        "confirm_order_payment_and_capture_stock",
         {
           p_order_id: typedOrder.id,
           p_flow_status: flowStatus,
@@ -79,7 +99,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       if (!result?.success) {
         sendJson(res, 200, {
           ok: false,
-          status: "failed",
+          status: result?.status ?? "requires_manual_review",
           commerceOrder: typedOrder.commerce_order,
           inventoryConflict: true,
           message: result?.message ?? "Order stock could not be confirmed",
@@ -90,6 +110,26 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       sendJson(res, 200, {
         ok: true,
         status: "paid",
+        commerceOrder: typedOrder.commerce_order,
+      });
+      return;
+    }
+
+    if (["failed", "cancelled", "expired"].includes(localStatus)) {
+      const { error: releaseError } = await supabase.rpc("release_order_stock_reservations", {
+        p_order_id: typedOrder.id,
+        p_order_status: localStatus,
+        p_flow_status: flowStatus,
+        p_flow_status_text: String(flowStatus.status ?? ""),
+      });
+
+      if (releaseError) {
+        throw new ApiError(500, "Could not release order stock reservation");
+      }
+
+      sendJson(res, 200, {
+        ok: true,
+        status: localStatus,
         commerceOrder: typedOrder.commerce_order,
       });
       return;
@@ -125,10 +165,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 }
 
+function isOperationalTerminalStatus(currentStatus: string) {
+  return ["reservation_expired", "stock_conflict", "requires_manual_review"].includes(
+    currentStatus,
+  );
+}
+
 function isDuplicateTerminalStatus(currentStatus: string, nextStatus: string) {
   return (
     currentStatus === nextStatus &&
-    ["paid", "failed", "cancelled", "expired"].includes(currentStatus)
+    ["paid", "failed", "cancelled", "expired", "requires_manual_review", "stock_conflict"].includes(
+      currentStatus,
+    )
   );
 }
 

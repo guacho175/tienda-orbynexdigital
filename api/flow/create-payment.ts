@@ -9,7 +9,6 @@ import {
 import { getFlowServerEnv } from "../../src/server/flow/env.js";
 import {
   buildCommerceOrder,
-  calculateOrder,
   aggregateRequestedItems,
   parseCreatePaymentBody,
 } from "../../src/server/flow/checkout.js";
@@ -21,7 +20,7 @@ import {
 import {
   createSupabaseAdmin,
   getAuthenticatedUserId,
-  type ProductRow,
+  type CreateOrderWithReservationResult,
 } from "../../src/server/flow/supabase.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
@@ -32,56 +31,30 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const supabase = createSupabaseAdmin(env);
     const body = parseCreatePaymentBody(await parseJsonBody(req));
     const requestedItems = aggregateRequestedItems(body.items);
+    const itemsForReservation = Array.from(requestedItems, ([productId, quantity]) => ({
+      productId,
+      quantity,
+    }));
     const userId = await getAuthenticatedUserId(supabase, req.headers.authorization);
-
-    const { data: products, error: productsError } = await supabase
-      .from("products")
-      .select(
-        "id,name,slug,price,currency,is_active,availability,stock_quantity,track_inventory,allow_backorder,low_stock_threshold,out_of_stock_behavior",
-      )
-      .in("id", Array.from(requestedItems.keys()));
-
-    if (productsError) {
-      throw new ApiError(500, "Could not load products");
-    }
-
-    const calculatedOrder = calculateOrder(requestedItems, (products ?? []) as ProductRow[]);
     const commerceOrder = buildCommerceOrder();
 
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        commerce_order: commerceOrder,
-        user_id: userId,
-        status: "pending",
-        currency: calculatedOrder.currency,
-        subtotal: calculatedOrder.subtotal,
-        discount_total: 0,
-        shipping_total: 0,
-        tax_total: 0,
-        total: calculatedOrder.total,
-        customer_name: body.customer.name,
-        customer_email: body.customer.email,
-        customer_phone: body.customer.phone || null,
-        customer_comment: body.customer.comment || null,
-      })
-      .select("id, commerce_order, public_lookup_token")
-      .single();
-
-    if (orderError || !order) {
-      throw new ApiError(500, "Could not create order");
-    }
-
-    const { error: itemsError } = await supabase.from("order_items").insert(
-      calculatedOrder.items.map((item) => ({
-        ...item,
-        order_id: order.id,
-      })),
+    const { data: orderResult, error: orderError } = await supabase.rpc(
+      "create_order_with_stock_reservation",
+      {
+        p_user_id: userId,
+        p_commerce_order: commerceOrder,
+        p_customer: body.customer,
+        p_items: itemsForReservation,
+        p_reservation_minutes: 15,
+      },
     );
 
-    if (itemsError) {
-      await supabase.from("orders").update({ status: "failed" }).eq("id", order.id);
-      throw new ApiError(500, "Could not create order items");
+    const order = Array.isArray(orderResult)
+      ? (orderResult[0] as CreateOrderWithReservationResult | undefined)
+      : (orderResult as CreateOrderWithReservationResult | undefined);
+
+    if (orderError || !order) {
+      throw new ApiError(409, orderError?.message ?? "Could not create order reservation");
     }
 
     let flowResponse: FlowCreatePaymentResponse;
@@ -91,8 +64,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       flowResponse = await createFlowPayment(env, {
         commerceOrder,
         subject: `Pedido ${commerceOrder}`,
-        currency: calculatedOrder.currency,
-        amount: calculatedOrder.total,
+        currency: order.currency,
+        amount: Number(order.total),
         email: body.customer.email,
         urlReturn: buildOrderReturnUrl(env.flowReturnUrl, commerceOrder, order.public_lookup_token),
         optional: JSON.stringify({
@@ -102,17 +75,20 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       });
       redirectUrl = buildFlowRedirectUrl(flowResponse);
     } catch (error) {
-      await supabase
-        .from("orders")
-        .update({
-          status: "failed",
-          flow_raw_status: {
-            source: "payment/create",
-            error: error instanceof Error ? error.message : "Flow request failed",
-          },
-          failed_at: new Date().toISOString(),
-        })
-        .eq("id", order.id);
+      const { error: releaseError } = await supabase.rpc("release_order_stock_reservations", {
+        p_order_id: order.order_id,
+        p_order_status: "failed",
+        p_flow_status: {
+          source: "payment/create",
+          error: error instanceof Error ? error.message : "Flow request failed",
+        },
+        p_flow_status_text: "payment_create_failed",
+      });
+
+      if (releaseError) {
+        throw new ApiError(500, "Could not release stock reservation after Flow failure");
+      }
+
       throw error;
     }
 
@@ -128,9 +104,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
           flowOrder: flowResponse.flowOrder ?? null,
         },
       })
-      .eq("id", order.id);
+      .eq("id", order.order_id);
 
     if (updateError) {
+      await supabase.rpc("release_order_stock_reservations", {
+        p_order_id: order.order_id,
+        p_order_status: "failed",
+        p_flow_status: {
+          source: "payment/create-local-update",
+          error: updateError.message,
+        },
+        p_flow_status_text: "payment_create_update_failed",
+      });
       throw new ApiError(500, "Could not update order with Flow response");
     }
 

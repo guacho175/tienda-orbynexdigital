@@ -8,6 +8,144 @@ export type Database = {
   };
   public: {
     Tables: {
+      order_items: {
+        Row: {
+          created_at: string;
+          currency: string;
+          id: string;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          product_slug: string;
+          quantity: number;
+          subtotal: number;
+          unit_price: number;
+        };
+        Insert: {
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          product_slug: string;
+          quantity: number;
+          subtotal: number;
+          unit_price: number;
+        };
+        Update: {
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          order_id?: string;
+          product_id?: string;
+          product_name?: string;
+          product_slug?: string;
+          quantity?: number;
+          subtotal?: number;
+          unit_price?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      orders: {
+        Row: {
+          commerce_order: string;
+          confirmed_at: string | null;
+          created_at: string;
+          currency: string;
+          customer_comment: string | null;
+          customer_email: string;
+          customer_name: string;
+          customer_phone: string | null;
+          discount_total: number;
+          expires_at: string | null;
+          failed_at: string | null;
+          flow_raw_status: Json | null;
+          flow_status: string | null;
+          flow_token: string | null;
+          flow_url: string | null;
+          id: string;
+          paid_at: string | null;
+          public_lookup_token: string;
+          shipping_total: number;
+          status: string;
+          subtotal: number;
+          tax_total: number;
+          total: number;
+          updated_at: string;
+          user_id: string | null;
+        };
+        Insert: {
+          commerce_order: string;
+          confirmed_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          customer_comment?: string | null;
+          customer_email: string;
+          customer_name: string;
+          customer_phone?: string | null;
+          discount_total?: number;
+          expires_at?: string | null;
+          failed_at?: string | null;
+          flow_raw_status?: Json | null;
+          flow_status?: string | null;
+          flow_token?: string | null;
+          flow_url?: string | null;
+          id?: string;
+          paid_at?: string | null;
+          public_lookup_token?: string;
+          shipping_total?: number;
+          status?: string;
+          subtotal?: number;
+          tax_total?: number;
+          total: number;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          commerce_order?: string;
+          confirmed_at?: string | null;
+          created_at?: string;
+          currency?: string;
+          customer_comment?: string | null;
+          customer_email?: string;
+          customer_name?: string;
+          customer_phone?: string | null;
+          discount_total?: number;
+          expires_at?: string | null;
+          failed_at?: string | null;
+          flow_raw_status?: Json | null;
+          flow_status?: string | null;
+          flow_token?: string | null;
+          flow_url?: string | null;
+          id?: string;
+          paid_at?: string | null;
+          public_lookup_token?: string;
+          shipping_total?: number;
+          status?: string;
+          subtotal?: number;
+          tax_total?: number;
+          total?: number;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       products: {
         Row: {
           availability: string;
@@ -89,6 +227,57 @@ export type Database = {
         };
         Relationships: [];
       };
+      stock_reservations: {
+        Row: {
+          confirmed_at: string | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          order_id: string;
+          product_id: string;
+          quantity: number;
+          released_at: string | null;
+          status: string;
+        };
+        Insert: {
+          confirmed_at?: string | null;
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          order_id: string;
+          product_id: string;
+          quantity: number;
+          released_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          confirmed_at?: string | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          order_id?: string;
+          product_id?: string;
+          quantity?: number;
+          released_at?: string | null;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stock_reservations_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stock_reservations_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_roles: {
         Row: {
           created_at: string;
@@ -115,6 +304,18 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      confirm_order_payment_and_capture_stock: {
+        Args: {
+          p_flow_status: Json;
+          p_flow_status_text?: string;
+          p_order_id: string;
+        };
+        Returns: {
+          message: string;
+          status: string;
+          success: boolean;
+        }[];
+      };
       confirm_order_and_decrement_stock: {
         Args: {
           p_flow_status: Json;
@@ -126,12 +327,50 @@ export type Database = {
           success: boolean;
         }[];
       };
+      create_order_with_stock_reservation: {
+        Args: {
+          p_commerce_order: string;
+          p_customer: Json;
+          p_items: Json;
+          p_reservation_minutes?: number;
+          p_user_id: string | null;
+        };
+        Returns: {
+          commerce_order: string;
+          currency: string;
+          order_id: string;
+          public_lookup_token: string;
+          subtotal: number;
+          total: number;
+        }[];
+      };
+      expire_stock_reservations: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          expired_orders: number;
+          expired_reservations: number;
+        }[];
+      };
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"];
           _user_id: string;
         };
         Returns: boolean;
+      };
+      release_order_stock_reservations: {
+        Args: {
+          p_flow_status?: Json;
+          p_flow_status_text?: string;
+          p_order_id: string;
+          p_order_status?: string;
+        };
+        Returns: {
+          message: string;
+          released_count: number;
+          status: string;
+          success: boolean;
+        }[];
       };
     };
     Enums: {
