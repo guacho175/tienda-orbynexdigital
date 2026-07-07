@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DocsRouteImport } from './routes/docs'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as CarritoRouteImport } from './routes/carrito'
@@ -22,11 +21,6 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminNewRouteImport } from './routes/_authenticated/admin.new'
 import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
 
-const DocsRoute = DocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -89,7 +83,6 @@ export interface FileRoutesByFullPath {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/checkout': typeof CheckoutRoute
-  '/docs': typeof DocsRoute
   '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
@@ -102,7 +95,6 @@ export interface FileRoutesByTo {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/checkout': typeof CheckoutRoute
-  '/docs': typeof DocsRoute
   '/checkout/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
@@ -117,7 +109,6 @@ export interface FileRoutesById {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/checkout': typeof CheckoutRoute
-  '/docs': typeof DocsRoute
   '/checkout_/resultado': typeof CheckoutResultadoRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/_authenticated/admin/new': typeof AuthenticatedAdminNewRoute
@@ -132,7 +123,6 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/checkout'
-    | '/docs'
     | '/checkout/resultado'
     | '/producto/$slug'
     | '/admin/new'
@@ -145,7 +135,6 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/checkout'
-    | '/docs'
     | '/checkout/resultado'
     | '/producto/$slug'
     | '/admin/new'
@@ -159,7 +148,6 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/checkout'
-    | '/docs'
     | '/checkout_/resultado'
     | '/producto/$slug'
     | '/_authenticated/admin/new'
@@ -174,20 +162,12 @@ export interface RootRouteChildren {
   CarritoRoute: typeof CarritoRoute
   CatalogoRoute: typeof CatalogoRoute
   CheckoutRoute: typeof CheckoutRoute
-  DocsRoute: typeof DocsRoute
   CheckoutResultadoRoute: typeof CheckoutResultadoRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/docs': {
-      id: '/docs'
-      path: '/docs'
-      fullPath: '/docs'
-      preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/checkout': {
       id: '/checkout'
       path: '/checkout'
@@ -290,7 +270,6 @@ const rootRouteChildren: RootRouteChildren = {
   CarritoRoute: CarritoRoute,
   CatalogoRoute: CatalogoRoute,
   CheckoutRoute: CheckoutRoute,
-  DocsRoute: DocsRoute,
   CheckoutResultadoRoute: CheckoutResultadoRoute,
   ProductoSlugRoute: ProductoSlugRoute,
 }

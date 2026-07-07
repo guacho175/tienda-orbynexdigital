@@ -22,7 +22,7 @@ Fecha: 2026-07-06
 
 ## Cambios realizados
 
-- Home redisenada con presencia fuerte de `orbynex.digital`, H1 comercial, CTA principal a servicios y CTA secundario a WhatsApp.
+- Home redisenada con presencia fuerte de `orbynex.digital`, H1 comercial, CTA principal a servicios y CTA secundario interno.
 - Panel tecnico del hero reemplazado por un mockup liviano de tienda: producto destacado, resumen comercial y pasos de compra.
 - Copy publico ajustado para clientes: se eliminaron referencias comerciales a `payment_url`, `Flow API`, `Supabase`, backend, demo y "Probar carrito".
 - Categorias reescritas como soluciones de servicio, con tarjetas mas clickeables y foco visible.
@@ -33,7 +33,9 @@ Fecha: 2026-07-06
 - Carrito, checkout y footer recibieron copy mas comercial.
 - CTA primario global usa gradiente blue-to-fuchsia y las superficies usan radio mas consistente con la identidad Orbynex.
 - Logo real de Orbynex agregado desde `C:\Users\galin\OneDrive\Documentos\Orbynex.digital\public\logo` y usado en navbar, hero y footer.
-- Referencias visibles a WhatsApp retiradas de home, catalogo, carrito, checkout y docs. La configuracion interna se conserva para no romper compatibilidad.
+- Referencias visibles a WhatsApp retiradas de home, catalogo, carrito y checkout. La configuracion interna se conserva para no romper compatibilidad.
+- Ruta publica `/docs` eliminada para que la documentacion interna no quede expuesta en frontend.
+- La seccion de categorias ahora consulta todas las categorias activas de productos desde Supabase. Se retiro el fallback hardcodeado `categoriesFallback`; si Supabase no responde o no trae categorias, se muestra estado de carga, error o vacio sin inventar nombres.
 
 ## Criterios responsive aplicados
 
@@ -52,8 +54,9 @@ Fecha: 2026-07-06
   - Catalogo mobile: OK, sin overflow.
   - Carrito mobile: OK, sin overflow.
   - Checkout mobile: OK, sin overflow.
-  - Docs desktop: OK, sin referencias visibles a WhatsApp.
+  - `/docs`: OK, responde 404 localmente y ya no se expone como pagina publica.
   - Logo real renderiza correctamente en navbar, hero y footer.
+  - Categorias de home: OK, renderiza solo categorias devueltas por la consulta de productos activos en Supabase; no existe fallback hardcodeado.
   - Busqueda de copy publico: sin `payment_url`, `Flow API`, `Supabase`, `Probar carrito`, `Flujo demo`, textos de prueba ni referencias visibles a WhatsApp.
 
 ## Riesgos y pendientes

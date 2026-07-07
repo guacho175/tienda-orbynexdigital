@@ -373,14 +373,6 @@ function AdminPage() {
             </tbody>
           </table>
         </div>
-
-        <p className="mt-6 text-xs text-muted-foreground">
-          Documentación del template en{" "}
-          <Link to="/docs" className="underline hover:text-foreground">
-            /docs
-          </Link>
-          .
-        </p>
       </Container>
     </>
   );

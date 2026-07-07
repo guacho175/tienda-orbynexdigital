@@ -21,7 +21,11 @@ import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Price } from "@/components/ui-common/Price";
 import { homeConfig } from "@/config/home.config";
 import { brandConfig } from "@/config/brand.config";
-import { fetchFeaturedProducts, PRODUCTS_STALE_TIME_MS } from "@/services/products.service";
+import {
+  fetchActiveProductCategories,
+  fetchFeaturedProducts,
+  PRODUCTS_STALE_TIME_MS,
+} from "@/services/products.service";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -41,12 +45,17 @@ function Home() {
     queryFn: () => fetchFeaturedProducts(featuredProducts.limit),
     staleTime: PRODUCTS_STALE_TIME_MS,
   });
+  const {
+    data: activeCategories,
+    isLoading: isLoadingCategories,
+    error: categoriesError,
+  } = useQuery({
+    queryKey: ["products", "active-categories"],
+    queryFn: fetchActiveProductCategories,
+    staleTime: PRODUCTS_STALE_TIME_MS,
+  });
 
-  const derivedCategories = Array.from(
-    new Set((products ?? []).map((product) => product.category).filter(Boolean)),
-  ) as string[];
-  const visibleCategories =
-    derivedCategories.length > 0 ? derivedCategories : homeConfig.categoriesFallback;
+  const visibleCategories = activeCategories ?? [];
   const previewProduct = products?.[0] ?? null;
 
   return (
@@ -250,21 +259,43 @@ function Home() {
           </h2>
           <p className="mt-3 text-muted-foreground">{categories.subtitle}</p>
         </div>
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleCategories.map((category) => (
-            <Link
-              key={category}
-              to="/catalogo"
-              className="group rounded-2xl border border-border/60 bg-card/70 px-5 py-5 text-center font-semibold text-foreground transition duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <span className="block">{category}</span>
-              <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
-                Ver servicios
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </Link>
-          ))}
-        </div>
+        {isLoadingCategories ? (
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-[92px] rounded-2xl" />
+            ))}
+          </div>
+        ) : categoriesError ? (
+          <div className="mt-10">
+            <EmptyState
+              title="No pudimos cargar las categorias"
+              description="Recarga la pagina para intentar nuevamente."
+            />
+          </div>
+        ) : visibleCategories.length === 0 ? (
+          <div className="mt-10">
+            <EmptyState
+              title="No hay categorias publicadas"
+              description="Las categorias apareceran cuando existan productos activos con categoria."
+            />
+          </div>
+        ) : (
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleCategories.map((category) => (
+              <Link
+                key={category}
+                to="/catalogo"
+                className="group rounded-2xl border border-border/60 bg-card/70 px-5 py-5 text-center font-semibold text-foreground transition duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <span className="block">{category}</span>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
+                  Ver servicios
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </Section>
 
       <Section>

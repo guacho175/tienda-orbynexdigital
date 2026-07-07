@@ -9,14 +9,6 @@ export const homeConfig = {
     primaryCta: { label: "Ver servicios", href: "/catalogo" },
     secondaryCta: { label: "Ver como comprar", href: "#como-comprar" },
   },
-  categoriesFallback: [
-    "Sitios web",
-    "Tiendas online",
-    "Automatizacion",
-    "Soporte digital",
-    "Consultoria",
-    "Servicios digitales",
-  ],
   storeHighlights: [
     {
       title: "Catalogo listo para vender",

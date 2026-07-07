@@ -29,6 +29,19 @@ export async function fetchFeaturedProducts(limit = 6): Promise<ProductCardData[
   return (data ?? []) as ProductCardData[];
 }
 
+export async function fetchActiveProductCategories(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("category")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+  if (error) throw error;
+
+  return Array.from(
+    new Set((data ?? []).map((product) => product.category).filter(Boolean)),
+  ) as string[];
+}
+
 export async function fetchCatalogProducts(): Promise<ProductCardData[]> {
   const { data, error } = await supabase
     .from("products")
