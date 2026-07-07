@@ -1,5 +1,7 @@
 # Flow API - Fase 2: Endpoints Vercel
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06
 Rama: `feature/flow-api-dynamic-checkout`
 

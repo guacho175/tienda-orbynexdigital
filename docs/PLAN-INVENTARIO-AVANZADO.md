@@ -1,5 +1,7 @@
 # Plan de inventario avanzado
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-07
 
 ## Objetivo

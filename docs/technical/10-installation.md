@@ -10,7 +10,7 @@ Asegúrate de contar con las siguientes herramientas instaladas en tu máquina d
 
 *   **Node.js**: Versión 18.0.0 o superior (se recomienda v20.x LTS).
 *   **Gestor de Paquetes**: `bun` (instalación recomendada por velocidad y compatibilidad con el archivo `bun.lock` del proyecto) o en su defecto `npm` / `pnpm`.
-*   **Git**: Para control de versiones y sincronización con Lovable/GitHub.
+*   **Git**: Para control de versiones y sincronización con GitHub.
 
 ---
 

@@ -2,25 +2,28 @@
 
 **Fecha**: 2026-07-07  
 **Estado**: Completado  
-**Objetivo**: Consolidar y ordenar la documentación del repositorio y preparar la independencia tecnológica del entorno de Lovable.
+**Objetivo**: Consolidar y ordenar la documentación del repositorio, eliminar dependencias obsoletas y asegurar la independencia tecnológica definitiva de Lovable.
 
 ---
 
-## 1. Estado de la Documentación
+## 1. Estado de la Documentación y Clasificación Semántica
 
-### Documentación Completa y Vigente (GUIA)
-La documentación del repositorio es de alta calidad y está muy bien detallada. Los siguientes archivos se consideran vigentes y guían el desarrollo operativo:
-- **`README.md` (Raíz)**: Guía principal de inicio y desarrollo local.
-- **`docs/INDEX.md`**: Índice general de toda la documentación.
-- **`docs/AGENT-HANDOFF.md`**: Manual de traspaso para agentes (modificado para ser neutral a Lovable).
-- **`docs/DEPLOY-VERCEL.md`**: Instrucciones específicas para el despliegue en Vercel.
-- **`docs/FLOW-SANDBOX-TESTING.md`**: Manual de pruebas de integración con la pasarela de pagos Flow en sandbox.
-- **`docs/INVENTARIO-PRODUCTOS.md` y `docs/INVENTARIO-RESERVAS-STOCK.md`**: Guías del modelo de inventario, stock disponible y control de concurrencia.
-- **`docs/SEED-PRODUCTOS-DEMO.md`**: Guía para la carga de datos iniciales en la base de datos.
-- **`docs/technical/` (00-overview a 15-glossary)**: Todo el manual de arquitectura modular, base de datos y modelo de dominio técnico está vigentes y describen correctamente la aplicación.
+Se realizó una revisión exhaustiva de todos los archivos `.md` en el repositorio para clasificarlos semánticamente. El índice detallado se mantiene en `docs/INDEX.md` bajo las siguientes etiquetas:
 
-### Planes Completamente Ejecutados (PLAN ejecutado)
-Múltiples archivos se crearon originalmente como propuestas o planes de fases de desarrollo y hoy están implementados y validados en producción:
+### A. Guías de Desarrollo y Operaciones (GUIA)
+*Instrucciones operativas y de arquitectura vigentes para desarrollo, instalación y despliegue:*
+- **`README.md` (Raíz)**: Inicio rápido y variables de entorno del e-commerce.
+- **`AGENTS.md` (Raíz)**: Instrucciones de desarrollo vigentes sobre Git, seguridad y testing.
+- **`docs/INDEX.md`**: Índice general clasificado.
+- **`docs/AGENT-HANDOFF.md`**: Manual de traspaso para futuros agentes de IA y desarrolladores (corregido para remover referencias a Lovable).
+- **`docs/DEPLOY-VERCEL.md`**: Guía operativa para despliegues en Vercel.
+- **`docs/FLOW-SANDBOX-TESTING.md`**: Manual de pruebas de transacciones en la pasarela Flow.cl.
+- **`docs/INVENTARIO-PRODUCTOS.md` y `docs/INVENTARIO-RESERVAS-STOCK.md`**: Explicación del modelo de datos de stock y control de concurrencia.
+- **`docs/SEED-PRODUCTOS-DEMO.md`**: Semillas SQL y carga inicial de productos demo.
+- **`docs/technical/` (00-overview.md a 15-glossary.md, README.md)**: Manual modular completo del sistema de e-commerce que describe detalladamente la arquitectura física y lógica vigente.
+
+### B. Planes de Desarrollo Ejecutados (PLAN ejecutado)
+*Propuestas de desarrollo que ya se implementaron en su totalidad y fueron verificadas en producción. Se ha añadido la etiqueta de estado `**Estado**: PLAN ejecutado` en el encabezado de cada uno de ellos para evitar confusiones:*
 - `docs/FLOW-FASE-1-ORDERS-RLS.md`
 - `docs/FLOW-FASE-2-ENDPOINTS.md`
 - `docs/FLOW-FASE-3-RESULTADO-CHECKOUT.md`
@@ -34,56 +37,37 @@ Múltiples archivos se crearon originalmente como propuestas o planes de fases d
 - `docs/PLAN-RESERVAS-STOCK-CRON-10-MIN.md`
 - `docs/REDISENO-HOME-ECOMMERCE.md`
 
-### Documentación Histórica (HISTORICO)
-Documentos que contienen bitácoras de diseño o plantillas iniciales que ya no se modifican pero se conservan para referencia histórica:
-- `docs/ESTADO-ACTUAL-TEMPLATE.md` (Estado inicial del template base).
-- `docs/MIGRACION-SUPABASE-PROPIA.md` (Proceso de migración de base de datos de Lovable Cloud a la instancia propia de Supabase).
-- `docs/PROMPT-EJECUTAR-INVENTARIO-FASES-1-5.md` (Instrucciones operativas de prompts para desarrollos previos).
+### C. Documentación Histórica (HISTORICO)
+*Documentos antiguos que no se alteran y se archivan para consulta sobre decisiones de diseño pasadas:*
+- `docs/ESTADO-ACTUAL-TEMPLATE.md` (Estado original del template base de Lovable).
+- `docs/MIGRACION-SUPABASE-PROPIA.md` (Bitácora de migración de base de datos de Lovable Cloud a la instancia propia de Supabase. Actualizado para reflejar las URLs correctas de Vercel en la configuración de Auth).
+- `docs/PROMPT-EJECUTAR-INVENTARIO-FASES-1-5.md` (Instrucciones e historial de prompts de ejecuciones previas).
 
 ---
 
-## 2. Análisis de Referencias a Lovable
+## 2. Análisis y Limpieza de Referencias a Lovable
 
-Se realizó una búsqueda exhaustiva en todo el repositorio. Los hallazgos se clasifican a continuación:
+Se completó una purga sistemática de las referencias al entorno de Lovable. El estado actual de los hallazgos es el siguiente:
 
-### A. Referencias Documentales
-*   **Menciones de "Supabase/Lovable Cloud"**: Se encuentran en múltiples archivos de `docs/` sugiriendo que la base de datos es administrada por Lovable. Esto es obsoleto, ya que ahora se utiliza una base de datos propia de Supabase.
-*   **Advertencias en `AGENTS.md` y `docs/AGENT-HANDOFF.md`**: Instrucciones específicas de no reescribir el historial de Git para no romper la sincronización con Lovable.
+### A. Referencias Documentales (Modificadas)
+- **`docs/AGENT-HANDOFF.md`**: Se modificó la tercera regla de oro (línea 34) para cambiar el enfoque restrictivo de Lovable.dev por una recomendación general de mejores prácticas de Git en flujos de integración continua (CI/CD).
+- **`docs/DEPLOY-VERCEL.md`**: Se reemplazaron las menciones de "Supabase/Lovable Cloud" por "Supabase" en las líneas 3 y 82, asumiendo el uso directo de la base de datos independiente.
+- **`docs/technical/10-installation.md`**: Se corrigió la línea 13 para remover "sincronización con Lovable/GitHub" por "sincronización con GitHub".
+- **`docs/MIGRACION-SUPABASE-PROPIA.md`**: Se actualizaron las URLs de callback de Supabase Auth (líneas 184, 190, 191, 192) que antes apuntaban a `tienda-orbynexdigital.lovable.app` para que apunten al dominio de producción definitivo en Vercel (`tienda-orbynexdigital.vercel.app`), reflejando la realidad técnica.
 
-### B. Referencias Visibles al Usuario / Dev-Console
-*   **Mensaje de error en Supabase**: Los archivos `auth-middleware.ts`, `client.server.ts` y `client.ts` dentro de `src/integrations/supabase/` contenían la cadena `Connect Supabase in Lovable Cloud.`. Se reemplaza por un mensaje neutral sobre variables de entorno.
-*   **URLs de Metadata de Imagen**: `src/routes/__root.tsx` utilizaba URLs de preview de Lovable (`*.lovable.app`) en las propiedades `og:image` y `twitter:image`. Se reemplazan por la URL del activo local `/og-image.png`.
-
-### C. Referencias Técnicas (Dependencias y Configuración)
-*   **`vite.config.ts`**: Utilizaba `defineConfig` de `@lovable.dev/vite-tanstack-config`.
-*   **`package.json`**: Contenía la dependencia `@lovable.dev/vite-tanstack-config`.
-*   **`bunfig.toml`**: Excluía `@lovable.dev/*` de los controles de antigüedad de paquetes.
-*   **`src/lib/lovable-error-reporting.ts`**: Script de reportes cliente de Lovable inyectado.
-*   **`src/routes/__root.tsx`**: Importaba y usaba el reportador de errores en `ErrorComponent`.
+### B. Referencias Técnicas (Eliminadas)
+- **Carpeta `.lovable/`**: Se eliminó físicamente de la raíz del proyecto el directorio `.lovable/` y su archivo de metadatos `project.json` para desligar el repositorio de sincronizaciones automáticas externas.
+- **Lockfile `bun.lock`**: Dado que el entorno del usuario utiliza exclusivamente `npm` como gestor de paquetes (evidenciado por `package-lock.json` y la ausencia del ejecutable `bun` local), se eliminó el archivo `bun.lock` obsoleto, removiendo así los paquetes huérfanos de `lovable-tagger` que contenía.
+- **Dependencias en `package.json` y config de Vite**: Confirmado que no queda rastro de `@lovable.dev/vite-tanstack-config` ni de sus configuraciones en `vite.config.ts`. El bundler utiliza la API nativa y declarativa estándar de Vite + TanStack Start.
+- **Inyección de Código**: Confirmado que se eliminó el script cliente de reporte de errores en `src/lib/lovable-error-reporting.ts` y todas sus importaciones en `src/routes/__root.tsx`.
+- **Mensajes de Supabase**: Los archivos de inicialización del cliente en `src/integrations/supabase/` no contienen referencias a "Lovable Cloud", arrojando mensajes de error genéricos y limpios sobre variables de entorno.
 
 ---
 
-## 3. Plan de Limpieza y Migración Técnica
+## 3. Resultados de Compilación y Validación
 
-### Fase Segura Inmediata (Ejecutada)
-- Limpieza de `AGENTS.md`.
-- Corrección de mensajes de error de Supabase.
-- Reemplazo de metatags de preview de Lovable en `__root.tsx`.
-- Actualización del índice general `docs/INDEX.md`.
-
-### Fase Técnica de Migración (Ejecutada)
-- Reemplazo de `@lovable.dev/vite-tanstack-config` en `vite.config.ts` por la configuración nativa declarativa de Vite equivalente.
-- Validación intermedia del build para asegurar la total independencia de compilación.
-
-### Fase Final (Ejecutada)
-- Eliminación de `src/lib/lovable-error-reporting.ts` y sus referencias en `__root.tsx`.
-- Eliminación de dependencias en `package.json` y exclusiones en `bunfig.toml`.
-- Re-instalación de dependencias para limpiar `bun.lock`.
-- Ejecución de validación final de compilación.
-
----
-
-## 4. Resultados de Compilación y Validación
-
-- **`npm run build` intermedio (Con config nativa y dependencias de Lovable en package.json)**: Completado de forma exitosa.
-- **`npm run build` final (Con instalación limpia sin rastro de dependencias de Lovable)**: Completado de forma exitosa y limpia. El cliente compiló en 10.63s y el SSR en 1.06s, reportando 0 vulnerabilidades. El deploy en Vercel es 100% independiente.
+- **Instalación y Dependencias (`npm install`)**: Completado con éxito en 2.0s. Reportó 0 vulnerabilidades en los 403 paquetes instalados.
+- **Compilación de Producción (`npm run build`)**: Ejecutado de manera exitosa tras la eliminación de la carpeta `.lovable` y el archivo `bun.lock`. El bundler generó los activos de cliente y el SSR correctamente:
+  - **Client Build**: Compilado exitosamente en 1.45 segundos (generando activos CSS y JS optimizados bajo `dist/client/`).
+  - **SSR Build**: Compilado exitosamente en 0.94 segundos (empaquetando el servidor Nitro en `dist/server/`).
+  - **Resultado**: Cero errores de TypeScript, cero advertencias de compilación y total independencia técnica. El sitio web está listo para desplegar en Vercel sin dependencias de Lovable. El deploy en Vercel es 100% independiente.

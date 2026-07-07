@@ -1,6 +1,6 @@
 # Deploy en Vercel
 
-Esta guia deja el minimo necesario para publicar el frontend en Vercel manteniendo Supabase/Lovable Cloud como backend.
+Esta guia deja el minimo necesario para publicar el frontend en Vercel manteniendo Supabase como backend.
 
 ## 1. Preparar local
 
@@ -79,7 +79,7 @@ https://tienda-orbynexdigital.vercel.app/api/flow/confirm
 
 ## 5. Supabase Auth
 
-En Supabase/Lovable Cloud, configurar:
+En Supabase, configurar:
 
 - Site URL: `https://tu-dominio.com`
 - Redirect URLs:

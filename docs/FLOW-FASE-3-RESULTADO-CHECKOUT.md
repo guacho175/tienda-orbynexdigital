@@ -1,5 +1,7 @@
 # Flow API - Fase 3: resultado de checkout
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06  
 Estado: implementado para sandbox en Vercel.
 

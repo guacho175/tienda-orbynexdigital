@@ -1,5 +1,7 @@
 # Rediseno home e-commerce
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06
 
 ## Objetivo

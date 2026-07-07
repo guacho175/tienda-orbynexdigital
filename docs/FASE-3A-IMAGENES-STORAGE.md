@@ -1,5 +1,7 @@
 # Fase 3A - Imagenes con Supabase Storage
 
+**Estado**: PLAN ejecutado
+
 Estado: completada a nivel de codigo y migracion. El panel admin ahora optimiza las imagenes en navegador antes de subirlas, por lo que no guarda originales pesados en Storage.
 
 ## Bucket

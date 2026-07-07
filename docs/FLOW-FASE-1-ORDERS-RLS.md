@@ -1,5 +1,7 @@
 # Flow API - Fase 1: Orders y RLS
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06
 Rama: `feature/flow-api-dynamic-checkout`
 Migracion: `supabase/migrations/20260705225916_orders_flow_api_phase_1.sql`

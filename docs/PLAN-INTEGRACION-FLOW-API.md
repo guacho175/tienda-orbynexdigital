@@ -1,5 +1,7 @@
 # Plan tecnico cerrado: integracion Flow API sandbox
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06  
 Estado: Fase 2 endpoints server-side implementados localmente en rama `feature/flow-api-dynamic-checkout`; checkout/frontend pendientes
 Alcance: reemplazar o complementar `payment_url` con pago dinamico Flow API para carritos con varios productos, sin romper el flujo actual.

@@ -181,15 +181,15 @@ Configurar en Supabase Dashboard > Authentication > URL Configuration:
 Site URL:
 
 ```text
-https://tienda-orbynexdigital.lovable.app
+https://tienda-orbynexdigital.vercel.app
 ```
 
 Redirect URLs:
 
 ```text
-https://tienda-orbynexdigital.lovable.app/auth
-https://tienda-orbynexdigital.lovable.app/admin
-https://tienda-orbynexdigital.lovable.app/*
+https://tienda-orbynexdigital.vercel.app/auth
+https://tienda-orbynexdigital.vercel.app/admin
+https://tienda-orbynexdigital.vercel.app/*
 http://localhost:5173/*
 ```
 

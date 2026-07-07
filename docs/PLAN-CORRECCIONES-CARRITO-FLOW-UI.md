@@ -1,5 +1,7 @@
 # Plan de correcciones: carrito y Flow API UI
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06  
 Estado: implementado en UI local
 Alcance: conectar la UI del carrito/checkout con Flow API dinamico sin romper WhatsApp checkout ni `payment_url`.

@@ -1,5 +1,7 @@
 # Imagenes por variantes: thumb, card y detail
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-06
 
 ## Por que una sola image_url no basta

@@ -31,7 +31,7 @@ No alteres la lógica de los siguientes archivos a menos que el usuario lo solic
 
 1.  **Nunca expongas secretos**: No dejes rastros de llaves de API reales ni contraseñas. Utiliza las variables del entorno en Node.js y variables con prefijo `VITE_` en el cliente.
 2.  **Respeta las políticas RLS**: La escritura en tablas de órdenes y stock está bloqueada para accesos anónimos. La creación y el decremento de inventario se gestionan exclusivamente mediante RPCs privilegiadas gatilladas desde la API del servidor.
-3.  **Protege la historia de Git en Lovable**: Este proyecto está conectado a Lovable.dev. Evita reescribir la historia publicada (ej. `git push --force`, `git commit --amend`, o `git rebase` de commits ya publicados), ya que romperá el historial del proyecto en Lovable provocando pérdida de datos para el usuario.
+3.  **Protege la historia de Git**: Evita reescribir la historia publicada (ej. `git push --force`, `git commit --amend`, o `git rebase` de commits ya publicados), ya que esto puede desestabilizar entornos de integración y despliegue continuos.
 4.  **Mantenga el Checkout Híbrido**: La visualización y botones de compra de productos deben tolerar tanto el pago online automatizado (Flow) como la compra mediante links de cobro externo (`payment_url`) registrados en la base de datos de productos.
 
 ---

@@ -1,5 +1,7 @@
 # Plan: hero sin logo redundante y expiracion de reservas en Vercel Hobby
 
+**Estado**: PLAN ejecutado
+
 Fecha: 2026-07-07
 
 ## Contexto encontrado
