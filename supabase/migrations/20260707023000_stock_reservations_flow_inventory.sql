@@ -266,7 +266,7 @@ BEGIN
     RAISE EXCEPTION 'CLP Flow payments require an integer amount';
   END IF;
 
-  INSERT INTO public.orders (
+  INSERT INTO public.orders AS inserted_order (
     commerce_order,
     user_id,
     status,
@@ -298,7 +298,7 @@ BEGIN
     NULLIF(p_customer->>'comment', ''),
     CASE WHEN v_has_reservations THEN v_expires_at ELSE NULL END
   )
-  RETURNING id, public_lookup_token
+  RETURNING inserted_order.id, inserted_order.public_lookup_token
   INTO v_order_id, v_public_lookup_token;
 
   FOR v_product IN
