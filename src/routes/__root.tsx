@@ -17,7 +17,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { brandConfig } from "@/config/brand.config";
 import { supabase } from "@/integrations/supabase/client";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/store/cart.store";
 
 function NotFoundComponent() {
@@ -45,10 +44,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -97,13 +92,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: brandConfig.description },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png",
+        content: "/logo/logo_orbynex_horizontal_blanco_v2_trim.png",
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/bd82ad54-c025-4b09-857c-e1768a4fef1b/id-preview-deac698d--02ee1b82-b08e-4f23-892c-c77161ee0ac0.lovable.app-1783298985774.png",
+        content: "/logo/logo_orbynex_horizontal_blanco_v2_trim.png",
       },
     ],
     links: [
