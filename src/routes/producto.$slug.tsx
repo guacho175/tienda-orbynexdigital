@@ -10,7 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchProductBySlug } from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
 import { buildWhatsappContactUrl } from "@/utils/whatsapp";
-import { canPurchase, isLowStock, isSoldOut } from "@/utils/inventory";
+import {
+  TEMPORARILY_RESERVED_MESSAGE,
+  canPurchase,
+  getAvailableQuantity,
+  isLowStock,
+  isSoldOut,
+  isTemporarilyReserved,
+} from "@/utils/inventory";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/producto/$slug")({
@@ -28,6 +35,7 @@ function ProductDetail() {
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug),
     staleTime: 5 * 60 * 1000,
+    refetchOnMount: "always",
   });
 
   if (isLoading) {
@@ -63,7 +71,9 @@ function ProductDetail() {
 
   const soldOut = isSoldOut(product);
   const lowStock = isLowStock(product);
+  const temporarilyReserved = isTemporarilyReserved(product);
   const purchaseAvailable = canPurchase(product);
+  const availableQuantity = getAvailableQuantity(product);
 
   return (
     <Container className="py-8 sm:py-12">
@@ -112,16 +122,18 @@ function ProductDetail() {
               className={
                 soldOut
                   ? "mt-5 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
-                  : lowStock
+                  : temporarilyReserved || lowStock
                     ? "mt-5 rounded-lg border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100"
                     : "mt-5 rounded-lg border border-accent/20 bg-accent/10 p-4 text-sm text-accent"
               }
             >
               {soldOut
                 ? "Agotado"
-                : lowStock
-                  ? `Ultimas unidades: ${product.stock_quantity} disponibles`
-                  : `Stock disponible: ${product.stock_quantity}`}
+                : temporarilyReserved
+                  ? `Reservado temporalmente. ${TEMPORARILY_RESERVED_MESSAGE}`
+                  : lowStock
+                    ? `Ultimas unidades: ${availableQuantity} disponibles`
+                    : `Stock disponible: ${product.stock_quantity}`}
             </div>
           ) : null}
 
@@ -141,8 +153,10 @@ function ProductDetail() {
               disabled={!purchaseAvailable}
               onClick={() => {
                 if (!purchaseAvailable) {
-                  toast.error("Producto agotado", {
-                    description: `${product.name} no esta disponible para agregar al carrito.`,
+                  toast.error(temporarilyReserved ? "Producto reservado" : "Producto agotado", {
+                    description: temporarilyReserved
+                      ? TEMPORARILY_RESERVED_MESSAGE
+                      : `${product.name} no esta disponible para agregar al carrito.`,
                   });
                   return;
                 }
@@ -154,7 +168,7 @@ function ProductDetail() {
               }}
             >
               <ShoppingCart className="mr-1 h-4 w-4" />
-              Agregar al carrito
+              {temporarilyReserved ? "Reservado temporalmente" : "Agregar al carrito"}
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-full">
               <Link to="/catalogo">Seguir comprando</Link>

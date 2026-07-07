@@ -12,6 +12,8 @@ export type InventoryProduct = Pick<
   | "allow_backorder"
   | "low_stock_threshold"
   | "out_of_stock_behavior"
+  | "available_quantity"
+  | "temporarily_reserved"
 >;
 
 export type InventoryCardProduct = Pick<
@@ -22,6 +24,8 @@ export type InventoryCardProduct = Pick<
   | "allow_backorder"
   | "low_stock_threshold"
   | "out_of_stock_behavior"
+  | "available_quantity"
+  | "temporarily_reserved"
 >;
 
 export interface CartInventoryIssue {
@@ -31,28 +35,45 @@ export interface CartInventoryIssue {
   canAdjust: boolean;
 }
 
+export const TEMPORARILY_RESERVED_MESSAGE =
+  "Este producto esta reservado temporalmente por otra compra. Si no se completa el pago, podria volver a estar disponible en unos minutos.";
+
+export function getAvailableQuantity(product: InventoryCardProduct) {
+  return Number(product.available_quantity ?? product.stock_quantity) || 0;
+}
+
+export function isTemporarilyReserved(product: InventoryCardProduct) {
+  return Boolean(product.temporarily_reserved);
+}
+
 export function isSoldOut(product: InventoryCardProduct) {
   if (product.availability === "out_of_stock") return true;
-  return product.track_inventory && !product.allow_backorder && Number(product.stock_quantity) <= 0;
+  return (
+    !isTemporarilyReserved(product) &&
+    product.track_inventory &&
+    !product.allow_backorder &&
+    getAvailableQuantity(product) <= 0
+  );
 }
 
 export function isLowStock(product: InventoryCardProduct) {
   return (
     product.track_inventory &&
     !product.allow_backorder &&
-    Number(product.stock_quantity) > 0 &&
-    Number(product.stock_quantity) <= Number(product.low_stock_threshold)
+    getAvailableQuantity(product) > 0 &&
+    getAvailableQuantity(product) <= Number(product.low_stock_threshold)
   );
 }
 
 export function canPurchase(product: InventoryCardProduct, quantity = 1) {
   if (product.availability === "out_of_stock") return false;
   if (!product.track_inventory || product.allow_backorder) return true;
-  return Number(product.stock_quantity) >= quantity;
+  return getAvailableQuantity(product) >= quantity;
 }
 
 export function isHiddenByStock(product: InventoryCardProduct) {
   return (
+    !isTemporarilyReserved(product) &&
     product.track_inventory &&
     !product.allow_backorder &&
     Number(product.stock_quantity) <= 0 &&
@@ -83,14 +104,16 @@ export function getCartInventoryIssues(
     }
 
     if (!canPurchase(product, item.quantity)) {
-      const availableQuantity = Math.max(0, Number(product.stock_quantity) || 0);
+      const availableQuantity = Math.max(0, getAvailableQuantity(product));
       return [
         {
           productId: item.productId,
           message:
-            availableQuantity > 0
-              ? `${item.name} solo tiene ${availableQuantity} unidades disponibles.`
-              : `${item.name} esta agotado.`,
+            product.temporarily_reserved && availableQuantity === 0
+              ? TEMPORARILY_RESERVED_MESSAGE
+              : availableQuantity > 0
+                ? `${item.name} solo tiene ${availableQuantity} unidades disponibles.`
+                : `${item.name} esta agotado.`,
           availableQuantity,
           canAdjust: availableQuantity > 0,
         },

@@ -20,6 +20,8 @@ No se implementaron movimientos de inventario, ajustes manuales admin ni notific
 
 `stock_reservations` representa unidades apartadas temporalmente mientras el cliente paga en Flow. Una reserva activa reduce el stock vendible, pero no descuenta stock definitivo.
 
+La ventana operativa definida para checkout Flow es 10 minutos.
+
 Disponibilidad vendible:
 
 ```sql
@@ -61,6 +63,14 @@ Productos sin control de inventario o con backorder permitido siguen comprables 
 
 No se descuenta `stock_quantity` al iniciar pago.
 
+Si otro cliente intenta comprar stock fisico que esta totalmente reservado, la UI debe mostrar:
+
+```text
+Este producto esta reservado temporalmente por otra compra. Si no se completa el pago, podria volver a estar disponible en unos minutos.
+```
+
+El mensaje no expone cliente, orden, token, reserva ni hora exacta de expiracion.
+
 ## Flujo confirm
 
 `POST /api/flow/confirm`:
@@ -94,6 +104,7 @@ No se descuenta `stock_quantity` al iniciar pago.
 - Marca ordenes en `pending`, `stock_reserved` o `redirected` como `reservation_expired`.
 - Es idempotente.
 - Se ejecuta opportunistic al crear nuevas ordenes.
+- Tambien se ejecuta por Vercel Cron cada minuto desde `GET /api/stock/expire-reservations`, protegido con `CRON_SECRET`.
 
 `public.release_order_stock_reservations(...)`:
 
@@ -124,9 +135,20 @@ Antes, dos clientes podian iniciar pago contra el mismo `stock_quantity`; el pri
 
 Ahora, el primer checkout reserva unidades. El segundo checkout calcula stock vendible descontando reservas activas y no puede reservar mas de lo disponible.
 
+## Disponibilidad publica
+
+El frontend no consulta `public.stock_reservations` directamente.
+
+`POST /api/products/availability` usa `service_role` server-side, ejecuta `public.expire_stock_reservations()` y devuelve solo:
+
+- `availableQuantity`
+- `canPurchase`
+- `temporarilyReserved`
+
+No devuelve IDs de reserva, ordenes, clientes, tokens ni `expires_at`.
+
 ## Casos pendientes
 
-- Cron programado para expirar reservas sin depender de trafico nuevo.
 - Tabla `inventory_movements`.
 - Ajustes manuales admin.
 - Filtros y notificaciones de bajo stock.

@@ -23,6 +23,8 @@ import {
   type CreateOrderWithReservationResult,
 } from "../../src/server/flow/supabase.js";
 
+const FLOW_STOCK_RESERVATION_MINUTES = 10;
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
     assertMethod(req, "POST");
@@ -45,7 +47,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         p_commerce_order: commerceOrder,
         p_customer: body.customer,
         p_items: itemsForReservation,
-        p_reservation_minutes: 15,
+        p_reservation_minutes: FLOW_STOCK_RESERVATION_MINUTES,
       },
     );
 

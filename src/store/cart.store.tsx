@@ -95,6 +95,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
               out_of_stock_behavior: product.out_of_stock_behavior,
               payment_url: product.payment_url,
               payment_button_label: product.payment_button_label,
+              available_quantity: product.available_quantity,
+              temporarily_reserved: product.temporarily_reserved,
               quantity,
             },
           ];

@@ -21,6 +21,7 @@ export function CartDrawer() {
     queryKey: ["cart-drawer-featured-products"],
     queryFn: () => fetchFeaturedProducts(8),
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
     enabled: drawerOpen,
   });
 

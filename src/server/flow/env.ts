@@ -11,6 +11,11 @@ export interface FlowServerEnv {
   supabaseServiceRoleKey: string;
 }
 
+export interface SupabaseServerEnv {
+  supabaseUrl: string;
+  supabaseServiceRoleKey: string;
+}
+
 export function getFlowServerEnv(): FlowServerEnv {
   return {
     flowApiKey: requiredEnv("FLOW_API_KEY"),
@@ -22,6 +27,17 @@ export function getFlowServerEnv(): FlowServerEnv {
     supabaseUrl: requiredEnv("SUPABASE_URL"),
     supabaseServiceRoleKey: requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
   };
+}
+
+export function getSupabaseServerEnv(): SupabaseServerEnv {
+  return {
+    supabaseUrl: requiredEnv("SUPABASE_URL"),
+    supabaseServiceRoleKey: requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
+  };
+}
+
+export function getCronSecret(): string | null {
+  return process.env.CRON_SECRET || null;
 }
 
 function requiredEnv(name: string): string {

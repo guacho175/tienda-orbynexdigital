@@ -45,6 +45,7 @@ function Home() {
     queryKey: ["products", "featured", featuredProducts.limit],
     queryFn: () => fetchFeaturedProducts(featuredProducts.limit),
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
   });
   const {
     data: activeCategories,
@@ -54,6 +55,7 @@ function Home() {
     queryKey: ["products", "active-categories"],
     queryFn: fetchActiveProductCategories,
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
   });
 
   const visibleCategories = activeCategories ?? [];

@@ -6,12 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Price } from "@/components/ui-common/Price";
 import { useCart } from "@/store/cart.store";
 import type { ProductCardData } from "@/types/product";
-import { canPurchase, isLowStock, isSoldOut } from "@/utils/inventory";
+import {
+  TEMPORARILY_RESERVED_MESSAGE,
+  canPurchase,
+  isLowStock,
+  isSoldOut,
+  isTemporarilyReserved,
+} from "@/utils/inventory";
 
 export function ProductCard({ product }: { product: ProductCardData }) {
   const { addItem, openDrawer } = useCart();
   const soldOut = isSoldOut(product);
   const lowStock = isLowStock(product);
+  const temporarilyReserved = isTemporarilyReserved(product);
   const purchaseAvailable = canPurchase(product);
 
   return (
@@ -42,12 +49,18 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           className={
             soldOut
               ? "absolute bottom-3 right-3 rounded-full border border-destructive/30 bg-destructive/15 px-3 py-1 text-xs font-semibold text-destructive backdrop-blur"
-              : lowStock
+              : temporarilyReserved || lowStock
                 ? "absolute bottom-3 right-3 rounded-full border border-amber-300/35 bg-amber-300/15 px-3 py-1 text-xs font-semibold text-amber-200 backdrop-blur"
                 : "absolute bottom-3 right-3 rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent backdrop-blur"
           }
         >
-          {soldOut ? "Agotado" : lowStock ? "Ultimas unidades" : "Disponible online"}
+          {soldOut
+            ? "Agotado"
+            : temporarilyReserved
+              ? "Reservado temporalmente"
+              : lowStock
+                ? "Ultimas unidades"
+                : "Disponible online"}
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5 text-center sm:text-left">
@@ -82,8 +95,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             disabled={!purchaseAvailable}
             onClick={() => {
               if (!purchaseAvailable) {
-                toast.error("Producto agotado", {
-                  description: `${product.name} no esta disponible para agregar al carrito.`,
+                toast.error(temporarilyReserved ? "Producto reservado" : "Producto agotado", {
+                  description: temporarilyReserved
+                    ? TEMPORARILY_RESERVED_MESSAGE
+                    : `${product.name} no esta disponible para agregar al carrito.`,
                 });
                 return;
               }
@@ -95,8 +110,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             }}
           >
             <ShoppingCart className="mr-1 h-4 w-4" />
-            Agregar
-            <ArrowRight className="ml-1 h-4 w-4" />
+            {temporarilyReserved ? "Reservado" : "Agregar"}
+            {!temporarilyReserved ? <ArrowRight className="ml-1 h-4 w-4" /> : null}
           </Button>
         </div>
       </div>

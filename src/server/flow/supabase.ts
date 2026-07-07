@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { FlowServerEnv } from "./env.js";
+import type { SupabaseServerEnv } from "./env.js";
 
 export interface ProductRow {
   id: string;
@@ -48,7 +48,7 @@ export interface CreateOrderWithReservationResult {
   currency: string;
 }
 
-export function createSupabaseAdmin(env: FlowServerEnv) {
+export function createSupabaseAdmin(env: SupabaseServerEnv) {
   return createClient(env.supabaseUrl, env.supabaseServiceRoleKey, {
     auth: {
       persistSession: false,

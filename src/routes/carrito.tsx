@@ -28,6 +28,7 @@ function CartPage() {
     queryKey: ["cart-products", productIds],
     queryFn: () => fetchProductsByIds(productIds),
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
     enabled: productIds.length > 0,
   });
   const latestProductsById = useMemo(

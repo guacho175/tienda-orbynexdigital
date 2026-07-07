@@ -104,7 +104,7 @@ Segun la documentacion oficial de Flow, la confirmacion llega por POST con un to
 
 No se descuenta stock al iniciar el pago.
 
-Cuando se inicia un pago Flow, los productos con `track_inventory = true` y `allow_backorder = false` quedan reservados temporalmente en `public.stock_reservations`.
+Cuando se inicia un pago Flow, los productos con `track_inventory = true` y `allow_backorder = false` quedan reservados temporalmente en `public.stock_reservations` por 10 minutos.
 
 Cuando Flow confirma pago exitoso, `api/flow/confirm.ts` llama el RPC:
 
@@ -139,6 +139,10 @@ La tabla `public.stock_reservations` guarda reservas por orden y producto:
 
 `public.expire_stock_reservations()` libera reservas vencidas de forma idempotente y marca ordenes pendientes como `reservation_expired`.
 
+La limpieza automatica queda configurada con Vercel Cron llamando `GET /api/stock/expire-reservations` cada minuto. El endpoint exige `Authorization: Bearer CRON_SECRET`; `CRON_SECRET` debe existir en Vercel como variable server-side y no debe usar prefijo `VITE_`.
+
+Las vistas publicas consultan `POST /api/products/availability` para obtener disponibilidad vendible sin exponer `public.stock_reservations` al navegador. Ese endpoint devuelve solo `availableQuantity`, `canPurchase` y `temporarilyReserved`.
+
 `public.release_order_stock_reservations(...)` libera reservas activas cuando `payment/create` falla o cuando Flow reporta `failed`, `cancelled` o `expired`.
 
 Mas detalle: `docs/INVENTARIO-RESERVAS-STOCK.md`.
@@ -157,7 +161,6 @@ Pendientes de inventario avanzado:
 - Auditoria por usuario/admin.
 - Notificaciones por bajo stock.
 - Reposicion y ajustes manuales con motivo.
-- Cron programado para expirar reservas sin depender de trafico nuevo.
 - Vista/admin de conciliacion para `requires_manual_review` y `stock_conflict`.
 
-La decision actual evita descontar stock por pagos abandonados y cierra la ventana de competencia del checkout Flow con reservas activas. La expiracion existe de forma opportunistic; un cron programado queda pendiente para liberacion aunque no haya trafico nuevo.
+La decision actual evita descontar stock por pagos abandonados y cierra la ventana de competencia del checkout Flow con reservas activas. La expiracion existe de forma opportunistic dentro de los RPC y tambien por cron programado para liberar inventario aunque no haya trafico nuevo.

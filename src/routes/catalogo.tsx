@@ -31,6 +31,7 @@ function CatalogoPage() {
     queryKey: ["products", "catalog"],
     queryFn: fetchCatalogProducts,
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
   });
 
   const categories = useMemo(() => {

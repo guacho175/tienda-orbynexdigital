@@ -23,6 +23,8 @@ export interface Product {
   display_order: number;
   created_at: string;
   updated_at: string;
+  available_quantity?: number;
+  temporarily_reserved?: boolean;
 }
 
 export type ProductCardData = Pick<
@@ -46,4 +48,6 @@ export type ProductCardData = Pick<
   | "out_of_stock_behavior"
   | "payment_url"
   | "payment_button_label"
+  | "available_quantity"
+  | "temporarily_reserved"
 >;

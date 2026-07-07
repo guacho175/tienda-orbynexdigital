@@ -20,6 +20,8 @@ export interface CartItem {
   out_of_stock_behavior?: "show_sold_out" | "hide_product";
   payment_url: string | null;
   payment_button_label: string | null;
+  available_quantity?: number;
+  temporarily_reserved?: boolean;
   quantity: number;
 }
 
@@ -44,4 +46,6 @@ export type ProductForCart = Pick<
   | "out_of_stock_behavior"
   | "payment_url"
   | "payment_button_label"
+  | "available_quantity"
+  | "temporarily_reserved"
 >;

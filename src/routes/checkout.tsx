@@ -46,6 +46,7 @@ function CheckoutPage() {
     queryKey: ["checkout-products", productIds],
     queryFn: () => fetchProductsByIds(productIds),
     staleTime: PRODUCTS_STALE_TIME_MS,
+    refetchOnMount: "always",
     enabled: productIds.length > 0,
   });
   const inventoryIssues = getCartInventoryIssues(items, latestProducts);
