@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui-common/EmptyState";
 import { Price } from "@/components/ui-common/Price";
-import { brandConfig } from "@/config/brand.config";
 import { homeConfig } from "@/config/home.config";
 import {
   fetchActiveProductCategories,
@@ -115,15 +114,6 @@ function Home() {
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,oklch(0.84_0.11_214/0.15),transparent_0_34%),radial-gradient(circle_at_78%_20%,oklch(0.72_0.18_320/0.14),transparent_0_24%)]" />
         <Container className="relative z-10 grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="text-center lg:text-left">
-            <div className="mb-5 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-3 shadow-[0_18px_60px_-28px_oklch(0.82_0.15_200/0.7)] backdrop-blur">
-              <img
-                src={brandConfig.logoUrl}
-                alt={brandConfig.name}
-                className="h-12 w-auto max-w-[210px] object-contain"
-                width={291}
-                height={80}
-              />
-            </div>
             <p className="eyebrow-tech mb-4 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-2 text-xs font-semibold uppercase text-accent">
               <Sparkles className="h-3.5 w-3.5" />
               {hero.eyebrow}
