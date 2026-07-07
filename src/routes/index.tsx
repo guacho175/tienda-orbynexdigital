@@ -1,9 +1,15 @@
+import { useRef } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
+  Bot,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   CreditCard,
+  Globe2,
+  Headphones,
   Layers,
   Package,
   ReceiptText,
@@ -34,9 +40,40 @@ export const Route = createFileRoute("/")({
 
 const HIGHLIGHT_ICONS = [Layers, ShoppingCart, CreditCard];
 
+const CATEGORY_DETAILS = {
+  "sitios web": {
+    icon: Globe2,
+    description: "Landing pages, sitios corporativos y presencia online lista para publicar.",
+  },
+  "e-commerce": {
+    icon: ShoppingCart,
+    description: "Catalogos, carritos y experiencias de compra para vender con claridad.",
+  },
+  automatizacion: {
+    icon: Bot,
+    description: "Procesos, formularios y flujos digitales para ahorrar tareas repetitivas.",
+  },
+  soporte: {
+    icon: Headphones,
+    description: "Mantencion, ajustes y acompanamiento para sostener tu operacion digital.",
+  },
+};
+
+function getCategoryDetails(category: string) {
+  const key = category.trim().toLowerCase();
+
+  return (
+    CATEGORY_DETAILS[key as keyof typeof CATEGORY_DETAILS] ?? {
+      icon: Layers,
+      description: "Servicios digitales organizados para que el cliente elija rapido.",
+    }
+  );
+}
+
 function Home() {
   const { hero, storeHighlights, howItWorks, demoSection, featuredProducts, categories, finalCta } =
     homeConfig;
+  const categoryScrollerRef = useRef<HTMLDivElement>(null);
   const {
     data: products,
     isLoading,
@@ -64,6 +101,12 @@ function Home() {
   const heroTitleStart = hero.title.endsWith(heroAccent)
     ? hero.title.slice(0, -heroAccent.length).trimEnd()
     : hero.title;
+  const scrollCategories = (direction: "left" | "right") => {
+    categoryScrollerRef.current?.scrollBy({
+      left: direction === "left" ? -380 : 380,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <>
@@ -302,22 +345,68 @@ function Home() {
             />
           </div>
         ) : (
-          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleCategories.map((category) => (
-              <Link
-                key={category}
-                to="/catalogo"
-                data-interactive-card
-                className="card-surface group flex flex-col items-center justify-center gap-2 rounded-[1.25rem] px-5 py-5 text-center font-semibold text-foreground transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          <div className="mt-10">
+            <div className="mb-4 flex items-center justify-center gap-2 sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-white/3"
+                aria-label="Ver categorias anteriores"
+                onClick={() => scrollCategories("left")}
               >
-                <div className="card-glow" aria-hidden="true" />
-                <span className="block">{category}</span>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-accent">
-                  Ver servicios
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </Link>
-            ))}
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-white/3"
+                aria-label="Ver mas categorias"
+                onClick={() => scrollCategories("right")}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div
+              ref={categoryScrollerRef}
+              className={`-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scroll-smooth [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 [&::-webkit-scrollbar]:hidden ${
+                visibleCategories.length <= 3 ? "lg:justify-center" : ""
+              }`}
+            >
+              {visibleCategories.map((category) => {
+                const details = getCategoryDetails(category);
+                const Icon = details.icon;
+
+                return (
+                  <Link
+                    key={category}
+                    to="/catalogo"
+                    data-interactive-card
+                    className="card-surface group flex min-h-[172px] w-[min(82vw,21rem)] shrink-0 snap-center flex-col justify-between rounded-[1.25rem] px-5 py-5 text-left text-foreground transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-[22rem] sm:px-6 sm:py-6"
+                  >
+                    <div className="card-glow" aria-hidden="true" />
+                    <div className="flex items-start gap-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/12 text-accent">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-lg font-semibold leading-tight">
+                          {category}
+                        </span>
+                        <span className="mt-2 block text-sm leading-6 text-muted-foreground">
+                          {details.description}
+                        </span>
+                      </span>
+                    </div>
+                    <span className="mt-5 inline-flex items-center gap-1 self-start text-xs font-semibold uppercase tracking-wide text-accent">
+                      Ver servicios
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
       </Section>
