@@ -8,6 +8,47 @@ export type Database = {
   };
   public: {
     Tables: {
+      product_audit_events: {
+        Row: {
+          after_snapshot: Json;
+          before_snapshot: Json;
+          changed_fields: string[];
+          created_at: string;
+          created_by: string | null;
+          event_type: string;
+          id: string;
+          product_id: string;
+        };
+        Insert: {
+          after_snapshot?: Json;
+          before_snapshot?: Json;
+          changed_fields?: string[];
+          created_at?: string;
+          created_by?: string | null;
+          event_type?: string;
+          id?: string;
+          product_id: string;
+        };
+        Update: {
+          after_snapshot?: Json;
+          before_snapshot?: Json;
+          changed_fields?: string[];
+          created_at?: string;
+          created_by?: string | null;
+          event_type?: string;
+          id?: string;
+          product_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_audit_events_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       order_items: {
         Row: {
           created_at: string;
@@ -290,6 +331,73 @@ export type Database = {
           },
         ];
       };
+      stock_movements: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          movement_type: string;
+          order_id: string | null;
+          product_id: string;
+          quantity_delta: number;
+          reason: string | null;
+          reservation_id: string | null;
+          source: string;
+          stock_after: number;
+          stock_before: number;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          movement_type: string;
+          order_id?: string | null;
+          product_id: string;
+          quantity_delta: number;
+          reason?: string | null;
+          reservation_id?: string | null;
+          source?: string;
+          stock_after: number;
+          stock_before: number;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          movement_type?: string;
+          order_id?: string | null;
+          product_id?: string;
+          quantity_delta?: number;
+          reason?: string | null;
+          reservation_id?: string | null;
+          source?: string;
+          stock_after?: number;
+          stock_before?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stock_movements_reservation_id_fkey";
+            columns: ["reservation_id"];
+            isOneToOne: false;
+            referencedRelation: "stock_reservations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_roles: {
         Row: {
           created_at: string;
@@ -383,6 +491,15 @@ export type Database = {
           status: string;
           success: boolean;
         }[];
+      };
+      adjust_product_stock_admin: {
+        Args: {
+          p_movement_type?: string;
+          p_product_id: string;
+          p_quantity_delta: number;
+          p_reason?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["products"]["Row"];
       };
     };
     Enums: {

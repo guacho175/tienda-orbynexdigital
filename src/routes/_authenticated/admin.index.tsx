@@ -1,9 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Eye, LogOut, Package, Shield, Plus, Pencil, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  BarChart3,
+  ClipboardList,
+  Eye,
+  LogOut,
+  Package,
+  Shield,
+  Plus,
+  Pencil,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -39,6 +51,7 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [email, setEmail] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -58,6 +71,17 @@ function AdminPage() {
     queryFn: fetchAllProductsAdmin,
     enabled: isAdmin === true,
   });
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    if (!normalizedSearch) return products ?? [];
+
+    return (products ?? []).filter((product) =>
+      [product.name, product.slug, product.category, product.short_description].some((value) =>
+        value?.toLowerCase().includes(normalizedSearch),
+      ),
+    );
+  }, [products, searchTerm]);
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
@@ -211,6 +235,16 @@ function AdminPage() {
               </Link>
             </Button>
             <Button asChild variant="outline">
+              <Link to="/admin/analytics">
+                <BarChart3 className="mr-1 h-4 w-4" /> Analitica
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/admin/audit">
+                <ClipboardList className="mr-1 h-4 w-4" /> Auditoria
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link to="/">Ver sitio</Link>
             </Button>
             <Button onClick={handleSignOut} variant="ghost">
@@ -219,8 +253,19 @@ function AdminPage() {
           </div>
         </div>
 
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-white/10 bg-card/55 px-3 py-2">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <Input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Buscar por nombre, slug, categoria o descripcion"
+            aria-label="Buscar productos"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+          />
+        </div>
+
         <div className="space-y-4 md:hidden">
-          {(products ?? []).map((p) => (
+          {filteredProducts.map((p) => (
             <article key={p.id} className="card-surface p-4">
               <div className="grid grid-cols-[4.5rem_1fr] gap-4">
                 <ProductImage
@@ -264,9 +309,11 @@ function AdminPage() {
               </div>
             </article>
           ))}
-          {(products ?? []).length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="card-surface px-4 py-10 text-center text-muted-foreground">
-              No hay productos aun.
+              {searchTerm
+                ? "No hay productos que coincidan con la busqueda."
+                : "No hay productos aun."}
             </div>
           ) : null}
         </div>
@@ -284,7 +331,7 @@ function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {(products ?? []).map((p) => (
+              {filteredProducts.map((p) => (
                 <tr key={p.id} className="border-t border-border/50">
                   <td className="px-4 py-3 font-medium text-foreground">
                     <div className="grid grid-cols-[3.75rem_1fr] items-center gap-3">
@@ -384,10 +431,12 @@ function AdminPage() {
                   </td>
                 </tr>
               ))}
-              {(products ?? []).length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
-                    No hay productos aún.
+                    {searchTerm
+                      ? "No hay productos que coincidan con la busqueda."
+                      : "No hay productos aún."}
                   </td>
                 </tr>
               ) : null}

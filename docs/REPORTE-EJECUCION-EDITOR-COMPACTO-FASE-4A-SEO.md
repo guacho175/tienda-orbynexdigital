@@ -114,15 +114,19 @@ Se verifico el changelog oficial de Supabase y la documentacion de Data API/RLS.
 - `git diff --check`: pasa, con advertencias LF/CRLF de Git.
 - QA publica local en `http://127.0.0.1:5174/producto/demo-web-starter`: pasa; contenido visible y `head()` dinamico con title/description/OpenGraph correctos.
 - QA admin local en `http://127.0.0.1:5174/admin/new`: pasa; sesion admin disponible y seccion SEO muestra `slug`, `meta_title`, `meta_description`, `seo_noindex`, `og_image_url` y preview real.
+- Verificacion remota por Supabase CLI usando pooler IPv4: pasa; columnas y constraints SEO existen en `public.products`.
+- `supabase db lint --db-url <pooler-url> --schema public --fail-on none`: pasa, sin errores de schema.
+- `supabase db advisors --db-url <pooler-url> --type all --level info --fail-on none`: ejecutado; reporta warnings/performance preexistentes de RLS initplan, policies permisivas multiples e indices sin uso, sin findings especificos del bloque SEO.
 
 Intentado:
 
 - `supabase migration up --local`: no se pudo ejecutar porque la base local no esta levantada en `127.0.0.1:54322`.
 - `supabase db lint --local`: no se pudo ejecutar por la misma conexion local rechazada.
+- `supabase link --project-ref frpzanceiaijlbgkabib`: no se pudo ejecutar porque la cuenta Supabase autenticada en el CLI no tiene privilegios sobre ese proyecto.
+- `supabase db query --db-url SUPABASE_DB_URL`: no conecta porque el host directo `db.frpzanceiaijlbgkabib.supabase.co` no resuelve desde esta red. La alternativa funcional fue el pooler IPv4.
 
 Pendiente al final de la implementacion:
 
-- Supabase lint/advisors si se levanta entorno local o se autoriza entorno remoto.
 - QA de escritura real admin si se autoriza crear/editar un producto de prueba.
 
 ## 7. Riesgos y pendientes
