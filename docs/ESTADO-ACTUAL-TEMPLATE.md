@@ -542,7 +542,7 @@ Documentacion: [`PLAN-PRODUCTOS-SIMILARES-DETALLE.md`](./PLAN-PRODUCTOS-SIMILARE
 
 ## Editor compacto de productos
 
-Estado: Fases 1, 2 y 3 implementadas y revisadas tecnicamente al 2026-07-09. Fases 4 y 5 no iniciadas.
+Estado: Fases 1, 2, 3 y 4A SEO real implementadas a nivel de codigo/migracion local al 2026-07-09. Fase 5 no iniciada.
 
 - El editor admin usa seis secciones internas: General, Inventario, Precios y pago, Multimedia, Organizacion y SEO basico.
 - Desktop usa rail sticky; movil usa selector de seccion.
@@ -553,6 +553,9 @@ Estado: Fases 1, 2 y 3 implementadas y revisadas tecnicamente al 2026-07-09. Fas
 - Moneda queda limitada a las capacidades configuradas del checkout.
 - `ProductInput` ya no admite campos de lectura o runtime.
 - Fase 3 agrega preview SEO derivada sin persistir metadatos nuevos.
+- Fase 4A agrega SEO real persistido: `meta_title`, `meta_description`, `seo_noindex` y `og_image_url`.
+- `/producto/$slug` ahora tiene `head()` dinamico con fallback a nombre, descripciones e imagenes existentes.
+- Galeria, precios avanzados, envio, organizacion avanzada, semantica de estados y Fase 5 quedan en backlog hasta requisitos concretos.
 - El editor centraliza limites de caracteres y muestra contadores en campos actuales.
 - Las capacidades futuras (`shipping`, `gallery`, `advancedPricing`, `advancedVisibility`) quedan registradas por feature flag, apagadas y no visibles.
 - No se modificaron Flow, WhatsApp, RLS, migraciones, reservas ni eliminacion.
@@ -564,5 +567,8 @@ Estado: Fases 1, 2 y 3 implementadas y revisadas tecnicamente al 2026-07-09. Fas
 Documentacion:
 
 - [`PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md`](./PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md)
+- [`PLAN-TECNICO-EDITOR-COMPACTO-FASES-4-5.md`](./PLAN-TECNICO-EDITOR-COMPACTO-FASES-4-5.md)
 - [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md)
 - [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md)
+- [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-4A-SEO.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-4A-SEO.md)
+- [`PREGUNTAS-FASE-5-EDITOR-COMPACTO.md`](./PREGUNTAS-FASE-5-EDITOR-COMPACTO.md)

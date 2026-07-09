@@ -5,7 +5,10 @@ export const PRODUCT_EDITOR_LIMITS = {
   slug: 120,
   short_description: 200,
   description: 4000,
+  meta_title: 70,
+  meta_description: 170,
   category: 60,
+  og_image_url: 500,
   payment_button_label: 60,
 } as const;
 
@@ -67,6 +70,10 @@ export const PRODUCT_EDITOR_FIELD_SECTION = {
   display_order: "organization",
   is_active: "organization",
   slug: "seo",
+  meta_title: "seo",
+  meta_description: "seo",
+  seo_noindex: "seo",
+  og_image_url: "seo",
 } as const satisfies Record<string, ProductEditorSectionId>;
 
 export const PRODUCT_AVAILABILITY_OPTIONS = [

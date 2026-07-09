@@ -1,5 +1,8 @@
 # Manual de Traspaso para Futuros Agentes (Agent Handoff)
 
+> [!IMPORTANT]
+> **Fases 4/5 del editor compacto:** Fase 4A "SEO real" esta implementada a nivel de codigo y migracion local en `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-4A-SEO.md`. Antes de deploy, aplicar `supabase/migrations/20260709213134_product_seo_metadata.sql` en Supabase. Galeria, precios avanzados, envio, organizacion avanzada, semantica de estados y Fase 5 siguen en backlog; ver `docs/PREGUNTAS-FASE-5-EDITOR-COMPACTO.md`.
+
 > [!NOTE]
 > **Editor compacto de productos (2026-07-09):** Fases 1, 2 y 3 implementadas; Fases 4 y 5 no iniciadas y requieren aprobacion separada. La implementacion vive en `src/components/admin/product-editor/` y mantiene la API de `ProductForm`. QA visual autenticado ejecutado en `/admin`, `/admin/new` y `/admin/edit/$id`; queda pendiente solo una prueba con escritura real si el usuario autoriza crear/editar un producto de QA. El lint dirigido pasa; el lint global conserva deuda CRLF/Prettier previa. Ver `docs/PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md`, `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md` y `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md`.
 

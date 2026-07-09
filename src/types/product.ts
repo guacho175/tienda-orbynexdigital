@@ -4,6 +4,10 @@ export interface Product {
   slug: string;
   short_description: string | null;
   description: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  seo_noindex: boolean;
+  og_image_url: string | null;
   price: number;
   currency: string;
   category: string | null;

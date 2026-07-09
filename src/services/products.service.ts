@@ -7,6 +7,10 @@ export type ProductInput = Pick<
   | "name"
   | "slug"
   | "short_description"
+  | "meta_title"
+  | "meta_description"
+  | "seo_noindex"
+  | "og_image_url"
   | "description"
   | "price"
   | "currency"
@@ -120,6 +124,35 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .maybeSingle();
   if (error) throw error;
   const products = await applyPublicAvailability(data ? [data as Product] : []);
+  return products[0] ?? null;
+}
+
+export async function fetchProductSeoBySlug(slug: string): Promise<Product | null> {
+  const supabaseUrl =
+    import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) return null;
+
+  const endpoint = new URL("/rest/v1/products", supabaseUrl);
+  endpoint.searchParams.set("select", "*");
+  endpoint.searchParams.set("slug", `eq.${slug}`);
+  endpoint.searchParams.set("is_active", "eq.true");
+  endpoint.searchParams.set("or", `(${PUBLIC_INVENTORY_FILTER})`);
+  endpoint.searchParams.set("limit", "1");
+
+  const response = await fetch(endpoint, {
+    headers: {
+      apikey: supabaseKey,
+    },
+  });
+
+  if (!response.ok) return null;
+
+  const products = (await response.json()) as Product[];
   return products[0] ?? null;
 }
 

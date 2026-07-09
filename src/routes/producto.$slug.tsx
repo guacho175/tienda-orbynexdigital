@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/BackLink";
 import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
+import { brandConfig } from "@/config/brand.config";
 import { commerceConfig } from "@/config/commerce.config";
 import {
   fetchProductBySlug,
+  fetchProductSeoBySlug,
   fetchRelatedProducts,
   getRelatedProductsQueryKey,
   PRODUCTS_STALE_TIME_MS,
@@ -25,9 +27,46 @@ import {
   isSoldOut,
   isTemporarilyReserved,
 } from "@/utils/inventory";
+import { buildProductSeoMetadata } from "@/utils/product-seo";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/producto/$slug")({
+  loader: async ({ params }) => {
+    try {
+      return await fetchProductSeoBySlug(params.slug);
+    } catch {
+      return null;
+    }
+  },
+  head: ({ loaderData, params }) => {
+    const seo = buildProductSeoMetadata(
+      loaderData ?? {
+        name: "Producto no encontrado",
+        slug: params.slug,
+        meta_description: "El producto solicitado no existe o ya no esta disponible.",
+      },
+    );
+    const meta = [
+      { title: seo.title },
+      { name: "description", content: seo.description },
+      { property: "og:title", content: seo.title },
+      { property: "og:description", content: seo.description },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: seo.path },
+      { property: "og:image", content: seo.image },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: seo.title },
+      { name: "twitter:description", content: seo.description },
+      { name: "twitter:image", content: seo.image },
+      { name: "author", content: brandConfig.name },
+    ];
+
+    if (seo.robots) {
+      meta.push({ name: "robots", content: seo.robots });
+    }
+
+    return { meta };
+  },
   component: ProductDetail,
 });
 
