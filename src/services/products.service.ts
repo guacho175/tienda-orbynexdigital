@@ -2,7 +2,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { commerceConfig } from "@/config/commerce.config";
 import type { Product, ProductCardData } from "@/types/product";
 
-export type ProductInput = Omit<Product, "id" | "created_at" | "updated_at">;
+export type ProductInput = Pick<
+  Product,
+  | "name"
+  | "slug"
+  | "short_description"
+  | "description"
+  | "price"
+  | "currency"
+  | "category"
+  | "image_url"
+  | "image_url_thumb"
+  | "image_url_card"
+  | "image_url_detail"
+  | "is_active"
+  | "availability"
+  | "stock_quantity"
+  | "track_inventory"
+  | "allow_backorder"
+  | "low_stock_threshold"
+  | "out_of_stock_behavior"
+  | "payment_url"
+  | "payment_button_label"
+  | "display_order"
+>;
 
 type ProductAvailability = {
   productId: string;

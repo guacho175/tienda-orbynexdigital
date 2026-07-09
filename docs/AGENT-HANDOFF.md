@@ -1,5 +1,8 @@
 # Manual de Traspaso para Futuros Agentes (Agent Handoff)
 
+> [!NOTE]
+> **Editor compacto de productos (2026-07-09):** Fases 1 y 2 implementadas; Fase 3 no iniciada y requiere autorizacion explicita. La implementacion vive en `src/components/admin/product-editor/` y mantiene la API de `ProductForm`. Antes de continuar se necesita QA autenticado en `/admin/new` y `/admin/edit/$id`. El lint dirigido pasa; el lint global conserva deuda CRLF/Prettier previa. Ver `docs/PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md` y `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`.
+
 Este documento es una guía de transferencia rápida diseñada específicamente para agentes de Inteligencia Artificial que operen en este repositorio en el futuro. Léelo detenidamente antes de realizar cualquier cambio en el código.
 
 ---

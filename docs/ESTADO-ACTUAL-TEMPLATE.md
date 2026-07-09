@@ -537,3 +537,27 @@ Estado: implementado y validado localmente al 2026-07-09.
 - No se modificaron migraciones, RLS, Flow, WhatsApp, checkout ni `payment_url`.
 
 Documentacion: [`PLAN-PRODUCTOS-SIMILARES-DETALLE.md`](./PLAN-PRODUCTOS-SIMILARES-DETALLE.md).
+
+---
+
+## Editor compacto de productos
+
+Estado: Fases 1 y 2 implementadas y revisadas tecnicamente al 2026-07-09. Fase 3 no iniciada.
+
+- El editor admin usa seis secciones internas: General, Inventario, Precios y pago, Multimedia, Organizacion y SEO basico.
+- Desktop usa rail sticky; movil usa selector de seccion.
+- Un unico controlador conserva valores, errores, upload, dirty state y submit.
+- Los errores se cuentan por seccion y el submit abre el primer campo invalido.
+- Se mantienen URL manual, variantes WebP, `payment_url`, inventario y rutas de alta/edicion.
+- Inventario muestra el estado resultante sin consultar ni inventar reservas admin.
+- Moneda queda limitada a las capacidades configuradas del checkout.
+- `ProductInput` ya no admite campos de lectura o runtime.
+- No se modificaron Flow, WhatsApp, RLS, migraciones, reservas ni eliminacion.
+- Build, TypeScript y lint dirigido pasan.
+- Lint global sigue afectado por deuda CRLF/Prettier preexistente.
+- La verificacion visual autenticada del editor queda pendiente por falta de sesion admin local.
+
+Documentacion:
+
+- [`PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md`](./PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md)
+- [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md)

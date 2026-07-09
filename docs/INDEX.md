@@ -49,9 +49,11 @@ Haz click en cada enlace para navegar a las distintas secciones de la documentac
 *   `[REPORTE]` [**Reporte de Mini Cart Drawer (REPORTE-MINI-CART-DRAWER.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-MINI-CART-DRAWER.md): Implementación del drawer deslizable para el carrito de compras.
 *   `[REPORTE]` [**Reporte de Pulido de Interfaz UI/UX (REPORTE-PULIDO-UI-UX-ORBYNEX.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-PULIDO-UI-UX-ORBYNEX.md): Bitácora de pulido y refinamiento visual de la interfaz.
 *   `[REPORTE]` [**Productos Similares en Detalle (PLAN-PRODUCTOS-SIMILARES-DETALLE.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-PRODUCTOS-SIMILARES-DETALLE.md): Arquitectura, reglas de seleccion, cache y validacion de recomendaciones.
+*   `[REPORTE]` [**Ejecucion del Editor Compacto - Fases 1 y 2**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md): Implementacion, validaciones, problemas encontrados y decisiones tomadas fuera del plan.
 
-### 4. Planes de Desarrollo Ejecutados (PLAN ejecutado)
-*Planes de desarrollo que fueron propuestos e implementados en su totalidad.*
+### 4. Planes de Desarrollo Ejecutados o en Proceso
+*Planes de desarrollo implementados total o parcialmente.*
+*   `[PLAN en proceso]` [**Editor de Producto Compacto**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md): Fases 1 y 2 implementadas; Fase 3 no iniciada.
 *   `[PLAN ejecutado]` [**Integración de Flow Fase 1: Órdenes y RLS**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/FLOW-FASE-1-ORDERS-RLS.md)
 *   `[PLAN ejecutado]` [**Integración de Flow Fase 2: Endpoints Vercel**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/FLOW-FASE-2-ENDPOINTS.md)
 *   `[PLAN ejecutado]` [**Integración de Flow Fase 3: Checkout y Retorno**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/FLOW-FASE-3-RESULTADO-CHECKOUT.md)

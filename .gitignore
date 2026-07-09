@@ -36,3 +36,4 @@ dist-ssr
 *.sln
 *.sw?
 demo-product-images/
+stitch_compact_product_editor/

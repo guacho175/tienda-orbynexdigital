@@ -1,64 +1,28 @@
-import { useState, type FormEvent } from "react";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { commerceConfig } from "@/config/commerce.config";
-import { ProductImage } from "@/components/product/ProductImage";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
-  uploadProductImageVariants,
-  validateProductImage,
-  type ProductImageUploadResult,
-} from "@/services/storage.service";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PRODUCT_EDITOR_SECTIONS } from "@/config/product-editor.config";
 import type { Product } from "@/types/product";
 import type { ProductInput } from "@/services/products.service";
-
-const schema = z.object({
-  name: z.string().trim().min(2, "El nombre es obligatorio").max(120),
-  slug: z
-    .string()
-    .trim()
-    .min(2, "El slug es obligatorio")
-    .max(120)
-    .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
-  short_description: z.string().trim().max(200).optional().or(z.literal("")),
-  description: z.string().trim().max(4000).optional().or(z.literal("")),
-  price: z.coerce.number().min(0, "El precio no puede ser negativo"),
-  currency: z.string().trim().min(3).max(6),
-  category: z.string().trim().max(60).optional().or(z.literal("")),
-  image_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
-  image_url_thumb: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
-  image_url_card: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
-  image_url_detail: z.string().trim().url("URL invalida").max(500).optional().or(z.literal("")),
-  is_active: z.boolean(),
-  availability: z.enum(["in_stock", "out_of_stock", "on_demand"]),
-  stock_quantity: z.coerce.number().int().min(0, "El stock no puede ser negativo"),
-  track_inventory: z.boolean(),
-  allow_backorder: z.boolean(),
-  low_stock_threshold: z.coerce.number().int().min(0, "El umbral no puede ser negativo"),
-  out_of_stock_behavior: z.enum(["show_sold_out", "hide_product"]),
-  payment_url: z.string().trim().url("URL inválida").max(500).optional().or(z.literal("")),
-  payment_button_label: z.string().trim().max(60).optional().or(z.literal("")),
-  display_order: z.coerce.number().int().min(0).default(0),
-});
-
-function slugify(v: string) {
-  return v
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import { ProductEditorActionsBar } from "./product-editor/ProductEditorActionsBar";
+import { ProductEditorLayout } from "./product-editor/ProductEditorLayout";
+import { ProductEditorNav } from "./product-editor/ProductEditorNav";
+import { ProductGeneralSection } from "./product-editor/ProductGeneralSection";
+import { ProductInventorySection } from "./product-editor/ProductInventorySection";
+import { ProductMediaSection } from "./product-editor/ProductMediaSection";
+import { ProductOrganizationSection } from "./product-editor/ProductOrganizationSection";
+import { ProductPricingSection } from "./product-editor/ProductPricingSection";
+import { ProductSeoSection } from "./product-editor/ProductSeoSection";
+import { useProductEditor } from "./product-editor/useProductEditor";
 
 export interface ProductFormProps {
   initial?: Product | null;
@@ -67,460 +31,171 @@ export interface ProductFormProps {
   onCancel?: () => void;
 }
 
+function formatUpdatedAt(value: string | undefined) {
+  if (!value) return null;
+
+  try {
+    return new Intl.DateTimeFormat("es-CL", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value));
+  } catch {
+    return null;
+  }
+}
+
 export function ProductForm({
   initial,
   submitLabel = "Guardar",
   onSubmit,
   onCancel,
 }: ProductFormProps) {
-  const [values, setValues] = useState<ProductInput>({
-    name: initial?.name ?? "",
-    slug: initial?.slug ?? "",
-    short_description: initial?.short_description ?? "",
-    description: initial?.description ?? "",
-    price: initial?.price ?? 0,
-    currency: initial?.currency ?? commerceConfig.currency,
-    category: initial?.category ?? "",
-    image_url: initial?.image_url ?? "",
-    image_url_thumb: initial?.image_url_thumb ?? "",
-    image_url_card: initial?.image_url_card ?? "",
-    image_url_detail: initial?.image_url_detail ?? "",
-    is_active: initial?.is_active ?? true,
-    availability: (initial?.availability as ProductInput["availability"]) ?? "in_stock",
-    stock_quantity: initial?.stock_quantity ?? 0,
-    track_inventory: initial?.track_inventory ?? false,
-    allow_backorder: initial?.allow_backorder ?? false,
-    low_stock_threshold: initial?.low_stock_threshold ?? 3,
-    out_of_stock_behavior: initial?.out_of_stock_behavior ?? "show_sold_out",
-    payment_url: initial?.payment_url ?? "",
-    payment_button_label: initial?.payment_button_label ?? "",
-    display_order: initial?.display_order ?? 0,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageUploadPhase, setImageUploadPhase] = useState<"optimizing" | "uploading" | null>(null);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
-  const [imageUploadResult, setImageUploadResult] = useState<ProductImageUploadResult | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const editor = useProductEditor({ initial, onSubmit });
+  const activeSection = PRODUCT_EDITOR_SECTIONS.find(
+    (section) => section.id === editor.activeSection,
+  );
+  const totalErrors = Object.keys(editor.errors).length;
+  const updatedAt = formatUpdatedAt(initial?.updated_at);
+  const disabled = editor.submitting;
 
-  function update<K extends keyof ProductInput>(key: K, value: ProductInput[K]) {
-    setValues((prev) => ({ ...prev, [key]: value }));
-  }
-
-  function updateManualImageUrl(value: string) {
-    setValues((prev) => ({
-      ...prev,
-      image_url: value,
-      image_url_thumb: "",
-      image_url_card: "",
-      image_url_detail: "",
-    }));
-    setImageUploadError(null);
-    setImageUploadResult(null);
-  }
-
-  const hasLegacyImage =
-    Boolean(values.image_url) &&
-    (!values.image_url_thumb || !values.image_url_card || !values.image_url_detail);
-
-  async function handleImageUpload(file: File | undefined) {
-    if (!file) return;
-
-    const validationError = validateProductImage(file);
-    if (validationError) {
-      setImageUploadError(validationError);
-      setImageUploadResult(null);
+  function requestCancel() {
+    if (!onCancel) return;
+    if (editor.isDirty) {
+      setCancelDialogOpen(true);
       return;
     }
-
-    setImageUploadError(null);
-    setImageUploadResult(null);
-    setImageUploadPhase("optimizing");
-    setUploadingImage(true);
-
-    try {
-      const result = await uploadProductImageVariants(file, {
-        onPhaseChange: setImageUploadPhase,
-      });
-      update("image_url", result.detailUrl);
-      update("image_url_thumb", result.thumbUrl);
-      update("image_url_card", result.cardUrl);
-      update("image_url_detail", result.detailUrl);
-      setImageUploadResult(result);
-    } catch (err) {
-      setImageUploadError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo subir la imagen. Revisa permisos de Storage.",
-      );
-    } finally {
-      setUploadingImage(false);
-      setImageUploadPhase(null);
-    }
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setErrors({});
-    if (uploadingImage) {
-      setErrors({ image_upload: "Espera a que termine la subida de imagen." });
-      return;
-    }
-    const parsed = schema.safeParse(values);
-    if (!parsed.success) {
-      const flat: Record<string, string> = {};
-      for (const issue of parsed.error.issues) {
-        flat[issue.path.join(".")] = issue.message;
-      }
-      setErrors(flat);
-      return;
-    }
-    if (imageUploadError) {
-      setErrors({ image_upload: "Corrige la subida de imagen antes de guardar." });
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const clean: ProductInput = {
-        ...parsed.data,
-        short_description: parsed.data.short_description || null,
-        description: parsed.data.description || null,
-        category: parsed.data.category || null,
-        image_url: parsed.data.image_url || null,
-        image_url_thumb: parsed.data.image_url_thumb || null,
-        image_url_card: parsed.data.image_url_card || null,
-        image_url_detail: parsed.data.image_url_detail || null,
-        payment_url: parsed.data.payment_url || null,
-        payment_button_label: parsed.data.payment_button_label || null,
-      } as ProductInput;
-      await onSubmit(clean);
-    } finally {
-      setSubmitting(false);
-    }
+    onCancel();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-surface space-y-6 p-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre *</Label>
-          <Input
-            id="name"
-            value={values.name}
-            onChange={(e) => {
-              const v = e.target.value;
-              update("name", v);
-              if (!initial && !values.slug) update("slug", slugify(v));
-            }}
-          />
-          {errors.name ? <p className="text-xs text-destructive">{errors.name}</p> : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug *</Label>
-          <Input
-            id="slug"
-            value={values.slug}
-            onChange={(e) => update("slug", slugify(e.target.value))}
-          />
-          {errors.slug ? <p className="text-xs text-destructive">{errors.slug}</p> : null}
-        </div>
-      </div>
-
-      <section className="rounded-md border border-border/50 bg-secondary/20 p-4">
-        <div className="flex items-start justify-between gap-4">
+    <>
+      <form onSubmit={editor.handleSubmit} noValidate className="space-y-5">
+        <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-card/55 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Inventario</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Define si este producto descuenta stock o funciona como servicio sin limite.
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={editor.values.is_active ? "default" : "secondary"}>
+                {editor.values.is_active ? "Activo" : "Inactivo"}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Sección {activeSection?.label ?? "General"}
+              </span>
+            </div>
+            <p className="mt-2 text-sm font-medium text-foreground">
+              {editor.values.name || "Nuevo producto"}
             </p>
-          </div>
-          <Switch
-            id="track_inventory"
-            checked={values.track_inventory}
-            onCheckedChange={(v) => update("track_inventory", v)}
-          />
-        </div>
-        <Label htmlFor="track_inventory" className="mt-3 block cursor-pointer text-sm">
-          Controlar inventario
-        </Label>
-
-        {!values.track_inventory ? (
-          <p className="mt-4 rounded-md border border-accent/20 bg-accent/10 p-3 text-xs text-accent">
-            Este producto no controla stock. Util para servicios digitales o productos sin limite de
-            unidades.
-          </p>
-        ) : (
-          <div className="mt-4 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="stock_quantity">Stock disponible</Label>
-                <Input
-                  id="stock_quantity"
-                  type="number"
-                  min={0}
-                  value={values.stock_quantity}
-                  onChange={(e) => update("stock_quantity", Number(e.target.value))}
-                />
-                {errors.stock_quantity ? (
-                  <p className="text-xs text-destructive">{errors.stock_quantity}</p>
-                ) : null}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="low_stock_threshold">Umbral de pocas unidades</Label>
-                <Input
-                  id="low_stock_threshold"
-                  type="number"
-                  min={0}
-                  value={values.low_stock_threshold}
-                  onChange={(e) => update("low_stock_threshold", Number(e.target.value))}
-                />
-                {errors.low_stock_threshold ? (
-                  <p className="text-xs text-destructive">{errors.low_stock_threshold}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-md border border-border/50 bg-background/40 p-3">
-              <Switch
-                id="allow_backorder"
-                checked={values.allow_backorder}
-                onCheckedChange={(v) => update("allow_backorder", v)}
-              />
-              <Label htmlFor="allow_backorder" className="cursor-pointer">
-                Permitir venta sin stock
-              </Label>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="out_of_stock_behavior">Cuando no haya stock</Label>
-              <select
-                id="out_of_stock_behavior"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                value={values.out_of_stock_behavior}
-                onChange={(e) =>
-                  update(
-                    "out_of_stock_behavior",
-                    e.target.value as ProductInput["out_of_stock_behavior"],
-                  )
-                }
-              >
-                <option value="show_sold_out">Mostrar como agotado</option>
-                <option value="hide_product">Ocultar del catalogo</option>
-              </select>
-            </div>
-
-            {values.stock_quantity === 0 ? (
-              <p className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-                Producto agotado.
+            {updatedAt ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Última actualización: {updatedAt}
               </p>
             ) : null}
-            {values.out_of_stock_behavior === "hide_product" ? (
-              <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-xs text-amber-100">
-                Cuando el stock llegue a 0, este producto dejara de mostrarse en catalogo y home.
-              </p>
-            ) : (
-              <p className="rounded-md border border-accent/20 bg-accent/10 p-3 text-xs text-accent">
-                Cuando el stock llegue a 0, seguira visible como agotado.
-              </p>
-            )}
           </div>
-        )}
-      </section>
-
-      <div className="space-y-2">
-        <Label htmlFor="short_description">Descripción corta</Label>
-        <Input
-          id="short_description"
-          value={values.short_description ?? ""}
-          onChange={(e) => update("short_description", e.target.value)}
-          maxLength={200}
-        />
-        {errors.short_description ? (
-          <p className="text-xs text-destructive">{errors.short_description}</p>
-        ) : null}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Descripción completa</Label>
-        <Textarea
-          id="description"
-          rows={5}
-          value={values.description ?? ""}
-          onChange={(e) => update("description", e.target.value)}
-          maxLength={4000}
-        />
-        {errors.description ? (
-          <p className="text-xs text-destructive">{errors.description}</p>
-        ) : null}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="price">Precio *</Label>
-          <Input
-            id="price"
-            type="number"
-            min={0}
-            step="1"
-            value={values.price}
-            onChange={(e) => update("price", Number(e.target.value))}
-          />
-          {errors.price ? <p className="text-xs text-destructive">{errors.price}</p> : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="currency">Moneda</Label>
-          <Input
-            id="currency"
-            value={values.currency}
-            onChange={(e) => update("currency", e.target.value.toUpperCase())}
-            maxLength={6}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="display_order">Orden</Label>
-          <Input
-            id="display_order"
-            type="number"
-            min={0}
-            value={values.display_order}
-            onChange={(e) => update("display_order", Number(e.target.value))}
-          />
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="category">Categoría</Label>
-          <Input
-            id="category"
-            value={values.category ?? ""}
-            onChange={(e) => update("category", e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="availability">Disponibilidad</Label>
-          <select
-            id="availability"
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            value={values.availability}
-            onChange={(e) => update("availability", e.target.value as ProductInput["availability"])}
-          >
-            <option value="in_stock">En stock</option>
-            <option value="out_of_stock">Agotado</option>
-            <option value="on_demand">Bajo pedido</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="image_url">URL de imagen</Label>
-        <Input
-          id="image_url"
-          value={values.image_url ?? ""}
-          onChange={(e) => updateManualImageUrl(e.target.value)}
-          placeholder="https://..."
-        />
-        {errors.image_url ? <p className="text-xs text-destructive">{errors.image_url}</p> : null}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
-        <div className="space-y-2">
-          <Label htmlFor="product_image_upload">Subir imagen</Label>
-          <Input
-            id="product_image_upload"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            disabled={uploadingImage || submitting}
-            onChange={(e) => {
-              void handleImageUpload(e.target.files?.[0]);
-              e.currentTarget.value = "";
-            }}
-          />
-          <p className="text-xs text-muted-foreground">
-            JPG, PNG o WebP. Original maximo 10 MB. Se guardan variantes WebP optimizadas.
+          <p className="max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-right">
+            Completa una sección a la vez. Todos los cambios se guardan juntos al finalizar.
           </p>
-          {imageUploadPhase === "optimizing" ? (
-            <p className="text-xs text-accent">Optimizando imagen...</p>
-          ) : null}
-          {imageUploadPhase === "uploading" ? (
-            <p className="text-xs text-accent">Subiendo variantes optimizadas...</p>
-          ) : null}
-          {imageUploadResult ? (
-            <div className="grid gap-1 rounded-md border border-border/50 bg-secondary/20 p-3 text-xs text-muted-foreground sm:grid-cols-2">
-              <span>Original: {formatFileSize(imageUploadResult.originalSize)}</span>
-              <span>Thumb: {formatFileSize(imageUploadResult.thumbSize)}</span>
-              <span>Card: {formatFileSize(imageUploadResult.cardSize)}</span>
-              <span>Detail: {formatFileSize(imageUploadResult.detailSize)}</span>
-            </div>
-          ) : null}
-          {hasLegacyImage ? (
-            <p className="rounded-md border border-accent/30 bg-accent/10 p-3 text-xs text-accent">
-              Este producto usa imagen legacy. Re-subir imagen para generar variantes optimizadas.
-            </p>
-          ) : null}
-          {imageUploadError || errors.image_upload ? (
-            <p className="text-xs text-destructive">{imageUploadError ?? errors.image_upload}</p>
-          ) : null}
         </div>
 
-        <ProductImage
-          src={values.image_url}
-          thumbSrc={values.image_url_thumb}
-          cardSrc={values.image_url_card}
-          detailSrc={values.image_url_detail}
-          alt={values.name ? `Imagen de ${values.name}` : "Vista previa del producto"}
-          variant="card"
-          sizes="220px"
-          className="aspect-[4/3] rounded-md border border-border/50"
-          iconClassName="h-10 w-10"
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="payment_url">URL de pago externo</Label>
-          <Input
-            id="payment_url"
-            value={values.payment_url ?? ""}
-            onChange={(e) => update("payment_url", e.target.value)}
-            placeholder="https://flow.cl/... o Mercado Pago"
-          />
-          {errors.payment_url ? (
-            <p className="text-xs text-destructive">{errors.payment_url}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="payment_button_label">Texto del botón de pago</Label>
-          <Input
-            id="payment_button_label"
-            value={values.payment_button_label ?? ""}
-            onChange={(e) => update("payment_button_label", e.target.value)}
-            placeholder="Pagar ahora"
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 rounded-md border border-border/50 bg-secondary/20 p-4">
-        <Switch
-          id="is_active"
-          checked={values.is_active}
-          onCheckedChange={(v) => update("is_active", v)}
-        />
-        <Label htmlFor="is_active" className="cursor-pointer">
-          Producto activo (visible en la tienda)
-        </Label>
-      </div>
-
-      <div className="flex flex-wrap justify-end gap-2">
-        {onCancel ? (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancelar
-          </Button>
+        {totalErrors > 0 ? (
+          <div
+            role="alert"
+            className="rounded-xl border border-destructive/35 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            Hay {totalErrors} {totalErrors === 1 ? "campo pendiente" : "campos pendientes"}. Revisa
+            las secciones marcadas antes de guardar.
+          </div>
         ) : null}
-        <Button type="submit" disabled={submitting || uploadingImage} className="btn-hero">
-          {submitting ? "Guardando..." : submitLabel}
-        </Button>
-      </div>
-    </form>
+
+        <ProductEditorLayout
+          navigation={
+            <ProductEditorNav
+              activeSection={editor.activeSection}
+              errorCountBySection={editor.errorCountBySection}
+              onChange={editor.setActiveSection}
+            />
+          }
+        >
+          {editor.activeSection === "general" ? (
+            <ProductGeneralSection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              updateName={editor.updateName}
+              disabled={disabled}
+            />
+          ) : null}
+          {editor.activeSection === "inventory" ? (
+            <ProductInventorySection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              disabled={disabled}
+            />
+          ) : null}
+          {editor.activeSection === "pricing" ? (
+            <ProductPricingSection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              disabled={disabled}
+            />
+          ) : null}
+          {editor.activeSection === "media" ? (
+            <ProductMediaSection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              disabled={disabled}
+              uploadingImage={editor.uploadingImage}
+              imageUploadPhase={editor.imageUploadPhase}
+              imageUploadError={editor.imageUploadError}
+              imageUploadResult={editor.imageUploadResult}
+              hasLegacyImage={editor.hasLegacyImage}
+              hasOptimizedVariants={editor.hasOptimizedVariants}
+              updateManualImageUrl={editor.updateManualImageUrl}
+              onImageUpload={editor.handleImageUpload}
+            />
+          ) : null}
+          {editor.activeSection === "organization" ? (
+            <ProductOrganizationSection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              disabled={disabled}
+            />
+          ) : null}
+          {editor.activeSection === "seo" ? (
+            <ProductSeoSection
+              values={editor.values}
+              errors={editor.errors}
+              update={editor.update}
+              disabled={disabled}
+            />
+          ) : null}
+        </ProductEditorLayout>
+
+        <ProductEditorActionsBar
+          isDirty={editor.isDirty}
+          submitting={editor.submitting}
+          uploadingImage={editor.uploadingImage}
+          submitLabel={submitLabel}
+          onCancel={onCancel ? requestCancel : undefined}
+        />
+      </form>
+
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Descartar cambios?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Los cambios realizados en este producto todavía no se han guardado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Seguir editando</AlertDialogCancel>
+            <AlertDialogAction onClick={onCancel}>Descartar cambios</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
