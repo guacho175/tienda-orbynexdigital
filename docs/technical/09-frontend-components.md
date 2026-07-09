@@ -38,6 +38,15 @@ Las vistas están organizadas como rutas basadas en archivos bajo el directorio 
 *   **Función**: Formulario completo para la creación o modificación de un producto en el panel de administración.
 *   **Integración de Optimización**: Contiene el handler de subida de imágenes que invoca a `optimizeProductImageVariants` de `storage.service.ts`, transformando el archivo seleccionado en tres variantes WebP antes de subirlas a Supabase.
 
+### 2.5. Related Products (`src/components/product/RelatedProducts.tsx`)
+
+* **Funcion**: Renderiza recomendaciones en cada ficha mediante las tarjetas publicas existentes.
+* **Seleccion**: Prioriza la misma categoria, excluye el producto actual y completa los espacios con otras categorias.
+* **Estado vacio**: Si la tienda solo tiene el producto actual, la seccion no se renderiza.
+* **Rendimiento**: Usa consultas limitadas, cache de React Query, imagenes `card` diferidas y disponibilidad publica aplicada una sola vez.
+* **Responsive**: Grilla de tres columnas en escritorio y scroll horizontal nativo con `scroll-snap` en movil.
+* **Configuracion**: Limites, textos, tiempos de cache y fallback se controlan desde `commerceConfig.relatedProducts`.
+
 ---
 
 ## 3. Estado Global del Carrito (`cart.store.tsx`)

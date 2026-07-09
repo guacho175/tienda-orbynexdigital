@@ -22,6 +22,18 @@ export const commerceConfig = {
     enabled: true,
     providers: ["flow", "mercado_pago", "custom"] as const,
   },
+  relatedProducts: {
+    enabled: true,
+    limit: 3,
+    sameCategoryFirst: true,
+    fallbackAcrossCategories: true,
+    staleTimeMs: 5 * 60 * 1000,
+    gcTimeMs: 30 * 60 * 1000,
+    eyebrow: "Relacionados",
+    title: "Productos similares",
+    previousLabel: "Ver productos anteriores",
+    nextLabel: "Ver mas productos",
+  },
   legal: {
     termsShort:
       "Al comprar aceptas nuestros terminos. Las compras se procesan por pago online o el link de pago disponible.",

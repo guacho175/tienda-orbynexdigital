@@ -48,6 +48,7 @@ Haz click en cada enlace para navegar a las distintas secciones de la documentac
 *   `[REPORTE]` [**Reporte de GitHub Actions Cron (REPORTE-GITHUB-ACTIONS-CRON-HERO.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-GITHUB-ACTIONS-CRON-HERO.md): Implementación de la automatización del expirador de reservas en GitHub.
 *   `[REPORTE]` [**Reporte de Mini Cart Drawer (REPORTE-MINI-CART-DRAWER.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-MINI-CART-DRAWER.md): Implementación del drawer deslizable para el carrito de compras.
 *   `[REPORTE]` [**Reporte de Pulido de Interfaz UI/UX (REPORTE-PULIDO-UI-UX-ORBYNEX.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REPORTE-PULIDO-UI-UX-ORBYNEX.md): Bitácora de pulido y refinamiento visual de la interfaz.
+*   `[REPORTE]` [**Productos Similares en Detalle (PLAN-PRODUCTOS-SIMILARES-DETALLE.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-PRODUCTOS-SIMILARES-DETALLE.md): Arquitectura, reglas de seleccion, cache y validacion de recomendaciones.
 
 ### 4. Planes de Desarrollo Ejecutados (PLAN ejecutado)
 *Planes de desarrollo que fueron propuestos e implementados en su totalidad.*
@@ -63,6 +64,7 @@ Haz click en cada enlace para navegar a las distintas secciones de la documentac
 *   `[PLAN ejecutado]` [**Plan de Optimización de Imágenes de Panel**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-OPTIMIZACION-IMAGENES-PANEL.md)
 *   `[PLAN ejecutado]` [**Plan de Reservas de Stock con Cron cada 10 min**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-RESERVAS-STOCK-CRON-10-MIN.md)
 *   `[PLAN ejecutado]` [**Rediseño de Home de E-commerce**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/REDISENO-HOME-ECOMMERCE.md)
+*   `[PLAN ejecutado]` [**Productos Similares en el Detalle**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/PLAN-PRODUCTOS-SIMILARES-DETALLE.md)
 
 ### 5. Documentación Histórica (HISTORICO)
 *Documentos antiguos archivados para referencia sobre el estado original.*

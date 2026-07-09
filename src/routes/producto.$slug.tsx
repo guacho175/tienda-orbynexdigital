@@ -2,12 +2,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, ShoppingCart } from "lucide-react";
 import { ProductImage } from "@/components/product/ProductImage";
+import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/BackLink";
 import { Price } from "@/components/ui-common/Price";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchProductBySlug } from "@/services/products.service";
+import { commerceConfig } from "@/config/commerce.config";
+import {
+  fetchProductBySlug,
+  fetchRelatedProducts,
+  getRelatedProductsQueryKey,
+  PRODUCTS_STALE_TIME_MS,
+} from "@/services/products.service";
 import { useCart } from "@/store/cart.store";
 import { buildWhatsappContactUrl } from "@/utils/whatsapp";
 import {
@@ -34,8 +41,25 @@ function ProductDetail() {
   } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug),
-    staleTime: 5 * 60 * 1000,
+    staleTime: PRODUCTS_STALE_TIME_MS,
     refetchOnMount: "always",
+  });
+  const { data: relatedProducts = [], isLoading: relatedProductsLoading } = useQuery({
+    queryKey: getRelatedProductsQueryKey({
+      currentProductId: product?.id ?? "",
+      category: product?.category ?? null,
+      limit: commerceConfig.relatedProducts.limit,
+    }),
+    queryFn: () =>
+      fetchRelatedProducts({
+        currentProductId: product!.id,
+        category: product!.category,
+        limit: commerceConfig.relatedProducts.limit,
+      }),
+    enabled: commerceConfig.relatedProducts.enabled && Boolean(product?.id),
+    staleTime: commerceConfig.relatedProducts.staleTimeMs,
+    gcTime: commerceConfig.relatedProducts.gcTimeMs,
+    refetchOnMount: false,
   });
 
   if (isLoading) {
@@ -209,6 +233,8 @@ function ProductDetail() {
           ) : null}
         </div>
       </div>
+
+      <RelatedProducts products={relatedProducts} isLoading={relatedProductsLoading} />
     </Container>
   );
 }

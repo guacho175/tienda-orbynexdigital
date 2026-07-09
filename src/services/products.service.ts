@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { commerceConfig } from "@/config/commerce.config";
 import type { Product, ProductCardData } from "@/types/product";
 
 export type ProductInput = Omit<Product, "id" | "created_at" | "updated_at">;
@@ -17,6 +18,26 @@ const PUBLIC_INVENTORY_FILTER =
   "track_inventory.eq.false,stock_quantity.gt.0,allow_backorder.eq.true,out_of_stock_behavior.eq.show_sold_out";
 
 export const PRODUCTS_STALE_TIME_MS = 5 * 60 * 1000;
+
+export type RelatedProductsInput = {
+  currentProductId: string;
+  category: string | null;
+  limit?: number;
+};
+
+export function getRelatedProductsQueryKey({
+  currentProductId,
+  category,
+  limit = commerceConfig.relatedProducts.limit,
+}: RelatedProductsInput) {
+  return [
+    "products",
+    "related",
+    currentProductId,
+    category?.trim().toLowerCase() || null,
+    limit,
+  ] as const;
+}
 
 export async function fetchActiveProducts(): Promise<Product[]> {
   const { data, error } = await supabase
@@ -77,6 +98,58 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   if (error) throw error;
   const products = await applyPublicAvailability(data ? [data as Product] : []);
   return products[0] ?? null;
+}
+
+export async function fetchRelatedProducts({
+  currentProductId,
+  category,
+  limit = commerceConfig.relatedProducts.limit,
+}: RelatedProductsInput): Promise<ProductCardData[]> {
+  if (!commerceConfig.relatedProducts.enabled || limit <= 0) return [];
+
+  const normalizedCategory = category?.trim() || null;
+  const relatedProducts: ProductCardData[] = [];
+
+  if (commerceConfig.relatedProducts.sameCategoryFirst && normalizedCategory) {
+    const { data, error } = await supabase
+      .from("products")
+      .select(PRODUCT_CARD_SELECT)
+      .eq("is_active", true)
+      .eq("category", normalizedCategory)
+      .neq("id", currentProductId)
+      .or(PUBLIC_INVENTORY_FILTER)
+      .order("display_order", { ascending: true })
+      .order("id", { ascending: true })
+      .limit(limit);
+
+    if (error) throw error;
+    relatedProducts.push(...((data ?? []) as ProductCardData[]));
+  }
+
+  const remainingSlots = limit - relatedProducts.length;
+
+  if (commerceConfig.relatedProducts.fallbackAcrossCategories && remainingSlots > 0) {
+    let fallbackQuery = supabase
+      .from("products")
+      .select(PRODUCT_CARD_SELECT)
+      .eq("is_active", true)
+      .neq("id", currentProductId)
+      .or(PUBLIC_INVENTORY_FILTER)
+      .order("display_order", { ascending: true })
+      .order("id", { ascending: true })
+      .limit(remainingSlots);
+
+    const selectedIds = relatedProducts.map((product) => product.id);
+    if (selectedIds.length > 0) {
+      fallbackQuery = fallbackQuery.not("id", "in", `(${selectedIds.join(",")})`);
+    }
+
+    const { data, error } = await fallbackQuery;
+    if (error) throw error;
+    relatedProducts.push(...((data ?? []) as ProductCardData[]));
+  }
+
+  return applyPublicAvailability(relatedProducts.slice(0, limit));
 }
 
 export async function fetchAllProductsAdmin(): Promise<Product[]> {

@@ -31,6 +31,18 @@ Este documento detalla los flujos de interacción del sistema, especificando act
     *   Si el stock disponible del producto es 0, pero su stock físico es mayor a 0 y existen reservas activas asociadas: la UI deshabilita la compra y renderiza el mensaje: *"Este producto está reservado temporalmente por otra compra. Si no se completa el pago, podría volver a estar disponible en unos minutos."*
 *   **Estados Afectados**: `shop_cart_v1` en `localStorage`.
 
+### 1.2.1. Ver Productos Similares
+
+* **Actor**: Usuario anonimo / cliente autenticado.
+* **Precondiciones**: El cliente esta viendo una ficha publica de producto.
+* **Flujo Principal**:
+    1. El frontend consulta productos activos y visibles de la misma categoria, excluyendo el producto actual.
+    2. Si la categoria no completa el limite configurado, consulta solo los espacios restantes entre otras categorias.
+    3. El servicio aplica disponibilidad publica una vez y React Query conserva el resultado durante la ventana configurada.
+    4. La interfaz reutiliza `ProductCard`, manteniendo precio, imagen, inventario y carrito alineados con el catalogo.
+* **Flujo Alternativo**: Si no existe otro producto elegible o la consulta secundaria falla, la seccion se oculta y la ficha principal continua operativa.
+* **Estados Afectados**: Ninguno; es una operacion de lectura.
+
 ### 1.3. Validar Carrito y Crear Pago Flow (Inicio de Checkout)
 *   **Actor**: Usuario Anónimo / Cliente Autenticado.
 *   **Precondiciones**: El carrito tiene al menos un ítem. El cliente completa el formulario de contacto con éxito.

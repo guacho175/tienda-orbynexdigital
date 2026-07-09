@@ -519,3 +519,21 @@ Se agrego control de stock configurable por producto:
 - Admin permite configurar inventario y muestra badges de estado de stock.
 
 Documentacion operativa: [`INVENTARIO-PRODUCTOS.md`](./INVENTARIO-PRODUCTOS.md).
+
+---
+
+## Productos similares en ficha de detalle
+
+Estado: implementado y validado localmente al 2026-07-09.
+
+- Cada ruta `/producto/$slug` puede mostrar hasta tres recomendaciones.
+- Se prioriza la misma categoria y se completa con productos de otras categorias.
+- El producto actual queda excluido y no existen datos hardcodeados.
+- Con un unico producto publico elegible la seccion se oculta automaticamente.
+- La consulta solicita solo campos de tarjeta, limita resultados y aplica disponibilidad una vez.
+- React Query comparte cache durante 5 minutos y libera consultas inactivas despues de 30 minutos.
+- Limites, textos, tiempos y comportamiento se centralizan en `commerceConfig.relatedProducts`.
+- La UI reutiliza `ProductCard`, usa grilla desktop y carrusel nativo con `scroll-snap` en movil.
+- No se modificaron migraciones, RLS, Flow, WhatsApp, checkout ni `payment_url`.
+
+Documentacion: [`PLAN-PRODUCTOS-SIMILARES-DETALLE.md`](./PLAN-PRODUCTOS-SIMILARES-DETALLE.md).
