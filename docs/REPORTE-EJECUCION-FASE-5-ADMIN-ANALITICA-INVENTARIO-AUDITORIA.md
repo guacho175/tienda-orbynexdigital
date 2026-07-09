@@ -58,21 +58,23 @@ Ambas fueron aplicadas al proyecto remoto mediante pooler IPv4.
   - `supabase db lint --schema public --fail-on none`: sin errores de esquema.
   - `supabase db advisors --type all --level warn --fail-on none`: solo warnings heredados.
 
-## Warnings heredados pendientes
+## Warnings heredados
 
-Supabase sigue reportando warnings preexistentes en:
+Resueltos el 2026-07-09 con:
 
-- `user_roles`;
-- `products`;
-- `orders`;
-- `order_items`.
+- `supabase/migrations/20260709232902_optimize_rls_policies_advisors.sql`
 
-Categorias:
+Correcciones aplicadas:
 
-- `auth_rls_initplan`;
-- `multiple_permissive_policies`.
+- `auth.uid()` reemplazado por `(SELECT auth.uid())` en politicas heredadas.
+- Politicas SELECT duplicadas fusionadas en una sola politica por tabla/rol/accion.
+- `products`, `orders`, `order_items` y `user_roles` mantienen el mismo modelo de acceso.
 
-No se corrigieron en esta fase para no mezclar cambios de RLS heredados con la Fase 5.
+Validacion posterior:
+
+- `supabase db lint --schema public --fail-on none`: sin errores.
+- `supabase db advisors --type all --level warn --fail-on none`: sin issues.
+- REST publico de `products`: 200.
 
 ## No implementado en esta fase
 
