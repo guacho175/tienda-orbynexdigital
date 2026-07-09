@@ -8,15 +8,19 @@ const optionalUrl = z
   .refine((value) => value === "" || z.string().url().safeParse(value).success, "URL inválida");
 
 export const productEditorSchema = z.object({
-  name: z.string().trim().min(2, "El nombre es obligatorio").max(120),
+  name: z
+    .string()
+    .trim()
+    .min(2, "El nombre es obligatorio")
+    .max(productEditorConfig.characterLimits.name),
   slug: z
     .string()
     .trim()
     .min(2, "El slug es obligatorio")
-    .max(120)
+    .max(productEditorConfig.characterLimits.slug)
     .regex(/^[a-z0-9-]+$/, "Usa solo minúsculas, números y guiones"),
-  short_description: z.string().trim().max(200),
-  description: z.string().trim().max(4000),
+  short_description: z.string().trim().max(productEditorConfig.characterLimits.short_description),
+  description: z.string().trim().max(productEditorConfig.characterLimits.description),
   price: z.coerce.number().min(0, "El precio no puede ser negativo"),
   currency: z
     .string()
@@ -29,7 +33,7 @@ export const productEditorSchema = z.object({
         (productEditorConfig.currency.options as readonly string[]).includes(value),
       "Selecciona una moneda compatible con el pago online activo",
     ),
-  category: z.string().trim().max(60),
+  category: z.string().trim().max(productEditorConfig.characterLimits.category),
   image_url: optionalUrl,
   image_url_thumb: optionalUrl,
   image_url_card: optionalUrl,
@@ -42,7 +46,10 @@ export const productEditorSchema = z.object({
   low_stock_threshold: z.coerce.number().int().min(0, "El umbral no puede ser negativo"),
   out_of_stock_behavior: z.enum(["show_sold_out", "hide_product"]),
   payment_url: optionalUrl,
-  payment_button_label: z.string().trim().max(60),
+  payment_button_label: z
+    .string()
+    .trim()
+    .max(productEditorConfig.characterLimits.payment_button_label),
   display_order: z.coerce.number().int().min(0, "El orden no puede ser negativo"),
 });
 

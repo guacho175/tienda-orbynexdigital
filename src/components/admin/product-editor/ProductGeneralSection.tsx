@@ -1,6 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PRODUCT_EDITOR_LIMITS } from "@/config/product-editor.config";
+import { ProductEditorCharacterCounter } from "./ProductEditorCharacterCounter";
 import { ProductEditorSection } from "./ProductEditorSection";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
 
@@ -22,10 +24,14 @@ export function ProductGeneralSection({
     >
       <div className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Nombre *</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="name">Nombre *</Label>
+            <ProductEditorCharacterCounter value={values.name} max={PRODUCT_EDITOR_LIMITS.name} />
+          </div>
           <Input
             id="name"
             value={values.name}
+            maxLength={PRODUCT_EDITOR_LIMITS.name}
             disabled={disabled}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? "name-error" : undefined}
@@ -39,11 +45,17 @@ export function ProductGeneralSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="short_description">Descripción corta</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="short_description">Descripción corta</Label>
+            <ProductEditorCharacterCounter
+              value={values.short_description}
+              max={PRODUCT_EDITOR_LIMITS.short_description}
+            />
+          </div>
           <Input
             id="short_description"
             value={values.short_description}
-            maxLength={200}
+            maxLength={PRODUCT_EDITOR_LIMITS.short_description}
             disabled={disabled}
             aria-invalid={Boolean(errors.short_description)}
             aria-describedby={errors.short_description ? "short-description-error" : undefined}
@@ -57,12 +69,18 @@ export function ProductGeneralSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Descripción completa</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="description">Descripción completa</Label>
+            <ProductEditorCharacterCounter
+              value={values.description}
+              max={PRODUCT_EDITOR_LIMITS.description}
+            />
+          </div>
           <Textarea
             id="description"
             rows={8}
             value={values.description}
-            maxLength={4000}
+            maxLength={PRODUCT_EDITOR_LIMITS.description}
             disabled={disabled}
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}

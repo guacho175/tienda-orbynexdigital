@@ -10,6 +10,7 @@ import {
 import { commerceConfig } from "@/config/commerce.config";
 import { productEditorConfig } from "@/config/product-editor.config";
 import { formatCurrency } from "@/utils/currency";
+import { ProductEditorCharacterCounter } from "./ProductEditorCharacterCounter";
 import { ProductEditorSection } from "./ProductEditorSection";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
 
@@ -127,11 +128,17 @@ export function ProductPricingSection({
 
         {values.payment_url || errors.payment_button_label ? (
           <div className="space-y-2">
-            <Label htmlFor="payment_button_label">Texto del botón de pago</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="payment_button_label">Texto del botón de pago</Label>
+              <ProductEditorCharacterCounter
+                value={values.payment_button_label}
+                max={productEditorConfig.characterLimits.payment_button_label}
+              />
+            </div>
             <Input
               id="payment_button_label"
               value={values.payment_button_label}
-              maxLength={60}
+              maxLength={productEditorConfig.characterLimits.payment_button_label}
               disabled={disabled}
               aria-invalid={Boolean(errors.payment_button_label)}
               aria-describedby={

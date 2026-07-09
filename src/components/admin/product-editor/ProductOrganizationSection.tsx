@@ -2,6 +2,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { productEditorConfig } from "@/config/product-editor.config";
+import { ProductEditorCharacterCounter } from "./ProductEditorCharacterCounter";
 import { ProductEditorSection } from "./ProductEditorSection";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
 
@@ -19,11 +21,17 @@ export function ProductOrganizationSection({
       <div className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
           <div className="space-y-2">
-            <Label htmlFor="category">Categoría</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="category">Categoría</Label>
+              <ProductEditorCharacterCounter
+                value={values.category}
+                max={productEditorConfig.characterLimits.category}
+              />
+            </div>
             <Input
               id="category"
               value={values.category}
-              maxLength={60}
+              maxLength={productEditorConfig.characterLimits.category}
               disabled={disabled}
               aria-invalid={Boolean(errors.category)}
               aria-describedby={errors.category ? "category-error" : "category-help"}

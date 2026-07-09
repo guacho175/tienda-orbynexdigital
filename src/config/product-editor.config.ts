@@ -1,5 +1,14 @@
 import { commerceConfig } from "./commerce.config";
 
+export const PRODUCT_EDITOR_LIMITS = {
+  name: 120,
+  slug: 120,
+  short_description: 200,
+  description: 4000,
+  category: 60,
+  payment_button_label: 60,
+} as const;
+
 export const PRODUCT_EDITOR_SECTIONS = [
   {
     id: "general",
@@ -71,8 +80,60 @@ export const PRODUCT_OUT_OF_STOCK_OPTIONS = [
   { value: "hide_product", label: "Ocultar del catálogo" },
 ] as const;
 
+export type ProductEditorFutureCapabilityId =
+  "shipping" | "gallery" | "advancedPricing" | "advancedVisibility";
+
+export interface ProductEditorFutureCapability {
+  id: ProductEditorFutureCapabilityId;
+  label: string;
+  enabled: boolean;
+  visible: boolean;
+  reason: string;
+}
+
 export const productEditorConfig = {
   sections: PRODUCT_EDITOR_SECTIONS,
+  characterLimits: PRODUCT_EDITOR_LIMITS,
+  featureFlags: {
+    seoPreview: true,
+    shipping: false,
+    gallery: false,
+    advancedPricing: false,
+    advancedVisibility: false,
+  },
+  futureCapabilities: [
+    {
+      id: "shipping",
+      label: "Envío",
+      enabled: false,
+      visible: false,
+      reason: "No existe modelo de peso, dimensiones, métodos ni cálculo server-side de envío.",
+    },
+    {
+      id: "gallery",
+      label: "Galería",
+      enabled: false,
+      visible: false,
+      reason:
+        "El producto solo tiene una imagen principal y variantes técnicas generadas por upload.",
+    },
+    {
+      id: "advancedPricing",
+      label: "Precios avanzados",
+      enabled: false,
+      visible: false,
+      reason:
+        "Descuentos, impuestos y precio final requieren autoridad server-side antes de exponer UI.",
+    },
+    {
+      id: "advancedVisibility",
+      label: "Visibilidad avanzada",
+      enabled: false,
+      visible: false,
+      reason:
+        "Estados adicionales como borrador, privado o destacado no existen en el contrato actual.",
+    },
+  ] satisfies ProductEditorFutureCapability[],
   currency: {
     options: [commerceConfig.currency],
     locked: commerceConfig.flowCheckout.enabled,

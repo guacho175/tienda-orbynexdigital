@@ -542,7 +542,7 @@ Documentacion: [`PLAN-PRODUCTOS-SIMILARES-DETALLE.md`](./PLAN-PRODUCTOS-SIMILARE
 
 ## Editor compacto de productos
 
-Estado: Fases 1 y 2 implementadas y revisadas tecnicamente al 2026-07-09. Fase 3 no iniciada.
+Estado: Fases 1, 2 y 3 implementadas y revisadas tecnicamente al 2026-07-09. Fases 4 y 5 no iniciadas.
 
 - El editor admin usa seis secciones internas: General, Inventario, Precios y pago, Multimedia, Organizacion y SEO basico.
 - Desktop usa rail sticky; movil usa selector de seccion.
@@ -552,12 +552,17 @@ Estado: Fases 1 y 2 implementadas y revisadas tecnicamente al 2026-07-09. Fase 3
 - Inventario muestra el estado resultante sin consultar ni inventar reservas admin.
 - Moneda queda limitada a las capacidades configuradas del checkout.
 - `ProductInput` ya no admite campos de lectura o runtime.
+- Fase 3 agrega preview SEO derivada sin persistir metadatos nuevos.
+- El editor centraliza limites de caracteres y muestra contadores en campos actuales.
+- Las capacidades futuras (`shipping`, `gallery`, `advancedPricing`, `advancedVisibility`) quedan registradas por feature flag, apagadas y no visibles.
 - No se modificaron Flow, WhatsApp, RLS, migraciones, reservas ni eliminacion.
+- QA visual autenticado ejecutado en `/admin`, `/admin/new` y `/admin/edit/$id` sin escrituras.
 - Build, TypeScript y lint dirigido pasan.
 - Lint global sigue afectado por deuda CRLF/Prettier preexistente.
-- La verificacion visual autenticada del editor queda pendiente por falta de sesion admin local.
+- Pruebas con escritura real quedan pendientes solo si se autoriza crear/editar un producto de QA.
 
 Documentacion:
 
 - [`PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md`](./PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md)
 - [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md)
+- [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md)

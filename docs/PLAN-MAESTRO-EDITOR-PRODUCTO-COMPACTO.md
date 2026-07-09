@@ -1,22 +1,25 @@
 # Plan maestro para adaptar editor de producto compacto
 
-**Estado:** en proceso; Fases 1 y 2 implementadas y revisadas, Fase 3 no iniciada  
+**Estado:** en proceso; Fases 1, 2 y 3 implementadas y revisadas técnicamente; Fases 4–5 no iniciadas
 **Fecha del análisis:** 2026-07-09  
 **Alcance:** editor de creación y edición de productos, su contrato de datos y las referencias de `docs/stitch_compact_product_editor/`  
 **Restricción:** este documento no autoriza cambios de código, base de datos, contratos, despliegues ni commits.
 
 ## Estado de ejecución al 2026-07-09
 
-| Fase | Estado | Evidencia |
-|---|---|---|
-| Fase 1 | Implementada y validada técnicamente | Editor por secciones, estado único, errores por sección, dirty state, barra sticky y responsive |
-| Fase 2 | Implementada y validada técnicamente | Estado de inventario, variantes, precio localizado, moneda controlada, `updated_at` y contrato de escritura explícito |
-| Fase 3 | No iniciada | Requiere revisión del reporte y nueva autorización del usuario |
-| Fases 4–5 | No iniciadas | Fuera del alcance aprobado |
+| Fase      | Estado                               | Evidencia                                                                                                             |
+| --------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Fase 1    | Implementada y validada técnicamente | Editor por secciones, estado único, errores por sección, dirty state, barra sticky y responsive                       |
+| Fase 2    | Implementada y validada técnicamente | Estado de inventario, variantes, precio localizado, moneda controlada, `updated_at` y contrato de escritura explícito |
+| Fase 3    | Implementada y validada técnicamente | Preview SEO derivada, contadores de longitud y capacidades futuras apagadas/no visibles                               |
+| Fases 4–5 | No iniciadas                         | Fuera del alcance aprobado                                                                                            |
 
-Validaciones completadas: Prettier dirigido, ESLint dirigido, `tsc --noEmit`, build de producción y smoke test público en navegador. La inspección visual autenticada de `/admin/new` y `/admin/edit/$id` queda pendiente porque la sesión local disponible no tiene autenticación admin.
+Validaciones completadas: Prettier dirigido, ESLint dirigido, `tsc --noEmit`, build de producción, smoke test público en navegador y QA visual autenticado en `/admin`, `/admin/new` y `/admin/edit/$id`. Quedan pendientes solo pruebas con escritura real si se autoriza crear/editar un producto de QA.
 
-Reporte de ejecución, incidencias y decisiones: [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md).
+Reportes de ejecución, incidencias y decisiones:
+
+- [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md)
+- [`REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md`](./REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md)
 
 ## Resumen ejecutivo
 
@@ -57,28 +60,28 @@ No se detectó una infraestructura de pruebas automatizadas ni scripts de test e
 
 ### 1.2 Estructura relevante
 
-| Área | Archivo o carpeta | Responsabilidad actual |
-|---|---|---|
-| Formulario | `src/components/admin/ProductForm.tsx` | Estado, esquema Zod, upload, transformación, UI y submit en un componente de 526 líneas |
-| Alta | `src/routes/_authenticated/admin.new.tsx` | Mutación `createProduct`, toast, invalidación y navegación |
-| Edición | `src/routes/_authenticated/admin.edit.$id.tsx` | Carga por ID, mutación `updateProduct`, toast, invalidación y navegación |
-| Listado admin | `src/routes/_authenticated/admin.index.tsx` | Lista, estado, stock, miniaturas, activar/desactivar y eliminar |
-| Servicio de productos | `src/services/products.service.ts` | CRUD, consultas públicas/admin y enriquecimiento de disponibilidad |
-| Servicio de imágenes | `src/services/storage.service.ts` | Validación, optimización nativa y upload de variantes |
-| Tipo de dominio | `src/types/product.ts` | `Product` y `ProductCardData` |
-| Tipos Supabase | `src/integrations/supabase/types.ts` | Tipos generados/manuales de tablas |
-| Cliente público | `src/integrations/supabase/client.ts` | Cliente usado por frontend y CRUD sujeto a RLS |
-| Cliente servidor | `src/integrations/supabase/client.server.ts` | Operaciones confiables del backend |
-| Configuración comercial | `src/config/commerce.config.ts` | Moneda, checkout y funciones comerciales |
-| Configuración de marca | `src/config/brand.config.ts` | Marca, país, locale y moneda base |
-| Reglas de inventario UI | `src/utils/inventory.ts` | Agotado, stock bajo, compra disponible y ocultamiento |
-| API disponibilidad | `api/products/availability.ts` | Stock disponible descontando reservas activas |
-| Backend Flow | `api/flow/*`, `src/server/flow/*` | Creación/confirmación de pagos con valores autoritativos de servidor |
-| Modelo base | `supabase/migrations/20260706001459_ccfe6ebc-d21a-4806-b570-a4ebeb2582f7.sql` | Tabla `products`, RLS e índices |
-| Variantes de imagen | `supabase/migrations/20260706160000_product_image_variants.sql` | URLs `thumb`, `card` y `detail` |
-| Inventario | `supabase/migrations/20260707010000_product_inventory.sql` | Campos y constraints de inventario |
-| Reservas | `supabase/migrations/20260707023000_stock_reservations_flow_inventory.sql` | Reserva/captura/liberación de stock |
-| RLS admin | `supabase/migrations/20260706014500_products_policies_direct_user_roles.sql` | CRUD admin mediante `user_roles` |
+| Área                    | Archivo o carpeta                                                             | Responsabilidad actual                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Formulario              | `src/components/admin/ProductForm.tsx`                                        | Estado, esquema Zod, upload, transformación, UI y submit en un componente de 526 líneas |
+| Alta                    | `src/routes/_authenticated/admin.new.tsx`                                     | Mutación `createProduct`, toast, invalidación y navegación                              |
+| Edición                 | `src/routes/_authenticated/admin.edit.$id.tsx`                                | Carga por ID, mutación `updateProduct`, toast, invalidación y navegación                |
+| Listado admin           | `src/routes/_authenticated/admin.index.tsx`                                   | Lista, estado, stock, miniaturas, activar/desactivar y eliminar                         |
+| Servicio de productos   | `src/services/products.service.ts`                                            | CRUD, consultas públicas/admin y enriquecimiento de disponibilidad                      |
+| Servicio de imágenes    | `src/services/storage.service.ts`                                             | Validación, optimización nativa y upload de variantes                                   |
+| Tipo de dominio         | `src/types/product.ts`                                                        | `Product` y `ProductCardData`                                                           |
+| Tipos Supabase          | `src/integrations/supabase/types.ts`                                          | Tipos generados/manuales de tablas                                                      |
+| Cliente público         | `src/integrations/supabase/client.ts`                                         | Cliente usado por frontend y CRUD sujeto a RLS                                          |
+| Cliente servidor        | `src/integrations/supabase/client.server.ts`                                  | Operaciones confiables del backend                                                      |
+| Configuración comercial | `src/config/commerce.config.ts`                                               | Moneda, checkout y funciones comerciales                                                |
+| Configuración de marca  | `src/config/brand.config.ts`                                                  | Marca, país, locale y moneda base                                                       |
+| Reglas de inventario UI | `src/utils/inventory.ts`                                                      | Agotado, stock bajo, compra disponible y ocultamiento                                   |
+| API disponibilidad      | `api/products/availability.ts`                                                | Stock disponible descontando reservas activas                                           |
+| Backend Flow            | `api/flow/*`, `src/server/flow/*`                                             | Creación/confirmación de pagos con valores autoritativos de servidor                    |
+| Modelo base             | `supabase/migrations/20260706001459_ccfe6ebc-d21a-4806-b570-a4ebeb2582f7.sql` | Tabla `products`, RLS e índices                                                         |
+| Variantes de imagen     | `supabase/migrations/20260706160000_product_image_variants.sql`               | URLs `thumb`, `card` y `detail`                                                         |
+| Inventario              | `supabase/migrations/20260707010000_product_inventory.sql`                    | Campos y constraints de inventario                                                      |
+| Reservas                | `supabase/migrations/20260707023000_stock_reservations_flow_inventory.sql`    | Reserva/captura/liberación de stock                                                     |
+| RLS admin               | `supabase/migrations/20260706014500_products_policies_direct_user_roles.sql`  | CRUD admin mediante `user_roles`                                                        |
 
 ### 1.3 Rutas y flujo de guardado
 
@@ -98,22 +101,22 @@ No existe autosave, guardado parcial, borrador, bloqueo optimista por versión n
 
 ### 1.4 Validaciones actuales
 
-| Campo | Validación frontend | Restricción de base de datos relevante |
-|---|---|---|
-| `name` | requerido, trim, 2–120 | `NOT NULL` |
-| `slug` | requerido, 2–120, minúsculas/números/guiones | `NOT NULL`, `UNIQUE` |
-| `short_description` | opcional, máximo 200 | nullable |
-| `description` | opcional, máximo 4000 | nullable |
-| `price` | número, mínimo 0 | `NUMERIC(12,2) NOT NULL`; sin `CHECK >= 0` en `products` |
-| `currency` | 3–6 caracteres | `NOT NULL`; Flow acepta solo `CLP` |
-| `category` | opcional, máximo 60 | nullable; índice, sin catálogo normalizado |
-| URLs | URL válida, máximo 500 | nullable; sin constraint de formato |
-| `stock_quantity` | entero, mínimo 0 | `CHECK >= 0` |
-| `low_stock_threshold` | entero, mínimo 0 | `CHECK >= 0` |
-| `out_of_stock_behavior` | enum de dos valores | `CHECK` equivalente |
-| `availability` | enum de tres valores en UI | texto libre en base de datos |
-| `payment_button_label` | opcional, máximo 60 | nullable |
-| `display_order` | entero, mínimo 0 | entero sin `CHECK >= 0` |
+| Campo                   | Validación frontend                          | Restricción de base de datos relevante                   |
+| ----------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| `name`                  | requerido, trim, 2–120                       | `NOT NULL`                                               |
+| `slug`                  | requerido, 2–120, minúsculas/números/guiones | `NOT NULL`, `UNIQUE`                                     |
+| `short_description`     | opcional, máximo 200                         | nullable                                                 |
+| `description`           | opcional, máximo 4000                        | nullable                                                 |
+| `price`                 | número, mínimo 0                             | `NUMERIC(12,2) NOT NULL`; sin `CHECK >= 0` en `products` |
+| `currency`              | 3–6 caracteres                               | `NOT NULL`; Flow acepta solo `CLP`                       |
+| `category`              | opcional, máximo 60                          | nullable; índice, sin catálogo normalizado               |
+| URLs                    | URL válida, máximo 500                       | nullable; sin constraint de formato                      |
+| `stock_quantity`        | entero, mínimo 0                             | `CHECK >= 0`                                             |
+| `low_stock_threshold`   | entero, mínimo 0                             | `CHECK >= 0`                                             |
+| `out_of_stock_behavior` | enum de dos valores                          | `CHECK` equivalente                                      |
+| `availability`          | enum de tres valores en UI                   | texto libre en base de datos                             |
+| `payment_button_label`  | opcional, máximo 60                          | nullable                                                 |
+| `display_order`         | entero, mínimo 0                             | entero sin `CHECK >= 0`                                  |
 
 Hay una asimetría que debe corregirse en una fase controlada: `ProductInput` se deriva de `Product` y puede incluir propiedades runtime (`available_quantity`, `temporarily_reserved`) que no son campos editables. El payload actual no las envía porque Zod reconstruye el objeto, pero el tipo no expresa correctamente el contrato de escritura.
 
@@ -155,14 +158,14 @@ Referencia: [Supabase — Tables not exposed to Data and GraphQL API automatical
 
 ### 2.2 Agrupación propuesta
 
-| Sección | Campos iniciales |
-|---|---|
-| General | `name`, `short_description`, `description` |
-| Inventario | `availability`, `track_inventory`, `stock_quantity`, `low_stock_threshold`, `allow_backorder`, `out_of_stock_behavior` |
-| Precios y pago | `price`, `currency`, `payment_url`, `payment_button_label` |
-| Multimedia | `image_url`, upload, preview y estado de variantes |
-| Organización y visibilidad | `category`, `display_order`, `is_active` |
-| SEO básico | `slug` y preview derivada no persistente |
+| Sección                    | Campos iniciales                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| General                    | `name`, `short_description`, `description`                                                                             |
+| Inventario                 | `availability`, `track_inventory`, `stock_quantity`, `low_stock_threshold`, `allow_backorder`, `out_of_stock_behavior` |
+| Precios y pago             | `price`, `currency`, `payment_url`, `payment_button_label`                                                             |
+| Multimedia                 | `image_url`, upload, preview y estado de variantes                                                                     |
+| Organización y visibilidad | `category`, `display_order`, `is_active`                                                                               |
+| SEO básico                 | `slug` y preview derivada no persistente                                                                               |
 
 Las URLs de variantes son datos técnicos producidos por el upload. Deben conservarse en el estado y payload, pero no exponerse como campos de edición manual.
 
@@ -195,15 +198,15 @@ La mitigación es un único estado/controlador de formulario, validación global
 
 ## 3. Análisis de la carpeta Stitch
 
-| Archivo / vista | Elementos útiles | Elementos dudosos | Elementos descartables | Posible adaptación |
-|---|---|---|---|---|
-| `editar_producto_optimizado` | Rail lateral, cards por dominio, resumen de visibilidad/precio, barra fija de acciones, alta densidad | Tags, descuento, modos Public/Draft/Private, editor enriquecido, autosave | Marca Nexus, versión, buscador global, logs, datos ficticios, SKU inventado | Usar la estructura compacta y una navegación local; mantener controles reales del proyecto |
-| `editar_producto_inventario` | Agrupación de stock, umbral, backorder y conducta al agotarse | Métricas de rotación/optimización | Historial y analítica ficticios, usuarios y movimientos de ejemplo | Reutilizar solo la card de configuración; añadir ayuda basada en reglas reales |
-| `editar_producto_precios` | Agrupación de moneda/precio, formato numérico, resumen de valor | Descuento, tax toggle, precio final calculado | Benchmarking, Amazon/eBay/Walmart, historial ficticio y exportación | Mostrar precio y moneda reales; fijar/explicar CLP mientras Flow sea el checkout activo |
-| `editar_producto_media` | Zona de carga, URL externa, preview, feedback de límites | Alt text y selección masiva sin modelo actual | Galería falsa, límite 8/20, nombres y acciones no conectadas | Conservar upload y URL manual; mostrar una sola imagen lógica y sus variantes técnicas |
-| `editar_producto_env_o` | Agrupación clara de atributos y reglas logísticas | Peso/dimensiones/clase/envío gratis sin requerimiento actual | Tarifas DHL/FedEx/UPS, API activa, destino e impuestos ficticios | Mantener la sección fuera del editor hasta tener modelo y checkout logístico |
-| `editar_producto_seo` | Slug, contadores, preview de buscador | Score SEO e indexación sin fuente real | IA, competencia, volumen, OpenGraph “configurado” y métricas falsas | Mover el slug aquí y preparar preview derivada; persistencia SEO solo con backend |
-| `cyber_efficient_admin/DESIGN.md` | Azul profundo, cyan restringido, Inter/Space Grotesk, capas tonales, foco visible, densidad 8/16/24 | Sidebar global fijo de 240 px y radio técnico de 4 px | Copiar tokens completos o sustituir la identidad existente | Integrar la densidad y jerarquía en los tokens Orbynex ya existentes |
+| Archivo / vista                   | Elementos útiles                                                                                      | Elementos dudosos                                                         | Elementos descartables                                                      | Posible adaptación                                                                         |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `editar_producto_optimizado`      | Rail lateral, cards por dominio, resumen de visibilidad/precio, barra fija de acciones, alta densidad | Tags, descuento, modos Public/Draft/Private, editor enriquecido, autosave | Marca Nexus, versión, buscador global, logs, datos ficticios, SKU inventado | Usar la estructura compacta y una navegación local; mantener controles reales del proyecto |
+| `editar_producto_inventario`      | Agrupación de stock, umbral, backorder y conducta al agotarse                                         | Métricas de rotación/optimización                                         | Historial y analítica ficticios, usuarios y movimientos de ejemplo          | Reutilizar solo la card de configuración; añadir ayuda basada en reglas reales             |
+| `editar_producto_precios`         | Agrupación de moneda/precio, formato numérico, resumen de valor                                       | Descuento, tax toggle, precio final calculado                             | Benchmarking, Amazon/eBay/Walmart, historial ficticio y exportación         | Mostrar precio y moneda reales; fijar/explicar CLP mientras Flow sea el checkout activo    |
+| `editar_producto_media`           | Zona de carga, URL externa, preview, feedback de límites                                              | Alt text y selección masiva sin modelo actual                             | Galería falsa, límite 8/20, nombres y acciones no conectadas                | Conservar upload y URL manual; mostrar una sola imagen lógica y sus variantes técnicas     |
+| `editar_producto_env_o`           | Agrupación clara de atributos y reglas logísticas                                                     | Peso/dimensiones/clase/envío gratis sin requerimiento actual              | Tarifas DHL/FedEx/UPS, API activa, destino e impuestos ficticios            | Mantener la sección fuera del editor hasta tener modelo y checkout logístico               |
+| `editar_producto_seo`             | Slug, contadores, preview de buscador                                                                 | Score SEO e indexación sin fuente real                                    | IA, competencia, volumen, OpenGraph “configurado” y métricas falsas         | Mover el slug aquí y preparar preview derivada; persistencia SEO solo con backend          |
+| `cyber_efficient_admin/DESIGN.md` | Azul profundo, cyan restringido, Inter/Space Grotesk, capas tonales, foco visible, densidad 8/16/24   | Sidebar global fijo de 240 px y radio técnico de 4 px                     | Copiar tokens completos o sustituir la identidad existente                  | Integrar la densidad y jerarquía en los tokens Orbynex ya existentes                       |
 
 ### 3.1 Criterio visual
 
@@ -220,34 +223,34 @@ El diseño Stitch es compatible conceptualmente con la identidad actual: el proy
 
 ### 4.1 Campos persistidos y runtime actuales
 
-| Campo actual | Origen actual | Sección propuesta | Backend soporta | Frontend soporta | Acción recomendada | Riesgo |
-|---|---|---|---|---|---|---|
-| `id` | DB UUID | No editable | Sí | Lectura | Mantener fuera del formulario | Bajo |
-| `name` | `products` | General | Sí | Sí | Mantener y mejorar contador/errores | Bajo |
-| `slug` | `products` | SEO básico | Sí, único | Sí | Mover sin cambiar slugify | Medio |
-| `short_description` | `products` | General | Sí | Sí | Mantener | Bajo |
-| `description` | `products` | General | Sí | Sí | Mantener textarea simple | Bajo |
-| `price` | `products` | Precios y pago | Sí | Sí | Mantener; formato visual según locale | Alto por checkout |
-| `currency` | `products` | Precios y pago | Parcial: producto acepta texto; Flow solo CLP | Sí | Configurar como opción controlada/solo lectura con Flow | Alto |
-| `category` | `products` | Organización y visibilidad | Sí | Sí, texto libre | Mantener; no hardcodear categorías | Bajo |
-| `image_url` | `products` | Multimedia | Sí | Sí | Mantener como fallback y URL manual | Alto |
-| `image_url_thumb` | `products` | Multimedia, técnico | Sí | Sí | Preservar oculto; mostrar estado, no input manual | Alto |
-| `image_url_card` | `products` | Multimedia, técnico | Sí | Sí | Preservar oculto; mostrar estado, no input manual | Alto |
-| `image_url_detail` | `products` | Multimedia, técnico | Sí | Sí | Preservar oculto; mostrar estado, no input manual | Alto |
-| `is_active` | `products` | Organización y visibilidad | Sí, RLS/public queries | Sí | Mantener con resumen visible | Alto |
-| `availability` | `products` | Inventario | Sí como texto; lógica server/UI | Sí, enum UI | Mantener; documentar interacción con stock | Alto |
-| `stock_quantity` | `products` | Inventario | Sí, constraint/RPC | Sí | Mantener | Crítico |
-| `track_inventory` | `products` | Inventario | Sí, RPC/checkout | Sí | Mantener | Crítico |
-| `allow_backorder` | `products` | Inventario | Sí, RPC/checkout | Sí | Mantener | Crítico |
-| `low_stock_threshold` | `products` | Inventario | Sí | Sí | Mantener | Medio |
-| `out_of_stock_behavior` | `products` | Inventario | Sí, constraint/filtros | Sí | Mantener | Alto |
-| `payment_url` | `products` | Precios y pago | Sí | Sí | Mantener como camino de pago protegido | Alto |
-| `payment_button_label` | `products` | Precios y pago | Sí | Sí | Mostrar condicionalmente con `payment_url` | Medio |
-| `display_order` | `products` | Organización y visibilidad | Sí | Sí | Mantener | Bajo |
-| `created_at` | DB/trigger default | Resumen, solo lectura | Sí | Lectura | No editar; opcional en metadata | Bajo |
-| `updated_at` | trigger | Resumen, solo lectura | Sí | Lectura | Usar como “última actualización” real | Bajo |
-| `available_quantity` | API, derivado de reservas | Inventario, solo lectura futuro | Sí, derivado | Sí en superficies públicas | No enviarlo en `ProductInput` | Alto |
-| `temporarily_reserved` | API, derivado | Inventario, solo lectura futuro | Sí, derivado | Sí en superficies públicas | No enviarlo en `ProductInput` | Alto |
+| Campo actual            | Origen actual             | Sección propuesta               | Backend soporta                               | Frontend soporta           | Acción recomendada                                      | Riesgo            |
+| ----------------------- | ------------------------- | ------------------------------- | --------------------------------------------- | -------------------------- | ------------------------------------------------------- | ----------------- |
+| `id`                    | DB UUID                   | No editable                     | Sí                                            | Lectura                    | Mantener fuera del formulario                           | Bajo              |
+| `name`                  | `products`                | General                         | Sí                                            | Sí                         | Mantener y mejorar contador/errores                     | Bajo              |
+| `slug`                  | `products`                | SEO básico                      | Sí, único                                     | Sí                         | Mover sin cambiar slugify                               | Medio             |
+| `short_description`     | `products`                | General                         | Sí                                            | Sí                         | Mantener                                                | Bajo              |
+| `description`           | `products`                | General                         | Sí                                            | Sí                         | Mantener textarea simple                                | Bajo              |
+| `price`                 | `products`                | Precios y pago                  | Sí                                            | Sí                         | Mantener; formato visual según locale                   | Alto por checkout |
+| `currency`              | `products`                | Precios y pago                  | Parcial: producto acepta texto; Flow solo CLP | Sí                         | Configurar como opción controlada/solo lectura con Flow | Alto              |
+| `category`              | `products`                | Organización y visibilidad      | Sí                                            | Sí, texto libre            | Mantener; no hardcodear categorías                      | Bajo              |
+| `image_url`             | `products`                | Multimedia                      | Sí                                            | Sí                         | Mantener como fallback y URL manual                     | Alto              |
+| `image_url_thumb`       | `products`                | Multimedia, técnico             | Sí                                            | Sí                         | Preservar oculto; mostrar estado, no input manual       | Alto              |
+| `image_url_card`        | `products`                | Multimedia, técnico             | Sí                                            | Sí                         | Preservar oculto; mostrar estado, no input manual       | Alto              |
+| `image_url_detail`      | `products`                | Multimedia, técnico             | Sí                                            | Sí                         | Preservar oculto; mostrar estado, no input manual       | Alto              |
+| `is_active`             | `products`                | Organización y visibilidad      | Sí, RLS/public queries                        | Sí                         | Mantener con resumen visible                            | Alto              |
+| `availability`          | `products`                | Inventario                      | Sí como texto; lógica server/UI               | Sí, enum UI                | Mantener; documentar interacción con stock              | Alto              |
+| `stock_quantity`        | `products`                | Inventario                      | Sí, constraint/RPC                            | Sí                         | Mantener                                                | Crítico           |
+| `track_inventory`       | `products`                | Inventario                      | Sí, RPC/checkout                              | Sí                         | Mantener                                                | Crítico           |
+| `allow_backorder`       | `products`                | Inventario                      | Sí, RPC/checkout                              | Sí                         | Mantener                                                | Crítico           |
+| `low_stock_threshold`   | `products`                | Inventario                      | Sí                                            | Sí                         | Mantener                                                | Medio             |
+| `out_of_stock_behavior` | `products`                | Inventario                      | Sí, constraint/filtros                        | Sí                         | Mantener                                                | Alto              |
+| `payment_url`           | `products`                | Precios y pago                  | Sí                                            | Sí                         | Mantener como camino de pago protegido                  | Alto              |
+| `payment_button_label`  | `products`                | Precios y pago                  | Sí                                            | Sí                         | Mostrar condicionalmente con `payment_url`              | Medio             |
+| `display_order`         | `products`                | Organización y visibilidad      | Sí                                            | Sí                         | Mantener                                                | Bajo              |
+| `created_at`            | DB/trigger default        | Resumen, solo lectura           | Sí                                            | Lectura                    | No editar; opcional en metadata                         | Bajo              |
+| `updated_at`            | trigger                   | Resumen, solo lectura           | Sí                                            | Lectura                    | Usar como “última actualización” real                   | Bajo              |
+| `available_quantity`    | API, derivado de reservas | Inventario, solo lectura futuro | Sí, derivado                                  | Sí en superficies públicas | No enviarlo en `ProductInput`                           | Alto              |
+| `temporarily_reserved`  | API, derivado             | Inventario, solo lectura futuro | Sí, derivado                                  | Sí en superficies públicas | No enviarlo en `ProductInput`                           | Alto              |
 
 ### 4.2 Contrato de escritura recomendado
 
@@ -257,57 +260,57 @@ No se debe cambiar el contrato Supabase durante la fase UX. La mejora consiste e
 
 ## 5. Clasificación de funcionalidades
 
-| Funcionalidad | Existe en proyecto | Existe en Stitch | Estado frontend/backend | Recomendación | Fase |
-|---|---:|---:|---|---|---|
-| Stock disponible | Sí | Sí | Ya soportada | Reorganizar | 1 |
-| Stock bajo | Sí | Sí | Ya soportada; helper y badge admin | Mostrar contexto dentro de Inventario | 2 |
-| Umbral de stock bajo | Sí | Sí | Ya soportada | Reorganizar | 1 |
-| Producto agotado | Sí | Sí | Ya soportada | Mantener semántica | 1 |
-| Ocultar sin stock | Sí | Sí | Ya soportada end-to-end | Mantener | 1 |
-| Visible sin permitir compra | Sí | Sí | Ya soportada mediante `show_sold_out` | Etiquetar con lenguaje claro | 1 |
-| Venta sin stock | Sí | Sí | Ya soportada mediante backorder | Mantener | 1 |
-| Disponibilidad manual | Sí | Parcial | Ya soportada | Explicar precedencia | 1 |
-| Visibilidad activo/inactivo | Sí | Sí | Ya soportada | Reorganizar | 1 |
-| Draft/private/link-only | No | Sí | Falta modelo, rutas y autorización | No preparar controles visibles | 4/futura |
-| Precio base | Sí | Sí | Ya soportada | Reorganizar | 1 |
-| Moneda | Sí | Sí | Parcial: campo libre, Flow solo CLP | Restringir por configuración real | 2 |
-| Precio oferta/descuento | No | Sí | Falta modelo y reglas checkout | No preparar UI visible | 4 |
-| Impuestos por producto | No | Sí | Totales de orden existen, hoy quedan en 0 | Requiere reglas fiscales/backend | 4 |
-| Precio final calculado | No | Sí | Falta semántica de descuento/impuesto | Solo cuando existan reglas | 4 |
-| Formato visual de precio | Sí en storefront | Sí | Falta aplicarlo al editor | Reutilizar locale/config | 2 |
-| Imagen principal | Sí | Sí | Ya soportada | Reorganizar | 1 |
-| Preview | Sí | Sí | Ya soportada | Mantener | 1 |
-| Upload | Sí | Sí | Ya soportada con Storage/RLS | Mantener | 1 |
-| Variantes optimizadas | Sí | No de forma equivalente | Ya soportada | Mostrar estado técnico compacto | 2 |
-| URL manual | Sí | Sí | Ya soportada | Mantener como primera clase | 1 |
-| Cambiar imagen | Sí | Sí | Ya soportada | Mantener | 1 |
-| Eliminar referencia | Parcial | Sí | Puede vaciarse; no limpia objetos Storage | Falta servicio/estrategia de limpieza | 4 |
-| Galería | No | Sí | Falta modelo y servicios | Futura, no simular | 4 |
-| Ordenar galería | No | Sí | Falta modelo | Futura | 4 |
-| Alt text por imagen | No | Sí | Falta modelo | Añadir con galería/asset model | 4 |
-| Validación tipo/peso | Sí | Sí | Ya soportada | Mantener mensajes reales | 1 |
-| Slug | Sí | Sí | Ya soportada | Mover a SEO básico | 1 |
-| Meta título | No | Sí | Falta modelo y consumo en ruta | Requiere backend/modelo | 4 |
-| Meta descripción | No | Sí | Falta modelo y consumo en ruta | Requiere backend/modelo | 4 |
-| Preview SEO | No | Sí | Viable solo frontend derivando datos actuales | Preparar sin prometer persistencia | 3 |
-| Keywords/score/IA SEO | No | Sí | No existe | Futura/no recomendable ahora | 5 |
-| Indexación/OpenGraph por producto | No | Sí | Falta head dinámico y campos | Requiere implementación completa | 4 |
-| Peso/dimensiones | No | Sí | Falta modelo | Solo si la plantilla venderá físicos | 4 |
-| Costo/clase/envío gratis | No | Sí | `shipping_total` existe en orden, sin cálculo | Requiere backend y checkout | 4 |
-| Retiro/envío | No | No claro | Falta modelo y flujo | Futura según negocio | 4/5 |
-| Tarifas DHL/FedEx/UPS | No | Sí | Falta integración completa | Riesgo alto; no recomendable ahora | 5 |
-| Categoría | Sí | Sí | Ya soportada como texto | Mantener configurable | 1 |
-| Etiquetas | No | Sí | Falta modelo | Futura | 4 |
-| Colección | No | No claro | Falta modelo | Futura si hay caso real | 4 |
-| Destacado | No como campo; home usa orden/límite | No claro | Falta modelo | No inferir; evaluar separado | 4 |
-| Orden | Sí | No claro | Ya soportada | Reorganizar | 1 |
-| SKU | No | Sí en decoración | Falta modelo | No mostrar valor falso | 4 |
-| Autosave | No | Sí | Falta estrategia de concurrencia/versiones | Riesgo alto, fase futura | 5 |
-| Cambios pendientes | No | Sí | Viable solo frontend | Implementar indicador local | 1 |
-| Historial/auditoría | Solo timestamps | Sí | Falta modelo de eventos | Futura | 5 |
-| Analytics de inventario/precio | No | Sí | Falta modelo/eventos | No recomendable ahora | 5 |
-| Benchmark competencia | No | Sí | Falta datos/APIs y valor general | No recomendable para plantilla base | 5 |
-| Buscador global/notificaciones | No en editor | Sí | Fuera de alcance | No implementar | — |
+| Funcionalidad                     |                   Existe en proyecto |        Existe en Stitch | Estado frontend/backend                       | Recomendación                         | Fase     |
+| --------------------------------- | -----------------------------------: | ----------------------: | --------------------------------------------- | ------------------------------------- | -------- |
+| Stock disponible                  |                                   Sí |                      Sí | Ya soportada                                  | Reorganizar                           | 1        |
+| Stock bajo                        |                                   Sí |                      Sí | Ya soportada; helper y badge admin            | Mostrar contexto dentro de Inventario | 2        |
+| Umbral de stock bajo              |                                   Sí |                      Sí | Ya soportada                                  | Reorganizar                           | 1        |
+| Producto agotado                  |                                   Sí |                      Sí | Ya soportada                                  | Mantener semántica                    | 1        |
+| Ocultar sin stock                 |                                   Sí |                      Sí | Ya soportada end-to-end                       | Mantener                              | 1        |
+| Visible sin permitir compra       |                                   Sí |                      Sí | Ya soportada mediante `show_sold_out`         | Etiquetar con lenguaje claro          | 1        |
+| Venta sin stock                   |                                   Sí |                      Sí | Ya soportada mediante backorder               | Mantener                              | 1        |
+| Disponibilidad manual             |                                   Sí |                 Parcial | Ya soportada                                  | Explicar precedencia                  | 1        |
+| Visibilidad activo/inactivo       |                                   Sí |                      Sí | Ya soportada                                  | Reorganizar                           | 1        |
+| Draft/private/link-only           |                                   No |                      Sí | Falta modelo, rutas y autorización            | No preparar controles visibles        | 4/futura |
+| Precio base                       |                                   Sí |                      Sí | Ya soportada                                  | Reorganizar                           | 1        |
+| Moneda                            |                                   Sí |                      Sí | Parcial: campo libre, Flow solo CLP           | Restringir por configuración real     | 2        |
+| Precio oferta/descuento           |                                   No |                      Sí | Falta modelo y reglas checkout                | No preparar UI visible                | 4        |
+| Impuestos por producto            |                                   No |                      Sí | Totales de orden existen, hoy quedan en 0     | Requiere reglas fiscales/backend      | 4        |
+| Precio final calculado            |                                   No |                      Sí | Falta semántica de descuento/impuesto         | Solo cuando existan reglas            | 4        |
+| Formato visual de precio          |                     Sí en storefront |                      Sí | Falta aplicarlo al editor                     | Reutilizar locale/config              | 2        |
+| Imagen principal                  |                                   Sí |                      Sí | Ya soportada                                  | Reorganizar                           | 1        |
+| Preview                           |                                   Sí |                      Sí | Ya soportada                                  | Mantener                              | 1        |
+| Upload                            |                                   Sí |                      Sí | Ya soportada con Storage/RLS                  | Mantener                              | 1        |
+| Variantes optimizadas             |                                   Sí | No de forma equivalente | Ya soportada                                  | Mostrar estado técnico compacto       | 2        |
+| URL manual                        |                                   Sí |                      Sí | Ya soportada                                  | Mantener como primera clase           | 1        |
+| Cambiar imagen                    |                                   Sí |                      Sí | Ya soportada                                  | Mantener                              | 1        |
+| Eliminar referencia               |                              Parcial |                      Sí | Puede vaciarse; no limpia objetos Storage     | Falta servicio/estrategia de limpieza | 4        |
+| Galería                           |                                   No |                      Sí | Falta modelo y servicios                      | Futura, no simular                    | 4        |
+| Ordenar galería                   |                                   No |                      Sí | Falta modelo                                  | Futura                                | 4        |
+| Alt text por imagen               |                                   No |                      Sí | Falta modelo                                  | Añadir con galería/asset model        | 4        |
+| Validación tipo/peso              |                                   Sí |                      Sí | Ya soportada                                  | Mantener mensajes reales              | 1        |
+| Slug                              |                                   Sí |                      Sí | Ya soportada                                  | Mover a SEO básico                    | 1        |
+| Meta título                       |                                   No |                      Sí | Falta modelo y consumo en ruta                | Requiere backend/modelo               | 4        |
+| Meta descripción                  |                                   No |                      Sí | Falta modelo y consumo en ruta                | Requiere backend/modelo               | 4        |
+| Preview SEO                       |                                   No |                      Sí | Viable solo frontend derivando datos actuales | Preparar sin prometer persistencia    | 3        |
+| Keywords/score/IA SEO             |                                   No |                      Sí | No existe                                     | Futura/no recomendable ahora          | 5        |
+| Indexación/OpenGraph por producto |                                   No |                      Sí | Falta head dinámico y campos                  | Requiere implementación completa      | 4        |
+| Peso/dimensiones                  |                                   No |                      Sí | Falta modelo                                  | Solo si la plantilla venderá físicos  | 4        |
+| Costo/clase/envío gratis          |                                   No |                      Sí | `shipping_total` existe en orden, sin cálculo | Requiere backend y checkout           | 4        |
+| Retiro/envío                      |                                   No |                No claro | Falta modelo y flujo                          | Futura según negocio                  | 4/5      |
+| Tarifas DHL/FedEx/UPS             |                                   No |                      Sí | Falta integración completa                    | Riesgo alto; no recomendable ahora    | 5        |
+| Categoría                         |                                   Sí |                      Sí | Ya soportada como texto                       | Mantener configurable                 | 1        |
+| Etiquetas                         |                                   No |                      Sí | Falta modelo                                  | Futura                                | 4        |
+| Colección                         |                                   No |                No claro | Falta modelo                                  | Futura si hay caso real               | 4        |
+| Destacado                         | No como campo; home usa orden/límite |                No claro | Falta modelo                                  | No inferir; evaluar separado          | 4        |
+| Orden                             |                                   Sí |                No claro | Ya soportada                                  | Reorganizar                           | 1        |
+| SKU                               |                                   No |        Sí en decoración | Falta modelo                                  | No mostrar valor falso                | 4        |
+| Autosave                          |                                   No |                      Sí | Falta estrategia de concurrencia/versiones    | Riesgo alto, fase futura              | 5        |
+| Cambios pendientes                |                                   No |                      Sí | Viable solo frontend                          | Implementar indicador local           | 1        |
+| Historial/auditoría               |                      Solo timestamps |                      Sí | Falta modelo de eventos                       | Futura                                | 5        |
+| Analytics de inventario/precio    |                                   No |                      Sí | Falta modelo/eventos                          | No recomendable ahora                 | 5        |
+| Benchmark competencia             |                                   No |                      Sí | Falta datos/APIs y valor general              | No recomendable para plantilla base   | 5        |
+| Buscador global/notificaciones    |                         No en editor |                      Sí | Fuera de alcance                              | No implementar                        | —        |
 
 ## 6. Propuesta de arquitectura UI
 
@@ -400,23 +403,23 @@ Mobile
 
 Ubicación sugerida: `src/components/admin/product-editor/`.
 
-| Componente/módulo | Responsabilidad | Props/entradas | No debe contener |
-|---|---|---|---|
-| `ProductEditor` | Orquestar estado, validación, sección activa, dirty state, upload y submit | `initial`, `submitLabel`, `onSubmit`, `onCancel` | CRUD Supabase directo |
-| `ProductEditorLayout` | Grid responsive del editor | `navigation`, `content`, `actions`, metadata | Reglas de negocio |
-| `ProductEditorNav` | Navegar y mostrar errores por sección | `sections`, `activeSection`, `errorCountBySection`, `onChange` | Estado duplicado de campos |
-| `ProductEditorSection` | Card/heading/description común | `id`, `title`, `description`, `children` | Validación o persistencia |
-| `ProductEditorActionsBar` | Guardar/cancelar/dirty/uploading/submitting | flags y callbacks | Mutaciones Supabase |
-| `ProductGeneralSection` | Nombre y descripciones | estado/controlador + errores | Upload o inventario |
-| `ProductInventorySection` | Campos y ayudas de inventario | estado/controlador + errores | Cálculos autoritativos de reservas |
-| `ProductPricingSection` | Precio, moneda y pago externo | estado/controlador + config + errores | Precios/totales inventados |
-| `ProductMediaSection` | URL, upload, resultado y preview | estado/controlador + upload state | CRUD de producto |
-| `ProductOrganizationSection` | Categoría, orden y activo | estado/controlador + errores | Categorías hardcodeadas |
-| `ProductSeoSection` | Slug y preview derivada | estado/controlador + marca/config | Promesas de SEO no persistido |
-| `product-editor.schema.ts` | Esquema Zod y tipo explícito de escritura | configuración/constantes necesarias | JSX |
-| `product-editor.mappers.ts` | Defaults, normalización y payload | `Product`, `ProductEditorValues` | Estado React |
-| `product-editor.config.ts` | Secciones, labels, opciones y flags | configuración tipada | Acceso a DB |
-| `useProductImageUpload.ts` | Pipeline ya existente, estado y mensajes | callback de actualización | Renderizado de sección |
+| Componente/módulo            | Responsabilidad                                                            | Props/entradas                                                 | No debe contener                   |
+| ---------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------- |
+| `ProductEditor`              | Orquestar estado, validación, sección activa, dirty state, upload y submit | `initial`, `submitLabel`, `onSubmit`, `onCancel`               | CRUD Supabase directo              |
+| `ProductEditorLayout`        | Grid responsive del editor                                                 | `navigation`, `content`, `actions`, metadata                   | Reglas de negocio                  |
+| `ProductEditorNav`           | Navegar y mostrar errores por sección                                      | `sections`, `activeSection`, `errorCountBySection`, `onChange` | Estado duplicado de campos         |
+| `ProductEditorSection`       | Card/heading/description común                                             | `id`, `title`, `description`, `children`                       | Validación o persistencia          |
+| `ProductEditorActionsBar`    | Guardar/cancelar/dirty/uploading/submitting                                | flags y callbacks                                              | Mutaciones Supabase                |
+| `ProductGeneralSection`      | Nombre y descripciones                                                     | estado/controlador + errores                                   | Upload o inventario                |
+| `ProductInventorySection`    | Campos y ayudas de inventario                                              | estado/controlador + errores                                   | Cálculos autoritativos de reservas |
+| `ProductPricingSection`      | Precio, moneda y pago externo                                              | estado/controlador + config + errores                          | Precios/totales inventados         |
+| `ProductMediaSection`        | URL, upload, resultado y preview                                           | estado/controlador + upload state                              | CRUD de producto                   |
+| `ProductOrganizationSection` | Categoría, orden y activo                                                  | estado/controlador + errores                                   | Categorías hardcodeadas            |
+| `ProductSeoSection`          | Slug y preview derivada                                                    | estado/controlador + marca/config                              | Promesas de SEO no persistido      |
+| `product-editor.schema.ts`   | Esquema Zod y tipo explícito de escritura                                  | configuración/constantes necesarias                            | JSX                                |
+| `product-editor.mappers.ts`  | Defaults, normalización y payload                                          | `Product`, `ProductEditorValues`                               | Estado React                       |
+| `product-editor.config.ts`   | Secciones, labels, opciones y flags                                        | configuración tipada                                           | Acceso a DB                        |
+| `useProductImageUpload.ts`   | Pipeline ya existente, estado y mensajes                                   | callback de actualización                                      | Renderizado de sección             |
 
 ### 7.1 Estrategia de estado
 
@@ -523,7 +526,7 @@ No mostrar stock “disponible” descontando reservas en admin sin una fuente a
 
 ### Fase 3: Frontend preparado para futuras funciones
 
-**Estado de ejecución:** no iniciada. No avanzar sin nueva autorización.
+**Estado de ejecución:** implementada y revisada técnicamente el 2026-07-09.
 
 Objetivo: dejar puntos de extensión sin controles falsos en producción.
 
@@ -534,6 +537,14 @@ Objetivo: dejar puntos de extensión sin controles falsos en producción.
 - Añadir contadores de longitud para campos actuales.
 
 No guardar datos futuros en `localStorage`, objetos JSON opacos ni campos existentes reutilizados.
+
+Resultado ejecutado:
+
+- `productEditorConfig` mantiene `featureFlags`, límites de caracteres y capacidades futuras (`shipping`, `gallery`, `advancedPricing`, `advancedVisibility`) apagadas y no visibles.
+- `SEO básico` muestra una vista previa derivada y rotulada como no persistente.
+- Se añadieron contadores de longitud a `name`, `short_description`, `description`, `slug`, `category` y `payment_button_label`.
+- Los límites de validación Zod se alimentan desde la configuración del editor para evitar duplicación.
+- No se añadieron campos persistidos, rutas, dependencias, migraciones, `localStorage` ni controles falsos.
 
 ### Fase 4: Cambios backend/modelo, solo con requisito aprobado
 
@@ -593,28 +604,28 @@ Cada fase debe pasar build, lint dirigido, pruebas manuales y revisión de regre
 
 ## 10. Riesgos técnicos
 
-| Riesgo | Severidad | Mitigación |
-|---|---|---|
-| Pérdida de campos al dividir | Crítica | Matriz de 24 campos, payload snapshot y validación de paridad |
-| Alterar stock/checkout | Crítica | No tocar RPC, API ni lógica Flow en fase 1 |
-| Moneda incompatible con Flow | Alta | Capacidad configurable; CLP habilitado por defecto |
-| Error oculto en otra sección | Alta | Mapa campo→sección, badges, navegación y foco |
-| Perder upload al cambiar sección | Alta | Estado de upload en controlador común |
-| Sobrescribir variantes con URL manual | Alta | Mantener exactamente la limpieza actual y advertir |
-| Objetos Storage huérfanos | Media/Alta | No prometer eliminación hasta tener path/servicio |
-| Estados contradictorios | Alta | Ayudas y resumen; constraint futuro para `availability` |
-| Duplicación de estado | Alta | Único controlador; secciones controladas |
-| Componentes gigantes | Media | Separación por dominio y módulos puros |
-| Abstracción excesiva | Media | Componentes explícitos; metadata limitada |
-| Regresión crear vs. editar | Alta | Ejecutar matriz en ambas rutas |
-| Cancelación accidental | Media | Confirmar solo si dirty |
-| Barra sticky tapa contenido | Media | Espaciado inferior y pruebas móvil/safe area |
-| UI falsa de funciones futuras | Alta | Feature flags off; no renderizar controles sin soporte |
-| RLS/grants incorrectos en tablas futuras | Crítica | Auditoría Supabase por bloque, advisors/lint y pruebas por rol |
-| Tipos Supabase desactualizados | Alta | Regeneración/verificación antes de ampliar modelo |
-| Hardcodeo de categorías/monedas/estados | Alta | Config tipada y fuentes de verdad existentes |
-| Meta SEO sin consumo público | Media | No persistir hasta integrar la ruta de producto |
-| Autosave sobrescribe cambios | Alta | Posponer hasta tener versionado/conflictos |
+| Riesgo                                   | Severidad  | Mitigación                                                     |
+| ---------------------------------------- | ---------- | -------------------------------------------------------------- |
+| Pérdida de campos al dividir             | Crítica    | Matriz de 24 campos, payload snapshot y validación de paridad  |
+| Alterar stock/checkout                   | Crítica    | No tocar RPC, API ni lógica Flow en fase 1                     |
+| Moneda incompatible con Flow             | Alta       | Capacidad configurable; CLP habilitado por defecto             |
+| Error oculto en otra sección             | Alta       | Mapa campo→sección, badges, navegación y foco                  |
+| Perder upload al cambiar sección         | Alta       | Estado de upload en controlador común                          |
+| Sobrescribir variantes con URL manual    | Alta       | Mantener exactamente la limpieza actual y advertir             |
+| Objetos Storage huérfanos                | Media/Alta | No prometer eliminación hasta tener path/servicio              |
+| Estados contradictorios                  | Alta       | Ayudas y resumen; constraint futuro para `availability`        |
+| Duplicación de estado                    | Alta       | Único controlador; secciones controladas                       |
+| Componentes gigantes                     | Media      | Separación por dominio y módulos puros                         |
+| Abstracción excesiva                     | Media      | Componentes explícitos; metadata limitada                      |
+| Regresión crear vs. editar               | Alta       | Ejecutar matriz en ambas rutas                                 |
+| Cancelación accidental                   | Media      | Confirmar solo si dirty                                        |
+| Barra sticky tapa contenido              | Media      | Espaciado inferior y pruebas móvil/safe area                   |
+| UI falsa de funciones futuras            | Alta       | Feature flags off; no renderizar controles sin soporte         |
+| RLS/grants incorrectos en tablas futuras | Crítica    | Auditoría Supabase por bloque, advisors/lint y pruebas por rol |
+| Tipos Supabase desactualizados           | Alta       | Regeneración/verificación antes de ampliar modelo              |
+| Hardcodeo de categorías/monedas/estados  | Alta       | Config tipada y fuentes de verdad existentes                   |
+| Meta SEO sin consumo público             | Media      | No persistir hasta integrar la ruta de producto                |
+| Autosave sobrescribe cambios             | Alta       | Posponer hasta tener versionado/conflictos                     |
 
 ## 11. Checklist de pruebas
 
@@ -636,7 +647,7 @@ Cada fase debe pasar build, lint dirigido, pruebas manuales y revisión de regre
 - [ ] Validar slug duplicado y mostrar error comprensible.
 - [ ] Editar descripción corta y completa.
 - [ ] Validar máximos.
-- [ ] Verificar preview SEO derivada si Fase 3 está activa.
+- [x] Verificar preview SEO derivada si Fase 3 está activa.
 
 ### 11.3 Inventario
 
@@ -722,7 +733,7 @@ Cada fase debe pasar build, lint dirigido, pruebas manuales y revisión de regre
 - [ ] `npm run build`.
 - [ ] ESLint dirigido sobre archivos tocados.
 - [ ] `supabase db lint --local` cuando haya cambios SQL.
-- [ ] Revisión visual autenticada de `/admin/new` y `/admin/edit/$id`.
+- [x] Revisión visual autenticada de `/admin/new` y `/admin/edit/$id`.
 
 ## 12. Recomendación final
 
