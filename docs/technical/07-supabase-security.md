@@ -105,3 +105,24 @@ Resultado:
 - No usar `auth.role()` en nuevas politicas.
 - En nuevas politicas usar `TO authenticated`/`TO anon` y `(SELECT auth.uid())`.
 - Toda tabla nueva en `public` debe tener RLS y grants explicitos.
+
+## Validacion de identidad y cache de rol admin
+
+- La ruta protegida padre `src/routes/_authenticated/route.tsx` mantiene
+  `supabase.auth.getUser()` como validacion autoritativa de identidad. No se reemplaza por
+  `getSession()`, lectura de `localStorage`, cookies sin validar ni claims decodificados en cliente.
+- Las rutas hijas administrativas reutilizan el `user` ya validado por la ruta padre. La ruta
+  `src/routes/_authenticated/admin.tsx` no vuelve a llamar `getUser()`.
+- El servicio `src/services/admin-access.service.ts` consulta solo la existencia del rol `admin` en
+  `user_roles` para el `user_id` recibido, seleccionando unicamente `role`, filtrando por
+  `user_id` y `role = 'admin'`, y limitando la respuesta a una fila.
+- React Query cachea la comprobacion de rol con clave `["admin-access", user.id]`,
+  `staleTime: 60_000`, `gcTime: 300_000` y `retry: 1`. Esta cache es una optimizacion de interfaz,
+  no una barrera de seguridad.
+- Si la consulta de rol falla o no devuelve rol admin, el acceso se cierra por defecto y la UI
+  conserva el destino actual para usuarios sin permisos.
+- RLS sigue siendo la autorizacion definitiva para lectura y escritura de datos. Una revocacion de
+  rol puede tardar hasta 60 segundos en reflejarse en la visibilidad de la interfaz, pero las
+  operaciones contra Supabase quedan bloqueadas inmediatamente por las politicas RLS vigentes.
+- Al cerrar sesion se limpia la cache de React Query. Al iniciar sesion o actualizar usuario se
+  invalida explicitamente `["admin-access"]` junto con las consultas dependientes de usuario.
