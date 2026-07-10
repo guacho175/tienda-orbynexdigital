@@ -1,75 +1,110 @@
-# 11 - Guía de Despliegue en Producción
+# 11 - Guia de Despliegue en Produccion
 
-Este documento describe los requerimientos para desplegar la plataforma e-commerce Orbynex en ambientes productivos de Vercel y Supabase, configurando la pasarela Flow en modo real, activando tareas automatizadas (crons) y monitoreando la salud del sistema.
+Checklist vigente para desplegar la plataforma Orbynex en Vercel y Supabase.
 
----
+## 1. Base de Datos Supabase
 
-## 1. Despliegue de la Base de Datos (Supabase)
+1. Ejecutar migraciones en orden desde `/supabase/migrations/`.
+2. Verificar RLS en:
+   - `products`
+   - `user_roles`
+   - `orders`
+   - `order_items`
+   - `stock_reservations`
+   - `product_audit_events`
+   - `stock_movements`
+3. Confirmar que no hay escritura publica directa en:
+   - `orders`
+   - `order_items`
+   - `stock_reservations`
+4. Confirmar que `product_audit_events` y `stock_movements` solo permiten acceso admin.
+5. Ejecutar:
 
-Antes de conectar tu entorno de producción de Vercel, asegúrate de configurar tu instancia productiva de Supabase:
+```bash
+supabase db lint --db-url <pooler-url> --schema public --fail-on none
+supabase db advisors --db-url <pooler-url> --type all --level warn --fail-on none
+```
 
-1.  **Ejecutar las Migraciones**:
-    Aplica todos los scripts de migración ordenadamente sobre tu base de datos de producción mediante el CLI de Supabase o copiando el contenido de los archivos SQL de `/supabase/migrations/` en el editor de SQL de tu panel de Supabase.
-2.  **Verificar Políticas RLS**:
-    Asegúrate de que la Row Level Security (RLS) esté habilitada en todas las tablas (`products`, `user_roles`, `orders`, `order_items`, `stock_reservations`) y de que los permisos de escritura pública estén bloqueados.
-3.  **Configurar Bucket de Storage**:
-    Crea el bucket de almacenamiento público `product-images` y asegúrate de asignarle las políticas de lectura a `PUBLIC` y las de escritura únicamente a administradores logueados.
+El resultado esperado para advisors en nivel `warn` es `No issues found`.
 
----
+## 2. Storage
 
-## 2. Configuración en Vercel
+Bucket requerido:
 
-La aplicación está diseñada para compilarse y alojarse de forma nativa en la infraestructura Serverless de Vercel.
+- `product-images`
 
-1.  **Vincular el Proyecto**:
-    Conecta tu repositorio de GitHub a tu panel de control de Vercel.
-2.  **Configurar Variables de Entorno**:
-    Ingresa al apartado de Settings de tu proyecto en Vercel y registra todas las variables de entorno de producción equivalentes a las de tu archivo `.env` (pero con llaves y credenciales oficiales de producción para Flow y Supabase).
-3.  **Cron de Expiración en Vercel**:
-    El archivo `vercel.json` en la raíz del repositorio configura de manera automática la ruta del programador en la nube de Vercel:
-    ```json
+Reglas:
+
+- lectura publica de imagenes;
+- escritura solo admin autenticado;
+- variantes WebP `thumb`, `card`, `detail`.
+
+## 3. Variables de Entorno Vercel
+
+Configurar equivalentes productivos de:
+
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_DB_URL`
+- `FLOW_BASE_URL`
+- `FLOW_API_KEY`
+- `FLOW_SECRET_KEY`
+- `APP_PUBLIC_URL`
+- `FLOW_RETURN_URL`
+- `FLOW_CONFIRMATION_URL`
+- `CRON_SECRET`
+
+No publicar secretos con prefijo `VITE_` salvo llaves publicables.
+
+## 4. Cron de Reservas
+
+`vercel.json` debe mantener:
+
+```json
+{
+  "crons": [
     {
-      "crons": [
-        {
-          "path": "/api/stock/expire-reservations",
-          "schedule": "* * * * *"
-        }
-      ]
+      "path": "/api/stock/expire-reservations",
+      "schedule": "* * * * *"
     }
-    ```
-    *   **Importante**: Vercel gatillará este endpoint automáticamente cada 1 minuto en producción. Asegúrate de registrar la variable `CRON_SECRET` idéntica tanto en las variables de entorno de Vercel como en el header de autorización configurado para el trigger en el panel de Vercel Cron.
+  ]
+}
+```
 
----
+Validar logs del cron en Vercel.
 
-## 3. Integración con Flow Producción
+## 5. Flow Produccion
 
-Para transicionar desde el Sandbox al ambiente real de Flow Chile:
+Para pasar de sandbox a produccion:
 
-1.  **Cambiar URL Base**:
-    Actualiza la variable de entorno `FLOW_BASE_URL` apuntándola al endpoint transaccional oficial:
-    ```env
-    FLOW_BASE_URL=https://www.flow.cl/api
-    ```
-2.  **Reemplazar Llaves**:
-    Solicita tus llaves comerciales definitivas en tu portal de comercio de Flow y actualiza las variables de entorno `FLOW_API_KEY` y `FLOW_SECRET_KEY` en Vercel.
-3.  **Configurar URLs de Producción**:
-    Asegúrate de que `APP_PUBLIC_URL`, `FLOW_RETURN_URL` y `FLOW_CONFIRMATION_URL` apunten a los subdominios de producción definitivos asignados en Vercel (ej. `https://mi-tienda.com`).
+1. Usar `FLOW_BASE_URL=https://www.flow.cl/api`.
+2. Reemplazar `FLOW_API_KEY` y `FLOW_SECRET_KEY` por credenciales reales.
+3. Confirmar URLs publicas:
+   - `APP_PUBLIC_URL`
+   - `FLOW_RETURN_URL`
+   - `FLOW_CONFIRMATION_URL`
 
----
+## 6. Checklist Go-Live
 
-## 4. Checklist de Pre-Lanzamiento (Go-Live)
+- [ ] Build productivo OK.
+- [ ] Migraciones aplicadas.
+- [ ] RLS activa y advisors sin warnings `warn`.
+- [ ] Productos reales revisados.
+- [ ] Cron activo.
+- [ ] Compra real de bajo valor probada.
+- [ ] Redireccion Flow OK.
+- [ ] Webhook/confirmacion OK.
+- [ ] Stock fisico descuenta correctamente al quedar `paid`.
+- [ ] `/admin/analytics` carga datos.
+- [ ] `/admin/audit` muestra eventos.
+- [ ] Ajuste manual de stock registra `stock_movements`.
 
-Realiza las siguientes verificaciones obligatorias antes de abrir la tienda a transacciones reales:
+## 7. Logs
 
-*   [ ] **Verificación de RLS**: Las tablas de órdenes y reservas no tienen políticas de inserción o actualización directa habilitadas al público.
-*   [ ] **Limpieza de Datos**: La tabla `products` de producción no contiene productos de prueba o demostración que carezcan de stock físico real.
-*   [ ] **Integridad del Cron**: El cron de Vercel se encuentra en estado "Active" y se ejecuta de forma exitosa cada 1 minuto (verificar logs del cron en la pestaña *Crons* de Vercel).
-*   [ ] **Prueba de Redirección**: Realizar una compra real de bajo valor (ej. $1.000 CLP) y confirmar que la redirección a Flow, la aprobación bancaria y el retorno del cliente a `/checkout/resultado` funcionan correctamente en producción.
-*   [ ] **Verificación de Stock**: Confirmar que al completarse la compra real anterior, el stock físico del producto se redujo exactamente en la cantidad adquirida en el panel de Supabase.
+Monitorear:
 
----
-
-## 5. Logs y Monitoreo
-
-*   **Logs del Servidor**: Accede a la pestaña *Logs* de Vercel para visualizar las peticiones en caliente a los endpoints de la API. Monitorea especialmente los errores `502 Bad Gateway` (fallas de conexión del API de Flow) y `409 Conflict` (conflictos de stock físico).
-*   **Logs de Errores en Supabase**: Revisa el apartado de *API logs* y *Database logs* en tu consola de Supabase para capturar excepciones no controladas lanzadas por las funciones SQL RPC durante los checkouts concurrentes.
+- Vercel Function logs para `/api/flow/*` y `/api/stock/expire-reservations`.
+- Supabase API logs.
+- Supabase Database logs.
+- Ordenes con `requires_manual_review` o `stock_conflict`.

@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
-import { ProductStockAdjustmentPanel } from "@/components/admin/ProductStockAdjustmentPanel";
 import { fetchProductByIdAdmin, updateProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
 
@@ -82,7 +82,7 @@ function EditProductPage() {
   });
 
   return (
-    <>
+    <AdminShell tone="light" contentClassName="min-h-full">
       <PageHeader eyebrow="Admin" title="Editar producto" subtitle={product?.name ?? ""} />
       <Container className="py-8">
         {isLoading ? (
@@ -93,16 +93,16 @@ function EditProductPage() {
           <>
             <ProductForm
               initial={product}
+              stockAdjustmentProduct={product}
               submitLabel="Guardar cambios"
               onSubmit={async (values) => {
                 await mutation.mutateAsync(values);
               }}
               onCancel={() => navigate({ to: "/admin" })}
             />
-            <ProductStockAdjustmentPanel product={product} />
           </>
         )}
       </Container>
-    </>
+    </AdminShell>
   );
 }

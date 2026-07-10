@@ -4,6 +4,7 @@ import { BarChart3, ArrowLeft, PackageSearch, ShoppingCart } from "lucide-react"
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Container } from "@/components/layout/Container";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -42,7 +43,7 @@ function AdminAnalyticsPage() {
   const analytics = analyticsQuery.data;
 
   return (
-    <>
+    <AdminShell>
       <PageHeader
         eyebrow="Admin"
         title="Analitica"
@@ -121,7 +122,7 @@ function AdminAnalyticsPage() {
           </div>
         ) : null}
       </Container>
-    </>
+    </AdminShell>
   );
 }
 

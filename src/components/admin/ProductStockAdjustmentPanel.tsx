@@ -85,7 +85,7 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
   const canSubmit = parsedDelta !== 0 && nextStock >= 0 && !mutation.isPending;
 
   return (
-    <Card className="mt-6 rounded-xl border-white/10 bg-card/55 shadow-none">
+    <Card className="rounded-xl border-slate-200 bg-slate-50 shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <ClipboardList className="h-5 w-5" />
@@ -96,20 +96,20 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
       <CardContent className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)]">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 p-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="text-xs text-muted-foreground">Stock actual</p>
               <p className="mt-1 text-2xl font-semibold text-foreground">
                 {product.stock_quantity}
               </p>
             </div>
-            <div className="rounded-xl border border-white/10 p-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="text-xs text-muted-foreground">Ajuste</p>
               <p className="mt-1 text-2xl font-semibold text-foreground">
                 {parsedDelta > 0 ? "+" : ""}
                 {parsedDelta}
               </p>
             </div>
-            <div className="rounded-xl border border-white/10 p-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-3">
               <p className="text-xs text-muted-foreground">Nuevo stock</p>
               <p
                 className={
@@ -127,7 +127,7 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
             <select
               value={movementType}
               onChange={(event) => setMovementType(event.target.value as ManualStockMovementType)}
-              className="h-11 rounded-xl border border-white/10 bg-white/4 px-3 text-sm"
+              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-950"
               disabled={mutation.isPending}
               aria-label="Tipo de movimiento"
             >
@@ -182,7 +182,10 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
           <h3 className="mb-3 text-sm font-semibold text-foreground">Ultimos movimientos</h3>
           <div className="space-y-2">
             {(movementsQuery.data ?? []).map((movement) => (
-              <div key={movement.id} className="rounded-xl border border-white/10 p-3 text-sm">
+              <div
+                key={movement.id}
+                className="rounded-xl border border-slate-200 bg-white p-3 text-sm"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <Badge variant="outline">
                     {MOVEMENT_LABELS[movement.movement_type] ?? movement.movement_type}

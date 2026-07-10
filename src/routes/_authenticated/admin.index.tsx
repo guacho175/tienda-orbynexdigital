@@ -1,19 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import {
-  BarChart3,
-  ClipboardList,
-  Eye,
-  LogOut,
-  Package,
-  Shield,
-  Plus,
-  Pencil,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { Eye, LogOut, Package, Shield, Plus, Pencil, Search, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -216,13 +206,13 @@ function AdminPage() {
   }
 
   return (
-    <>
+    <AdminShell>
       <PageHeader
         eyebrow="Panel"
-        title="Administración"
-        subtitle={`Bienvenido, ${email}. Gestiona el catálogo de productos.`}
+        title="Catalogo administrativo"
+        subtitle={`Bienvenido, ${email}. Gestiona el catalogo de productos.`}
       />
-      <Container className="py-12">
+      <div className="px-4 py-8 sm:px-6 lg:px-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Package className="h-4 w-4" />
@@ -235,20 +225,7 @@ function AdminPage() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/admin/analytics">
-                <BarChart3 className="mr-1 h-4 w-4" /> Analitica
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/admin/audit">
-                <ClipboardList className="mr-1 h-4 w-4" /> Auditoria
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
               <Link to="/">Ver sitio</Link>
-            </Button>
-            <Button onClick={handleSignOut} variant="ghost">
-              <LogOut className="mr-1 h-4 w-4" /> Salir
             </Button>
           </div>
         </div>
@@ -443,7 +420,7 @@ function AdminPage() {
             </tbody>
           </table>
         </div>
-      </Container>
-    </>
+      </div>
+    </AdminShell>
   );
 }

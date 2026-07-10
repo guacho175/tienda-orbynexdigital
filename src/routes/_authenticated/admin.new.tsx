@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Container } from "@/components/layout/Container";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { createProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
@@ -49,7 +50,7 @@ function NewProductPage() {
   });
 
   return (
-    <>
+    <AdminShell tone="light" contentClassName="min-h-full">
       <PageHeader
         eyebrow="Admin"
         title="Nuevo producto"
@@ -64,6 +65,6 @@ function NewProductPage() {
           onCancel={() => navigate({ to: "/admin" })}
         />
       </Container>
-    </>
+    </AdminShell>
   );
 }

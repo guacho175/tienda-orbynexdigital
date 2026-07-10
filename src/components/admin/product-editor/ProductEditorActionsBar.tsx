@@ -19,7 +19,7 @@ export function ProductEditorActionsBar({
   const busy = submitting || uploadingImage;
 
   return (
-    <div className="sticky bottom-3 z-20 mt-5 flex flex-col gap-3 rounded-2xl border border-white/10 bg-background/90 p-3 shadow-[0_18px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+    <div className="sticky bottom-3 z-20 mt-5 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_18px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
       <div
         className="flex min-h-6 items-center justify-center gap-2 text-sm sm:justify-start"
         aria-live="polite"
@@ -34,7 +34,7 @@ export function ProductEditorActionsBar({
         ) : isDirty ? (
           <>
             <AlertCircle className="h-4 w-4 text-amber-300" aria-hidden="true" />
-            <span className="text-amber-100">Hay cambios sin guardar</span>
+            <span className="text-amber-700">Hay cambios sin guardar</span>
           </>
         ) : (
           <>

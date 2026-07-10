@@ -9,10 +9,12 @@ interface ProductEditorSectionProps {
 
 export function ProductEditorSection({ title, description, children }: ProductEditorSectionProps) {
   return (
-    <Card className="overflow-hidden rounded-2xl border-white/10 bg-card/80 shadow-[0_18px_60px_rgba(0,0,0,0.16)]">
-      <CardHeader className="border-b border-white/8 p-5 sm:p-6">
-        <CardTitle className="font-heading text-xl text-foreground">{title}</CardTitle>
-        <CardDescription className="max-w-2xl leading-relaxed">{description}</CardDescription>
+    <Card className="overflow-hidden rounded-2xl border-slate-200 bg-white text-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.08)] [&_input]:border-slate-200 [&_input]:bg-white [&_textarea]:border-slate-200 [&_textarea]:bg-white">
+      <CardHeader className="border-b border-slate-200 p-5 sm:p-6">
+        <CardTitle className="font-heading text-xl text-slate-950">{title}</CardTitle>
+        <CardDescription className="max-w-2xl leading-relaxed text-slate-600">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-5 sm:p-6">{children}</CardContent>
     </Card>

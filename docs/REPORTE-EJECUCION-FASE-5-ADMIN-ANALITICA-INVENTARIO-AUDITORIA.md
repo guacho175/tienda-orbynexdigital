@@ -56,7 +56,7 @@ Ambas fueron aplicadas al proyecto remoto mediante pooler IPv4.
   - tablas nuevas con RLS: OK.
   - funcion `adjust_product_stock_admin`: OK.
   - `supabase db lint --schema public --fail-on none`: sin errores de esquema.
-  - `supabase db advisors --type all --level warn --fail-on none`: solo warnings heredados.
+  - `supabase db advisors --type all --level warn --fail-on none`: inicialmente mostraba warnings heredados; luego quedaron resueltos con la migracion RLS indicada abajo.
 
 ## Warnings heredados
 

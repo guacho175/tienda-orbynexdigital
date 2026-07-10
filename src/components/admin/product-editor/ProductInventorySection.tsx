@@ -13,8 +13,14 @@ import {
   PRODUCT_AVAILABILITY_OPTIONS,
   PRODUCT_OUT_OF_STOCK_OPTIONS,
 } from "@/config/product-editor.config";
+import { ProductStockAdjustmentPanel } from "@/components/admin/ProductStockAdjustmentPanel";
+import type { Product } from "@/types/product";
 import { ProductEditorSection } from "./ProductEditorSection";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
+
+interface ProductInventorySectionProps extends ProductEditorFieldsProps {
+  stockAdjustmentProduct?: Product | null;
+}
 
 function getInventoryStatus(values: ProductEditorFieldsProps["values"]) {
   if (values.availability === "out_of_stock") {
@@ -44,7 +50,8 @@ export function ProductInventorySection({
   errors,
   update,
   disabled,
-}: ProductEditorFieldsProps) {
+  stockAdjustmentProduct,
+}: ProductInventorySectionProps) {
   const status = getInventoryStatus(values);
 
   return (
@@ -53,7 +60,7 @@ export function ProductInventorySection({
       description="Controla la disponibilidad y qué debe ocurrir cuando se acaben las unidades."
     >
       <div className="space-y-5">
-        <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-secondary/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-foreground">Estado resultante</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -88,7 +95,7 @@ export function ProductInventorySection({
           </Select>
         </div>
 
-        <div className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-secondary/20 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <div>
             <Label htmlFor="track_inventory" className="cursor-pointer text-sm font-medium">
               Controlar inventario
@@ -148,7 +155,7 @@ export function ProductInventorySection({
               </div>
             </div>
 
-            <div className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-secondary/20 p-4">
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div>
                 <Label htmlFor="allow_backorder" className="cursor-pointer text-sm font-medium">
                   Permitir venta sin stock
@@ -200,6 +207,10 @@ export function ProductInventorySection({
             Este producto seguirá disponible sin descontar unidades.
           </p>
         )}
+
+        {stockAdjustmentProduct ? (
+          <ProductStockAdjustmentPanel product={stockAdjustmentProduct} />
+        ) : null}
       </div>
     </ProductEditorSection>
   );

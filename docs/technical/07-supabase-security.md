@@ -1,95 +1,107 @@
-# 07 - Seguridad y Políticas de Acceso en Supabase
+# 07 - Seguridad y Politicas de Acceso en Supabase
 
-Este documento detalla el esquema de seguridad del backend en Supabase, la configuración de políticas a nivel de fila (RLS), la asignación de permisos (Grants), y el uso seguro de funciones privilegiadas (RPCs) y tokens de acceso.
+Este documento resume el estado vigente de RLS, grants y funciones Supabase.
 
----
+## Roles
 
-## 1. Modelo de Seguridad y Niveles de Rol
+| Rol             | Uso                    | Acceso                                                   |
+| --------------- | ---------------------- | -------------------------------------------------------- |
+| `anon`          | Cliente publico        | Lectura de productos activos.                            |
+| `authenticated` | Usuario logueado/admin | Lectura propia; admin obtiene permisos por `user_roles`. |
+| `service_role`  | Backend/API            | Acceso total desde entorno server-side.                  |
 
-El backend del e-commerce cuenta con tres niveles de roles lógicos, cada uno con un set de privilegios acotado en base a su nivel de confianza:
+## Politicas RLS Vigentes
 
-| Rol | Tipo de Cliente | Permisos de Acceso | Privilegios |
-| :--- | :--- | :--- | :--- |
-| **anon** | Cliente final (Navegador) | Llave pública anónima | Solo lectura (`SELECT`) de productos activos. |
-| **authenticated** | Cliente logueado o Administrador | Token JWT del usuario | Lectura de sus propios roles y órdenes. Si el rol es `admin`, tiene bypass de RLS en productos y órdenes. |
-| **service_role** | API Serverless (Backend) | Llave privada secreta | Acceso total de lectura/escritura (`SELECT`, `INSERT`, `UPDATE`, `DELETE`). |
+### `public.user_roles`
 
----
+- `authenticated` solo lee sus propios roles.
+- Politica optimizada con `(SELECT auth.uid())`.
 
-## 2. Row Level Security (RLS) y Políticas por Tabla
+### `public.products`
 
-La seguridad a nivel de fila está activada globalmente para todas las tablas del e-commerce. Esto previene que clientes maliciosos utilicen el cliente de Supabase en el navegador para editar precios, ver órdenes ajenas o secuestrar stock.
+Politica SELECT consolidada:
 
-### 2.1. Roles de Usuario (`public.user_roles`)
-*   **Permiso Público (`anon`)**: Revocado por completo (no puede ver roles de nadie).
-*   **Permiso Autenticado**: Solo lectura de sus propios registros:
-    ```sql
-    CREATE POLICY "Users can view their own roles"
-      ON public.user_roles FOR SELECT TO authenticated
-      USING (auth.uid() = user_id);
-    ```
+- `anon` y `authenticated` pueden leer productos activos.
+- admins autenticados pueden leer todo.
 
-### 2.2. Catálogo de Productos (`public.products`)
-*   **Permiso Público (`anon` / `authenticated` regular)**: Solo lectura de productos activos para evitar mostrar items deshabilitados en el catálogo:
-    ```sql
-    CREATE POLICY "Public can view active products"
-      ON public.products FOR SELECT TO anon, authenticated
-      USING (is_active = true);
-    ```
-*   **Permiso Administrador**: Control total sobre inserciones, actualizaciones y borrados basado en su rol:
-    ```sql
-    CREATE POLICY "Admins can update products"
-      ON public.products FOR UPDATE TO authenticated
-      USING (
-        EXISTS (
-          SELECT 1 FROM public.user_roles
-          WHERE user_id = auth.uid() AND role = 'admin'
-        )
-      );
-    ```
+Politicas admin separadas:
 
-### 2.3. Órdenes y Detalles (`public.orders` & `public.order_items`)
-*   **Permiso Público / Cliente regular**: Escritura directa bloqueada por completo (`REVOKE ALL`). Solo pueden leer órdenes creadas bajo su propia cuenta:
-    ```sql
-    CREATE POLICY "Users can view own orders"
-      ON public.orders FOR SELECT TO authenticated
-      USING (user_id = auth.uid());
-    ```
-*   **Permiso Administrador**: Lectura de todo el listado de ventas para gestión en panel.
+- insert;
+- update;
+- delete.
 
-### 2.4. Reservas de Stock (`public.stock_reservations`)
-*   **Permiso Público / Cliente regular**: Acceso de escritura y lectura revocado por completo (`REVOKE ALL`). Las RLS están activadas pero no existen políticas públicas. Sólo el backend ejecutado con `service_role` puede interactuar con esta tabla.
+Todas las comprobaciones admin usan `public.user_roles` y `(SELECT auth.uid())`.
 
----
+### `public.orders`
 
-## 3. SQL Remote Procedure Calls (RPC) y SECURITY DEFINER
+Politica SELECT consolidada:
 
-Las operaciones transaccionales más críticas (como pre-reservar stock al crear la orden o descontar stock al confirmar el pago) se implementan mediante funciones PL/pgSQL directamente en base de datos.
+- usuario autenticado ve sus propias ordenes;
+- admin ve todas.
 
-### 3.1. Mitigación de Vulnerabilidades con RPCs
-*   **Uso estricto de `SECURITY DEFINER`**: Las RPCs se ejecutan con los privilegios del creador de la función (el superusuario), evadiendo las RLS temporalmente de forma interna para realizar cálculos y escrituras controladas.
-*   **Restricción de Ejecución**: Los permisos de ejecución en las funciones RPC están explícitamente revocados para usuarios anónimos y autenticados regulares. Sólo la `service_role` del backend Vercel puede gatillar su ejecución:
-    ```sql
-    REVOKE EXECUTE ON FUNCTION public.confirm_order_payment_and_capture_stock(UUID, JSONB, TEXT)
-      FROM PUBLIC, anon, authenticated;
-    GRANT EXECUTE ON FUNCTION public.confirm_order_payment_and_capture_stock(UUID, JSONB, TEXT)
-      TO service_role;
-    ```
-*   **Prevención de Secuestro de Path (`search_path`)**: Para mitigar ataques de inyección de esquemas (donde un atacante crea una función maliciosa con el mismo nombre en un esquema público para ser ejecutada por la RPC privilegiada), todas las funciones definen explícitamente el `search_path` limitándolo a `public`:
-    ```sql
-    CREATE OR REPLACE FUNCTION public.expire_stock_reservations()
-    ...
-    SECURITY DEFINER
-    SET search_path = public
-    ```
+No hay insert/update/delete directos para clientes.
 
----
+### `public.order_items`
 
-## 4. Riesgos de Seguridad a No Romper en el Futuro
+Politica SELECT consolidada:
 
-Cualquier cambio futuro en el backend o en el frontend debe apegarse rigurosamente a las siguientes directrices de seguridad:
+- usuario autenticado ve items de sus propias ordenes;
+- admin ve todos.
 
-1.  **NO deshabilitar las RLS** bajo ninguna circunstancia.
-2.  **NO exponer la `supabaseServiceRoleKey`** en el cliente (código dentro de `/src`). Su uso está restringido exclusivamente a los archivos que se ejecutan en Node.js del servidor (`/api` o `/src/server`).
-3.  **NO cambiar las firmas de las RPCs** sin revocar nuevamente los permisos de ejecución a `PUBLIC`, `anon` y `authenticated`. Por defecto, PostgreSQL otorga permisos de ejecución pública a cualquier nueva función creada.
-4.  **NO crear políticas de inserción o actualización directa en la tabla de órdenes** para clientes del frontend. Todo flujo de creación de orden debe pasar exclusivamente a través de la API serverless y la RPC correspondiente.
+No hay insert/update/delete directos para clientes.
+
+### `public.stock_reservations`
+
+- RLS activo.
+- Sin politicas publicas.
+- Manipulacion solo por backend/RPC.
+
+### `public.product_audit_events`
+
+- Solo admins pueden leer.
+- Solo admins pueden insertar eventos propios.
+
+### `public.stock_movements`
+
+- Solo admins pueden leer.
+- Solo admins pueden insertar movimientos manuales (`manual_adjustment`, `manual_return`, `manual_correction`) desde source `admin`.
+
+## Funciones RPC
+
+### RPCs criticas de checkout
+
+Usan permisos restringidos y se ejecutan desde backend:
+
+- `create_order_with_stock_reservation`
+- `confirm_order_payment_and_capture_stock`
+- `release_order_stock_reservations`
+- `expire_stock_reservations`
+
+### RPC admin de inventario
+
+`adjust_product_stock_admin`:
+
+- `SECURITY INVOKER`;
+- ejecutable por `authenticated`;
+- depende de RLS admin para permitir o rechazar;
+- actualiza producto e inserta movimiento en una sola operacion.
+
+## Advisors Supabase
+
+Ultima correccion aplicada:
+
+- `20260709232902_optimize_rls_policies_advisors.sql`
+
+Resultado:
+
+- `supabase db lint --schema public --fail-on none`: sin errores.
+- `supabase db advisors --type all --level warn --fail-on none`: sin issues.
+
+## Reglas Que No Se Deben Romper
+
+- No exponer `service_role` en frontend.
+- No desactivar RLS.
+- No crear politicas de escritura directa en `orders`, `order_items` ni `stock_reservations`.
+- No usar `auth.role()` en nuevas politicas.
+- En nuevas politicas usar `TO authenticated`/`TO anon` y `(SELECT auth.uid())`.
+- Toda tabla nueva en `public` debe tener RLS y grants explicitos.

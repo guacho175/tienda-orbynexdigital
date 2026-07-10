@@ -1,151 +1,188 @@
 # 03 - Modelo de Dominio y Base de Datos
 
-Este documento describe la estructura lógica del almacenamiento, los campos clave, relaciones, estados posibles y las reglas de negocio que gobiernan a cada entidad del e-commerce Orbynex.
+Este documento describe las entidades vigentes del e-commerce Orbynex Digital en Supabase/PostgreSQL.
 
----
+## Entidades Principales
 
-## 1. Diagrama del Modelo Entidad-Relación (ERD)
+### `public.products`
 
-El diseño de datos centraliza la integridad transaccional y las reglas de stock en Supabase:
+Catalogo de productos y servicios.
 
-#### Opción A: Vista Premium Conceptual
-![Diagrama ERD de Base de Datos (Premium)](../assets/diagram_erd.png)
+Campos relevantes:
 
-#### Opción B: Vista UML ERD Formal (Tipos de datos y constraints)
-![Diagrama ERD de Base de Datos (UML Formal)](../assets/diagram_erd_uml.png)
+- `id`: UUID primario.
+- `name`, `slug`, `short_description`, `description`.
+- `meta_title`, `meta_description`, `seo_noindex`, `og_image_url`.
+- `price`, `currency`.
+- `category`.
+- `image_url`, `image_url_thumb`, `image_url_card`, `image_url_detail`.
+- `is_active`.
+- `availability`.
+- `stock_quantity`.
+- `track_inventory`.
+- `allow_backorder`.
+- `low_stock_threshold`.
+- `out_of_stock_behavior`.
+- `payment_url`, `payment_button_label`.
+- `display_order`.
+- `created_at`, `updated_at`.
 
+Reglas:
 
-### Estructura de Relaciones (Mermaid)
+- El catalogo publico solo debe leer productos activos y vendibles.
+- El admin puede leer, crear, editar y eliminar productos si tiene rol `admin`.
+- `updated_at` se usa como guardia anti-sobrescritura en el editor admin.
+
+### `public.user_roles`
+
+Define roles de usuarios autenticados.
+
+Campos:
+
+- `id`
+- `user_id`
+- `role`: `admin` o `user`
+- `created_at`
+
+Reglas:
+
+- Un usuario autenticado solo puede leer sus propios roles.
+- Las politicas admin revisan `user_roles` directamente.
+
+### `public.orders`
+
+Orden maestra de compra Flow.
+
+Estados relevantes:
+
+- `pending`
+- `stock_reserved`
+- `redirected`
+- `paid`
+- `failed`
+- `cancelled`
+- `expired`
+- `reservation_expired`
+- `stock_conflict`
+- `requires_manual_review`
+
+Reglas:
+
+- Clientes no escriben directamente en `orders`.
+- La API/RPC crea ordenes y confirma pagos.
+- Usuarios autenticados pueden leer sus propias ordenes.
+- Admin puede leer todas las ordenes.
+
+### `public.order_items`
+
+Items historicos de cada orden.
+
+Reglas:
+
+- Guarda precio y cantidad al momento de crear la orden.
+- Clientes no escriben directamente.
+- Usuarios autenticados pueden leer items de sus propias ordenes.
+- Admin puede leer todos los items.
+
+### `public.stock_reservations`
+
+Reservas temporales de stock durante checkout.
+
+Estados:
+
+- `active`
+- `confirmed`
+- `released`
+- `expired`
+
+Reglas:
+
+- No tiene acceso publico directo.
+- La API/RPC gestiona reservas y liberaciones.
+
+### `public.product_audit_events`
+
+Historial de cambios importantes de productos.
+
+Campos:
+
+- `id`
+- `product_id`
+- `event_type`
+- `before_snapshot`
+- `after_snapshot`
+- `changed_fields`
+- `created_by`
+- `created_at`
+
+Eventos usados:
+
+- `product_create`
+- `product_update`
+- `stock_adjustment`
+
+Reglas:
+
+- Solo admins pueden leer e insertar eventos.
+- Se usa en `/admin/audit`.
+
+### `public.stock_movements`
+
+Historial de movimientos de stock.
+
+Campos:
+
+- `id`
+- `product_id`
+- `movement_type`
+- `quantity_delta`
+- `stock_before`
+- `stock_after`
+- `reason`
+- `source`
+- `order_id`
+- `reservation_id`
+- `created_by`
+- `created_at`
+
+Tipos previstos:
+
+- `manual_adjustment`
+- `manual_return`
+- `manual_correction`
+- `flow_sale`
+- `reservation_created`
+- `reservation_released`
+
+Estado actual:
+
+- Implementado para ajustes manuales admin.
+- Flow y reservas todavia no escriben automaticamente movimientos.
+
+## Relaciones
 
 ```mermaid
 erDiagram
-    products {
-        uuid id PK
-        text name
-        text slug
-        numeric price
-        text currency
-        boolean is_active
-        text availability
-        integer stock_quantity
-        boolean track_inventory
-        boolean allow_backorder
-        integer low_stock_threshold
-        text out_of_stock_behavior
-    }
-
-    user_roles {
-        uuid id PK
-        uuid user_id FK
-        text role
-    }
-
-    orders {
-        uuid id PK
-        text commerce_order UK
-        uuid user_id FK
-        text status
-        text currency
-        numeric subtotal
-        numeric total
-        text customer_name
-        text customer_email
-        uuid public_lookup_token UK
-        timestamptz expires_at
-    }
-
-    order_items {
-        uuid id PK
-        uuid order_id FK
-        uuid product_id FK
-        numeric unit_price
-        integer quantity
-        numeric subtotal
-    }
-
-    stock_reservations {
-        uuid id PK
-        uuid order_id FK
-        uuid product_id FK
-        integer quantity
-        text status
-        timestamptz expires_at
-    }
-
-    user_roles }|--|| users : "pertenece_a"
-    orders }|--|| users : "creada_por"
-    order_items }|--|| orders : "contiene"
-    order_items }|--|| products : "referencia"
-    stock_reservations }|--|| orders : "pertenece_a"
-    stock_reservations }|--|| products : "reserva"
+  products ||--o{ order_items : referenced_by
+  orders ||--o{ order_items : contains
+  orders ||--o{ stock_reservations : reserves
+  products ||--o{ stock_reservations : reserved_product
+  products ||--o{ product_audit_events : audited
+  products ||--o{ stock_movements : stock_history
+  orders ||--o{ stock_movements : optional_order_source
+  stock_reservations ||--o{ stock_movements : optional_reservation_source
 ```
 
----
+## Storage
 
-## 2. Entidades del Sistema
+Bucket:
 
-### 2.1. Products (`public.products`)
-Representa los ítems que se pueden exhibir y vender en el catálogo.
+- `product-images`
 
-*   **Campos Clave**:
-    *   `price`: Precio del producto. En pesos chilenos (`CLP`), siempre debe redondearse sin decimales al procesar pagos en Flow.
-    *   `stock_quantity`: Inventario físico real en bodega (entero >= 0).
-    *   `track_inventory`: Si es `true`, el sistema valida el inventario físico y las reservas antes de vender. Si es `false` (servicios), el producto es infinito y comprable siempre.
-    *   `allow_backorder`: Si es `true`, permite comprar el producto aunque no haya stock disponible en bodega (venta bajo demanda/reserva diferida).
-    *   `out_of_stock_behavior`: Puede ser `show_sold_out` (muestra etiqueta Agotado en la web) o `hide_product` (remueve el producto del catálogo en caliente).
-    *   `payment_url` / `payment_button_label`: Link opcional de cobro externo directo.
+Convencion:
 
-### 2.2. User Roles (`public.user_roles`)
-Define la autorización administrativa de los usuarios autenticados.
+- `products/YYYY/MM/UUID-thumb.webp`
+- `products/YYYY/MM/UUID-card.webp`
+- `products/YYYY/MM/UUID-detail.webp`
 
-*   **Campos Clave**:
-    *   `user_id`: Referencia a la tabla interna de usuarios de Supabase (`auth.users`).
-    *   `role`: Enumeración (`app_role`) con valores: `admin` o `user`.
-*   **Regla de Negocio**: RLS restringe lecturas a usuarios sobre sus propios roles. El rol de administrador otorga permisos bypass RLS en la tabla de productos.
-
-### 2.3. Orders (`public.orders`)
-Almacena el estado maestro de un intento de compra o transacción.
-
-*   **Campos Clave**:
-    *   `commerce_order`: Identificador alfanumérico único e irrepetible para la pasarela Flow (ej. `ORD-1783455...`).
-    *   `status`: Estado de la orden.
-    *   `public_lookup_token`: Token UUID único autogenerado en la inserción. Sirve para que el cliente final acceda a `/checkout/resultado?commerceOrder=X&publicLookupToken=Y` para consultar el estado del pago de forma segura sin autenticación.
-    *   `expires_at`: Fecha y hora límite en que la reserva de stock asociada a esta orden sigue vigente.
-
-#### Estados de la Orden (`orders.status`):
-*   `pending`: Orden creada. Aún no se ha iniciado la redirección a Flow.
-*   `stock_reserved`: Stock físico bloqueado temporalmente por una ventana de reserva activa.
-*   `redirected`: El usuario fue enviado a la pasarela Flow para pagar.
-*   `paid`: Transacción confirmada y validada en el servidor. Stock restado definitivamente.
-*   `failed`: El pago fue rechazado por Flow o el banco.
-*   `cancelled`: El cliente abortó explícitamente el pago en el portal de Flow.
-*   `expired`: El token de pago de Flow venció sin acción del usuario.
-*   `reservation_expired`: La ventana de reserva de stock de 10 minutos venció en base de datos antes de que se recibiera la confirmación de pago de Flow.
-*   `stock_conflict`: El pago fue recibido pero no queda stock físico suficiente para sustentar la orden (ocurre por decrementos manuales). Requiere intervención del administrador.
-*   `requires_manual_review`: El pago se recibió pero la reserva del stock ya había vencido, por lo que el stock no fue decrementado para evitar errores. Requiere revisión manual.
-
-### 2.4. Order Items (`public.order_items`)
-Desglose detallado de los productos y precios al momento de la compra.
-
-*   **Campos Clave**:
-    *   `unit_price`: Captura histórica del precio del producto al momento de crear la orden. Previene que actualizaciones posteriores de precio en catálogo afecten transacciones anteriores.
-    *   `subtotal`: Restricción a nivel de base de datos que obliga a que `subtotal = unit_price * quantity`.
-
-### 2.5. Stock Reservations (`public.stock_reservations`)
-Mapea el bloqueo temporal de inventario físico mientras se completa una transacción en la pasarela.
-
-*   **Campos Clave**:
-    *   `quantity`: Cantidad reservada.
-    *   `expires_at`: Límite temporal de vigencia de la reserva.
-    *   `status`: Estado de la reserva.
-
-#### Estados de la Reserva (`stock_reservations.status`):
-*   `active`: Reserva vigente. Afecta directamente al cálculo del stock vendible en catálogo.
-*   `confirmed`: El pago fue confirmado. La reserva se consumió y el stock físico ya fue descontado.
-*   `released`: La compra falló, se canceló o actualizó, y el stock fue devuelto al catálogo.
-*   `expired`: Pasaron los 10 minutos de la ventana transaccional sin confirmación y la reserva fue desactivada por el cron.
-
-### 2.6. Storage Product Images (`product-images` bucket)
-Estructura física de almacenamiento para los archivos multimedia de catálogo.
-*   **Path**: `products/YYYY/MM/UUID-[thumb|card|detail].webp`.
-*   **Regla**: Solo administradores pueden escribir en este bucket. Todo archivo debe subirse optimizado bajo formato WebP.
+Solo admins pueden escribir imagenes.

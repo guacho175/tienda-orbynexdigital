@@ -26,6 +26,7 @@ import { useProductEditor } from "./product-editor/useProductEditor";
 
 export interface ProductFormProps {
   initial?: Product | null;
+  stockAdjustmentProduct?: Product | null;
   submitLabel?: string;
   onSubmit: (values: ProductInput) => Promise<void>;
   onCancel?: () => void;
@@ -46,6 +47,7 @@ function formatUpdatedAt(value: string | undefined) {
 
 export function ProductForm({
   initial,
+  stockAdjustmentProduct,
   submitLabel = "Guardar",
   onSubmit,
   onCancel,
@@ -71,7 +73,7 @@ export function ProductForm({
   return (
     <>
       <form onSubmit={editor.handleSubmit} noValidate className="space-y-5">
-        <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-card/55 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-slate-950 shadow-[0_14px_42px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={editor.values.is_active ? "default" : "secondary"}>
@@ -129,6 +131,7 @@ export function ProductForm({
               errors={editor.errors}
               update={editor.update}
               disabled={disabled}
+              stockAdjustmentProduct={stockAdjustmentProduct}
             />
           ) : null}
           {editor.activeSection === "pricing" ? (

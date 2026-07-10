@@ -1,68 +1,71 @@
-# Manual de Traspaso para Futuros Agentes (Agent Handoff)
+# Manual de Traspaso para Futuros Agentes
 
-> [!IMPORTANT]
-> **Fases 4/5 del editor compacto:** Fase 4A "SEO real" esta implementada a nivel de codigo y migracion local en `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-4A-SEO.md`. Antes de deploy, aplicar `supabase/migrations/20260709213134_product_seo_metadata.sql` en Supabase. Galeria, precios avanzados, envio, organizacion avanzada, semantica de estados y Fase 5 siguen en backlog; ver `docs/PREGUNTAS-FASE-5-EDITOR-COMPACTO.md`.
+Este documento resume el estado vigente del proyecto para agentes o desarrolladores que continúen el trabajo.
 
-> [!NOTE]
-> **Editor compacto de productos (2026-07-09):** Fases 1, 2 y 3 implementadas; Fases 4 y 5 no iniciadas y requieren aprobacion separada. La implementacion vive en `src/components/admin/product-editor/` y mantiene la API de `ProductForm`. QA visual autenticado ejecutado en `/admin`, `/admin/new` y `/admin/edit/$id`; queda pendiente solo una prueba con escritura real si el usuario autoriza crear/editar un producto de QA. El lint dirigido pasa; el lint global conserva deuda CRLF/Prettier previa. Ver `docs/PLAN-MAESTRO-EDITOR-PRODUCTO-COMPACTO.md`, `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASES-1-2.md` y `docs/REPORTE-EJECUCION-EDITOR-COMPACTO-FASE-3.md`.
+## Estado Actual
 
-Este documento es una guía de transferencia rápida diseñada específicamente para agentes de Inteligencia Artificial que operen en este repositorio en el futuro. Léelo detenidamente antes de realizar cualquier cambio en el código.
+El e-commerce Orbynex Digital esta operativo con:
 
----
+- React + Vite + TanStack Start/Router.
+- Supabase PostgreSQL con RLS activo.
+- Flow.cl sandbox integrado mediante Vercel Functions.
+- Reservas de stock por 10 minutos y expiracion por cron.
+- Panel admin de productos con editor compacto.
+- SEO real de productos.
+- Analitica admin, auditoria de productos y ajustes manuales de stock.
 
-## 1. Resumen Ejecutivo del Estado del Proyecto
+Ultimo bloque ejecutado:
 
-El e-commerce está completamente operativo y cuenta con una arquitectura desacoplada estructurada en:
+- Fase 5 admin: `/admin/analytics`, `/admin/audit`, buscador en `/admin`, aviso anti-sobrescritura y panel de inventario manual.
+- Migraciones aplicadas:
+  - `20260709231029_product_audit_events.sql`
+  - `20260709231029_stock_movements_manual_adjustments.sql`
+  - `20260709232902_optimize_rls_policies_advisors.sql`
+- Supabase advisors a nivel `warn`: sin issues despues de optimizar RLS heredadas.
 
-1.  **Frontend**: React + Vite + TanStack Start (Router) + Tailwind CSS v4. El estado del carrito se maneja localmente (`localStorage`).
-2.  **API / Backend**: Endpoints serverless escritos en TypeScript alojados en Vercel Functions bajo `/api`.
-3.  **Base de Datos**: PostgreSQL en Supabase, con políticas RLS activas en todas las tablas y control de stock encapsulado en funciones RPC SQL ejecutadas con privilegios administrativos (`service_role`).
-4.  **Pasarelas y Tareas**: Integración transaccional con Flow.cl (Chile) y cron automatizado en Vercel que gatilla la liberación de reservas expiradas cada 1 minuto.
+Reporte vigente:
 
-> [!IMPORTANT]
-> **Estado del Backend**: El backend se encuentra estabilizado y testeado. **Queda estrictamente prohibido realizar modificaciones en la lógica del backend**, migraciones, RPCs, endpoints de la API, Flow o Supabase. Todas las iteraciones futuras del proyecto deben enfocarse puramente en el diseño, optimización y funcionalidad del **frontend**.
+- [Reporte Fase 5](REPORTE-EJECUCION-FASE-5-ADMIN-ANALITICA-INVENTARIO-AUDITORIA.md)
 
----
+## Documentacion Vigente
 
-## 2. Archivos Críticos a No Modificar sin Autorización
+- [Indice general](INDEX.md)
+- [Documentacion tecnica modular](technical/README.md)
+- [Deployment Vercel](DEPLOY-VERCEL.md)
+- [Flow sandbox testing](FLOW-SANDBOX-TESTING.md)
+- [Inventario productos](INVENTARIO-PRODUCTOS.md)
+- [Inventario reservas stock](INVENTARIO-RESERVAS-STOCK.md)
 
-No alteres la lógica de los siguientes archivos a menos que el usuario lo solicite expresamente en un plan aprobado:
+Los planes, reportes antiguos, prompts y preguntas cerradas fueron archivados en:
 
-- `api/flow/confirm.ts`: Endpoint webhook de confirmación. Contiene lógica de firmas, validaciones y consulta GET directa a Flow para prevenir suplantaciones.
-- `supabase/migrations/20260707023000_stock_reservations_flow_inventory.sql`: Código SQL transaccional y RPCs (`confirm_order_payment_and_capture_stock`, `create_order_with_stock_reservation`).
-- `src/routes/_authenticated/route.tsx`: Control de rutas protegidas del panel de administración.
-- `vite.config.ts` y `vercel.json`: Configuraciones de compilación y cron-jobs en la nube de Vercel.
+- [Planes pasados](planes-pasados/README.md)
 
----
+## Archivos Criticos
 
-## 3. Reglas de Oro de Seguridad y Operaciones
+No modificar sin una solicitud explicita:
 
-1.  **Nunca expongas secretos**: No dejes rastros de llaves de API reales ni contraseñas. Utiliza las variables del entorno en Node.js y variables con prefijo `VITE_` en el cliente.
-2.  **Respeta las políticas RLS**: La escritura en tablas de órdenes y stock está bloqueada para accesos anónimos. La creación y el decremento de inventario se gestionan exclusivamente mediante RPCs privilegiadas gatilladas desde la API del servidor.
-3.  **Protege la historia de Git**: Evita reescribir la historia publicada (ej. `git push --force`, `git commit --amend`, o `git rebase` de commits ya publicados), ya que esto puede desestabilizar entornos de integración y despliegue continuos.
-4.  **Mantenga el Checkout Híbrido**: La visualización y botones de compra de productos deben tolerar tanto el pago online automatizado (Flow) como la compra mediante links de cobro externo (`payment_url`) registrados en la base de datos de productos.
+- `api/flow/*`
+- `src/server/flow/*`
+- `src/routes/_authenticated/route.tsx`
+- `supabase/migrations/*` relacionadas con Flow, reservas y RLS
+- `vercel.json`
+- `vite.config.ts`
 
----
+## Reglas de Seguridad
 
-## 4. Referencia Rápida de Comandos
+- No exponer `service_role`, secretos de Flow ni contraseñas en frontend.
+- No desactivar RLS.
+- No permitir escritura directa de clientes en `orders`, `order_items` ni `stock_reservations`.
+- Mantener el checkout hibrido: Flow interno y `payment_url` externo deben seguir coexistiendo.
+- Antes de tocar Supabase, usar la skill de Supabase, crear migracion con CLI y validar con `db lint`/`db advisors`.
 
-Utiliza preferentemente `bun` para ejecutar los scripts del ciclo de vida del desarrollo:
+## Comandos de Validacion
 
-- `bun dev`: Correr el servidor de desarrollo local.
-- `bun build`: Compilar la aplicación para producción.
-- `bun preview`: Previsualizar la compilación de producción localmente.
-- `bun lint`: Ejecutar análisis del linter.
-- `bun format`: Formatear archivos con Prettier.
+```bash
+npx tsc --noEmit --pretty false
+npx eslint <archivos-tocados>
+npm run build
+git diff --check
+```
 
----
-
-## 📂 Enlaces de Documentación Completa
-
-Para profundizar en cualquier dominio específico de la plataforma, consulta la guía modular correspondiente:
-
-- [**Índice de Guías Técnicas (docs/technical/README.md)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/README.md)
-- [**02 - Diagramas de Arquitectura y Flujos**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/02-architecture.md)
-- [**03 - Estructura de Tablas Supabase (ERD)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/03-domain-model.md)
-- [**05 - Funcionamiento Detallado de Pagos Flow**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/05-payment-flow.md)
-- [**06 - Explicación de Reservas de Stock (10 min)**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/06-inventory-reservations.md)
-- [**10 - Guía de Instalación Local y ngrok**](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/10-installation.md)
+Nota: `npm run lint` global puede fallar por deuda previa de Prettier/CRLF en archivos no relacionados. Para cambios acotados, validar con ESLint dirigido.
