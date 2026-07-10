@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteProduct,
   fetchAllProductsAdmin,
+  fetchProductByIdAdmin,
   toggleProductActive,
 } from "@/services/products.service";
 import { Price } from "@/components/ui-common/Price";
@@ -80,6 +81,14 @@ function AdminPage() {
   });
 
   function renderProductActions(p: Product) {
+    const preloadEditor = () => {
+      void queryClient.prefetchQuery({
+        queryKey: ["admin-product", p.id],
+        queryFn: () => fetchProductByIdAdmin(p.id),
+        staleTime: 30_000,
+      });
+    };
+
     return (
       <div className="flex justify-end gap-1">
         {p.slug ? (
@@ -109,7 +118,14 @@ function AdminPage() {
           )
         ) : null}
         <Button asChild variant="ghost" size="sm">
-          <Link to="/admin/edit/$id" params={{ id: p.id }}>
+          <Link
+            to="/admin/edit/$id"
+            params={{ id: p.id }}
+            preload="render"
+            onMouseEnter={preloadEditor}
+            onFocus={preloadEditor}
+            aria-label={`Editar ${p.name}`}
+          >
             <Pencil className="h-4 w-4" />
           </Link>
         </Button>
@@ -326,7 +342,26 @@ function AdminPage() {
                         )
                       ) : null}
                       <Button asChild variant="ghost" size="sm">
-                        <Link to="/admin/edit/$id" params={{ id: p.id }}>
+                        <Link
+                          to="/admin/edit/$id"
+                          params={{ id: p.id }}
+                          preload="render"
+                          onMouseEnter={() => {
+                            void queryClient.prefetchQuery({
+                              queryKey: ["admin-product", p.id],
+                              queryFn: () => fetchProductByIdAdmin(p.id),
+                              staleTime: 30_000,
+                            });
+                          }}
+                          onFocus={() => {
+                            void queryClient.prefetchQuery({
+                              queryKey: ["admin-product", p.id],
+                              queryFn: () => fetchProductByIdAdmin(p.id),
+                              staleTime: 30_000,
+                            });
+                          }}
+                          aria-label={`Editar ${p.name}`}
+                        >
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>

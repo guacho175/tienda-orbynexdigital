@@ -38,13 +38,35 @@ El admin siempre puede ver todos los productos, incluso agotados u ocultos por s
 
 ## Configuracion admin
 
-En `ProductForm`, el admin puede configurar:
+En `ProductForm`, la seccion `Inventario` permite configurar:
 
 - Controlar inventario.
-- Stock disponible.
+- Stock inicial al crear un producto.
+- Stock registrado de solo lectura al editar un producto.
 - Umbral de pocas unidades.
 - Permitir venta sin stock.
 - Comportamiento al agotarse: mostrar agotado u ocultar del catalogo.
+
+Los cambios de configuracion se aplican al guardar el producto. En productos existentes, el stock
+operativo no se edita desde este formulario para evitar dos caminos que modifiquen
+`stock_quantity`.
+
+## Movimientos de stock admin
+
+Los productos existentes muestran una seccion separada `Movimientos de stock` en el editor admin.
+Desde ahi se puede registrar:
+
+- `Entrada de stock`: suma unidades recibidas.
+- `Venta externa`: rebaja compras realizadas por `payment_url` u otro canal externo.
+- `Correccion`: suma o rebaja unidades por ajuste administrativo.
+- `Devolucion`: repone unidades devueltas.
+
+Cada operacion usa `public.adjust_product_stock_admin(...)`, evita que el stock final sea negativo y
+registra el antes, delta, resultado, motivo y usuario en `public.stock_movements`.
+
+Las ventas del checkout interno Flow no deben registrarse manualmente: el stock se descuenta al
+confirmarse el pago mediante el flujo de reservas existente. Un link de pago externo no participa
+de esa confirmacion, por lo que su venta debe registrarse como `Venta externa`.
 
 El listado admin muestra badges:
 
@@ -157,10 +179,7 @@ No hay un boton WhatsApp checkout activo en la pantalla actual de checkout. El h
 
 Pendientes de inventario avanzado:
 
-- Historial de movimientos de inventario.
-- Auditoria por usuario/admin.
 - Notificaciones por bajo stock.
-- Reposicion y ajustes manuales con motivo.
 - Vista/admin de conciliacion para `requires_manual_review` y `stock_conflict`.
 
 La decision actual evita descontar stock por pagos abandonados y cierra la ventana de competencia del checkout Flow con reservas activas. La expiracion existe de forma opportunistic dentro de los RPC y tambien por cron programado para liberar inventario aunque no haya trafico nuevo.

@@ -33,7 +33,7 @@ export function ProductPricingSection({
       title="Precios y pago"
       description="Configura el valor publicado y conserva el enlace de pago alternativo."
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
           <div className="space-y-2">
             <Label htmlFor="price">Precio *</Label>

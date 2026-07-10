@@ -12,7 +12,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/8 bg-[oklch(0.12_0.03_256/0.74)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 shrink-0 border-b border-white/8 bg-[oklch(0.12_0.03_256/0.74)] backdrop-blur-xl">
       <Container className="flex h-[4.5rem] items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 rounded-full px-2 py-1">
           <img

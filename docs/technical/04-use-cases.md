@@ -135,18 +135,26 @@ Este documento detalla los flujos de interacción del sistema, especificando act
   3. Cada evento muestra tipo, fecha, producto y campos modificados.
 - **Estados Afectados**: Ninguno; es solo lectura.
 
-### 2.4. Ajustar Inventario Manual
+### 2.4. Registrar Movimientos de Stock
 
 - **Actor**: Administrador autenticado.
 - **Ruta**: `/admin/edit/$id`.
 - **Flujo Principal**:
   1. El admin ingresa al editor de producto.
-  2. En el panel de inventario manual indica delta positivo o negativo.
-  3. Opcionalmente agrega motivo y tipo de movimiento.
+  2. Abre la seccion `Movimientos de stock`, separada de la configuracion `Inventario`.
+  3. Elige entrada, venta externa, correccion o devolucion e indica unidades y detalle opcional.
   4. El frontend llama `adjust_product_stock_admin`.
   5. La RPC bloquea el producto, valida stock final no negativo, actualiza `products.stock_quantity` e inserta `stock_movements`.
   6. El frontend registra evento `stock_adjustment` en `product_audit_events`.
 - **Estados Afectados**: `products.stock_quantity`, `stock_movements`, `product_audit_events`.
+
+Reglas operativas:
+
+- El stock inicial se define al crear el producto.
+- En productos existentes, `Inventario` muestra el stock registrado como solo lectura.
+- Una venta por checkout Flow se descuenta automaticamente durante la confirmacion del pago.
+- Una venta por `payment_url` o canal externo se registra manualmente como `Venta externa`.
+- El guardado general del producto conserva el stock mas reciente y no sobrescribe movimientos.
 
 ### 2.5. Evitar Sobrescritura de Cambios Recientes
 

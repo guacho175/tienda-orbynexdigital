@@ -22,8 +22,6 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const isEditorRoute = pathname === "/admin/new" || pathname.startsWith("/admin/edit");
-  const isLight = isEditorRoute;
   const activeItem = ADMIN_NAV_ITEMS.find((item) => {
     if (item.to === "/admin") {
       return (
@@ -41,13 +39,8 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
   }
 
   return (
-    <section
-      className={cn(
-        "mx-auto my-4 grid min-h-[calc(100vh-8.5rem)] w-[min(92rem,calc(100%_-_1rem))] overflow-hidden rounded-2xl border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:my-6 lg:grid-cols-[240px_minmax(0,1fr)]",
-        isLight ? "bg-slate-50" : "bg-[#071a3d]/60",
-      )}
-    >
-      <aside className="flex flex-col border-b border-white/10 bg-[#061936] px-4 py-4 text-white lg:border-b-0 lg:border-r lg:py-6">
+    <section className="mx-auto grid h-[calc(100dvh-4.5rem)] w-full overflow-hidden bg-slate-50 lg:grid-cols-[228px_minmax(0,1fr)]">
+      <aside className="flex shrink-0 flex-col border-b border-white/10 bg-[#061936] px-4 py-3 text-white lg:h-full lg:border-b-0 lg:border-r lg:py-5">
         <div className="flex items-center justify-between gap-3 lg:block">
           <Link to="/admin" className="flex items-center gap-3 px-1 lg:px-2">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan-300/30 bg-blue-500/10 text-cyan-300">
@@ -75,7 +68,7 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
 
         <nav
           aria-label="Menu admin"
-          className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:mt-8 lg:flex-col lg:overflow-visible lg:pb-0"
+          className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:mt-7 lg:flex-col lg:overflow-visible lg:pb-0"
         >
           {ADMIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -118,20 +111,8 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
         </div>
       </aside>
 
-      <div
-        className={cn(
-          "flex min-w-0 flex-col",
-          isLight
-            ? "bg-slate-50 text-slate-950 [--accent:oklch(0.70_0.16_232)] [--accent-foreground:oklch(0.99_0.005_250)] [--border:oklch(0.88_0.03_250)] [--card-foreground:oklch(0.17_0.03_260)] [--card:oklch(1_0_0)] [--foreground:oklch(0.17_0.03_260)] [--input:oklch(0.88_0.03_250)] [--muted-foreground:oklch(0.47_0.04_255)] [--muted:oklch(0.95_0.02_250)] [--popover-foreground:oklch(0.17_0.03_260)] [--popover:oklch(1_0_0)] [--secondary-foreground:oklch(0.25_0.03_260)] [--secondary:oklch(0.96_0.02_250)]"
-            : "bg-[#071a3d]/35",
-        )}
-      >
-        <div
-          className={cn(
-            "flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6 lg:px-8",
-            isLight ? "border-slate-200 bg-white/75" : "border-white/8 bg-[#071a3d]/45",
-          )}
-        >
+      <div className="flex min-h-0 min-w-0 flex-col bg-slate-50 text-slate-950 [--accent:oklch(0.70_0.16_232)] [--accent-foreground:oklch(0.99_0.005_250)] [--border:oklch(0.88_0.03_250)] [--card-foreground:oklch(0.17_0.03_260)] [--card:oklch(1_0_0)] [--foreground:oklch(0.17_0.03_260)] [--input:oklch(0.88_0.03_250)] [--muted-foreground:oklch(0.47_0.04_255)] [--muted:oklch(0.95_0.02_250)] [--popover-foreground:oklch(0.17_0.03_260)] [--popover:oklch(1_0_0)] [--secondary-foreground:oklch(0.25_0.03_260)] [--secondary:oklch(0.96_0.02_250)]">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6 lg:px-8">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
               {activeItem?.label ?? "Panel"}
@@ -142,7 +123,7 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
           </div>
         </div>
 
-        <div className="min-w-0 flex-1 overflow-x-hidden">{children}</div>
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">{children}</div>
       </div>
     </section>
   );

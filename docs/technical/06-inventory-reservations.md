@@ -46,9 +46,14 @@ La tabla `stock_movements` guarda historial operativo.
 
 Implementado actualmente:
 
-- ajustes manuales desde `/admin/edit/$id`;
+- entradas de stock desde `Movimientos de stock` en `/admin/edit/$id`;
+- ventas externas por `payment_url` u otros canales;
 - devoluciones manuales;
-- correcciones manuales.
+- correcciones positivas o negativas.
+
+`Entrada de stock` y `Venta externa` reutilizan `manual_adjustment` y guardan una etiqueta semantica
+normalizada en `reason`. Devoluciones y correcciones mantienen `manual_return` y
+`manual_correction`. Esto conserva el contrato y los permisos actuales sin migraciones adicionales.
 
 Previsto para fases futuras:
 
@@ -78,6 +83,9 @@ Esta RPC:
 - fuerza `track_inventory = true`;
 - inserta un registro en `stock_movements`;
 - corre como `SECURITY INVOKER`, por lo que respeta RLS del admin autenticado.
+
+El panel calcula el stock resultante y bloquea una rebaja que superaria el stock disponible. La RPC
+repite esa validacion dentro de la transaccion como autoridad definitiva.
 
 ## Auditoria Relacionada
 

@@ -22,7 +22,7 @@ export function ProductGeneralSection({
       title="Información general"
       description="Define el nombre y la información comercial que verá el cliente."
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="name">Nombre *</Label>
@@ -78,7 +78,7 @@ export function ProductGeneralSection({
           </div>
           <Textarea
             id="description"
-            rows={8}
+            rows={6}
             value={values.description}
             maxLength={PRODUCT_EDITOR_LIMITS.description}
             disabled={disabled}

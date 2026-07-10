@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Boxes,
   CircleDollarSign,
   Image,
@@ -23,6 +24,7 @@ import {
 const SECTION_ICONS: Record<ProductEditorSectionId, LucideIcon> = {
   general: SlidersHorizontal,
   inventory: Boxes,
+  stockMovements: ArrowLeftRight,
   pricing: CircleDollarSign,
   media: Image,
   organization: PackageSearch,
@@ -32,14 +34,20 @@ const SECTION_ICONS: Record<ProductEditorSectionId, LucideIcon> = {
 interface ProductEditorNavProps {
   activeSection: ProductEditorSectionId;
   errorCountBySection: Record<ProductEditorSectionId, number>;
+  showStockMovements: boolean;
   onChange: (section: ProductEditorSectionId) => void;
 }
 
 export function ProductEditorNav({
   activeSection,
   errorCountBySection,
+  showStockMovements,
   onChange,
 }: ProductEditorNavProps) {
+  const visibleSections = PRODUCT_EDITOR_SECTIONS.filter(
+    (section) => !("existingProductOnly" in section) || showStockMovements,
+  );
+
   return (
     <>
       <div className="lg:hidden">
@@ -57,7 +65,7 @@ export function ProductEditorNav({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {PRODUCT_EDITOR_SECTIONS.map((section) => {
+            {visibleSections.map((section) => {
               const errorCount = errorCountBySection[section.id];
               return (
                 <SelectItem key={section.id} value={section.id}>
@@ -72,13 +80,13 @@ export function ProductEditorNav({
 
       <nav
         aria-label="Secciones del editor de producto"
-        className="sticky top-24 hidden overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-[0_14px_42px_rgba(15,23,42,0.08)] lg:block"
+        className="sticky top-4 hidden overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm lg:block"
       >
-        <p className="px-3 pb-2 pt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        <p className="px-2.5 pb-1.5 pt-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
           Secciones
         </p>
         <div className="divide-y divide-slate-100">
-          {PRODUCT_EDITOR_SECTIONS.map((section) => {
+          {visibleSections.map((section) => {
             const Icon = SECTION_ICONS[section.id];
             const errorCount = errorCountBySection[section.id];
             const isActive = activeSection === section.id;
@@ -90,7 +98,7 @@ export function ProductEditorNav({
                 onClick={() => onChange(section.id)}
                 aria-current={isActive ? "step" : undefined}
                 className={cn(
-                  "relative flex min-h-14 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
+                  "relative flex min-h-12 w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
                   isActive
                     ? "bg-sky-50 text-sky-600"
                     : "text-slate-700 hover:bg-slate-50 hover:text-slate-950",
@@ -100,11 +108,11 @@ export function ProductEditorNav({
                   <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-sky-500" />
                 ) : null}
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0 flex-1 leading-tight">
                   <span className="block font-medium">{section.label}</span>
                   <span
                     className={cn(
-                      "mt-0.5 block truncate text-[11px]",
+                      "mt-0.5 block truncate text-[10px]",
                       isActive ? "text-sky-500" : "text-slate-500",
                     )}
                   >

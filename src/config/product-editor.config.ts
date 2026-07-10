@@ -21,7 +21,13 @@ export const PRODUCT_EDITOR_SECTIONS = [
   {
     id: "inventory",
     label: "Inventario",
-    description: "Disponibilidad, stock y reglas de compra.",
+    description: "Disponibilidad, stock registrado y reglas de compra.",
+  },
+  {
+    id: "stockMovements",
+    label: "Movimientos de stock",
+    description: "Entradas, ventas externas, correcciones e historial.",
+    existingProductOnly: true,
   },
   {
     id: "pricing",

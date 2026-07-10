@@ -20,7 +20,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
       title="SEO"
       description="Define la direccion publica y los metadatos que usara la ficha del producto."
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="slug">Slug *</Label>
@@ -56,7 +56,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
           )}
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="meta_title">Titulo SEO</Label>

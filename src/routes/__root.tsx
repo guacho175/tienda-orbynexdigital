@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -18,6 +19,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { brandConfig } from "@/config/brand.config";
 import { supabase } from "@/integrations/supabase/client";
 import { CartProvider } from "@/store/cart.store";
+import { cn } from "@/lib/utils";
 
 function NotFoundComponent() {
   return (
@@ -144,6 +146,9 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const isAdminRoute = useRouterState({
+    select: (state) => state.location.pathname.startsWith("/admin"),
+  });
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
@@ -161,12 +166,17 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <div className="app-shell flex min-h-screen flex-col">
+        <div
+          className={cn(
+            "app-shell flex min-h-screen flex-col",
+            isAdminRoute && "h-dvh overflow-hidden",
+          )}
+        >
           <Navbar />
-          <main className="flex-1">
+          <main className={cn("flex-1", isAdminRoute && "min-h-0 overflow-hidden")}>
             <Outlet />
           </main>
-          <Footer />
+          {isAdminRoute ? null : <Footer />}
         </div>
         <CartDrawer />
         <Toaster />

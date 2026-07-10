@@ -18,7 +18,7 @@ export function ProductOrganizationSection({
       title="Organización y visibilidad"
       description="Ordena el catálogo y controla si el producto está publicado."
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">

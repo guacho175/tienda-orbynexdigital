@@ -27,3 +27,12 @@ No se modificaron checkout, Flow, WhatsApp, `payment_url`, RLS, storage, RPCs ni
 - Solo cambia el contenido central.
 - Las cabeceras internas son compactas.
 - En movil no debe aparecer overflow horizontal ni solapamiento del menu.
+
+## Ajuste compacto posterior
+
+- El panel ocupa el alto disponible bajo la barra global y administra su propio scroll.
+- En escritorio, el lateral principal queda inmovil y el menu de secciones del editor permanece fijo dentro del contenido.
+- Todas las rutas admin comparten una superficie clara estable, evitando el cambio de fondo antes de montar el editor.
+- La lista precarga el producto al enfocar o apuntar a Editar; la vista de edicion reutiliza ese dato y precarga los movimientos de inventario.
+- El resumen del producto, las secciones del formulario y la barra de acciones redujeron altura y espacios sin eliminar informacion operativa.
+- Referencia de diseno: https://www.figma.com/design/umR6leULLc5eEP71GGHjJZ

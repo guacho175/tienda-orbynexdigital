@@ -7,6 +7,8 @@ import { Container } from "@/components/layout/Container";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { fetchProductByIdAdmin, updateProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
+import type { Product } from "@/types/product";
+import { fetchStockMovements } from "@/services/inventory.service";
 
 export const Route = createFileRoute("/_authenticated/admin/edit/$id")({
   component: EditProductPage,
@@ -21,13 +23,26 @@ function EditProductPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: ["admin-product", id],
     queryFn: () => fetchProductByIdAdmin(id),
+    initialData: () =>
+      queryClient
+        .getQueryData<Product[]>(["admin-products"])
+        ?.find((candidate) => candidate.id === id),
+    staleTime: 30_000,
   });
 
   useEffect(() => {
     if (product?.updated_at && !openedUpdatedAtRef.current) {
       openedUpdatedAtRef.current = product.updated_at;
     }
-  }, [product?.updated_at]);
+
+    if (product) {
+      void queryClient.prefetchQuery({
+        queryKey: ["stock-movements", product.id],
+        queryFn: () => fetchStockMovements(product.id),
+        staleTime: 30_000,
+      });
+    }
+  }, [product, queryClient]);
 
   const mutation = useMutation({
     mutationFn: async (values: Parameters<typeof updateProduct>[1]) => {
@@ -46,7 +61,11 @@ function EditProductPage() {
         }
       }
 
-      const updatedProduct = await updateProduct(id, values);
+      const updatedProduct = await updateProduct(id, {
+        ...values,
+        // Los movimientos operativos son la autoridad de stock en productos existentes.
+        stock_quantity: latestProduct.stock_quantity,
+      });
 
       try {
         await createProductAuditEvent({
@@ -87,7 +106,7 @@ function EditProductPage() {
         title="Editar producto"
         subtitle={product?.name ?? "Ajusta la informacion del catalogo."}
       />
-      <Container className="py-6 lg:py-8">
+      <Container className="py-4 lg:py-5">
         {isLoading ? (
           <p className="text-center text-muted-foreground">Cargando...</p>
         ) : !product ? (
@@ -96,7 +115,7 @@ function EditProductPage() {
           <>
             <ProductForm
               initial={product}
-              stockAdjustmentProduct={product}
+              stockMovementsProduct={product}
               submitLabel="Guardar cambios"
               onSubmit={async (values) => {
                 await mutation.mutateAsync(values);

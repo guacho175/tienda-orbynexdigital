@@ -45,7 +45,7 @@ export function ProductMediaSection({
       description="Gestiona la imagen principal sin perder el fallback manual ni las variantes optimizadas."
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="image_url">URL de imagen</Label>
             <Input

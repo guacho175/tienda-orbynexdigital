@@ -18,6 +18,7 @@ import { ProductEditorLayout } from "./product-editor/ProductEditorLayout";
 import { ProductEditorNav } from "./product-editor/ProductEditorNav";
 import { ProductGeneralSection } from "./product-editor/ProductGeneralSection";
 import { ProductInventorySection } from "./product-editor/ProductInventorySection";
+import { ProductStockMovementsSection } from "./product-editor/ProductStockMovementsSection";
 import { ProductMediaSection } from "./product-editor/ProductMediaSection";
 import { ProductOrganizationSection } from "./product-editor/ProductOrganizationSection";
 import { ProductPricingSection } from "./product-editor/ProductPricingSection";
@@ -26,7 +27,7 @@ import { useProductEditor } from "./product-editor/useProductEditor";
 
 export interface ProductFormProps {
   initial?: Product | null;
-  stockAdjustmentProduct?: Product | null;
+  stockMovementsProduct?: Product | null;
   submitLabel?: string;
   onSubmit: (values: ProductInput) => Promise<void>;
   onCancel?: () => void;
@@ -47,7 +48,7 @@ function formatUpdatedAt(value: string | undefined) {
 
 export function ProductForm({
   initial,
-  stockAdjustmentProduct,
+  stockMovementsProduct,
   submitLabel = "Guardar",
   onSubmit,
   onCancel,
@@ -72,29 +73,26 @@ export function ProductForm({
 
   return (
     <>
-      <form onSubmit={editor.handleSubmit} noValidate className="space-y-5">
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-slate-950 shadow-[0_14px_42px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
+      <form onSubmit={editor.handleSubmit} noValidate className="space-y-4">
+        <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-950 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2.5">
               <Badge variant={editor.values.is_active ? "default" : "secondary"}>
                 {editor.values.is_active ? "Activo" : "Inactivo"}
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                Sección {activeSection?.label ?? "General"}
+              <span className="text-sm font-medium text-foreground">
+                {editor.values.name || "Nuevo producto"}
               </span>
             </div>
-            <p className="mt-2 text-sm font-medium text-foreground">
-              {editor.values.name || "Nuevo producto"}
-            </p>
             {updatedAt ? (
               <p className="mt-1 text-xs text-muted-foreground">
                 Última actualización: {updatedAt}
               </p>
             ) : null}
           </div>
-          <p className="max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-right">
-            Completa una sección a la vez. Todos los cambios se guardan juntos al finalizar.
-          </p>
+          <span className="text-xs font-medium text-muted-foreground sm:text-right">
+            Sección {activeSection?.label ?? "General"}
+          </span>
         </div>
 
         {totalErrors > 0 ? (
@@ -112,6 +110,7 @@ export function ProductForm({
             <ProductEditorNav
               activeSection={editor.activeSection}
               errorCountBySection={editor.errorCountBySection}
+              showStockMovements={Boolean(stockMovementsProduct)}
               onChange={editor.setActiveSection}
             />
           }
@@ -131,8 +130,12 @@ export function ProductForm({
               errors={editor.errors}
               update={editor.update}
               disabled={disabled}
-              stockAdjustmentProduct={stockAdjustmentProduct}
+              existingProduct={initial}
+              onOpenStockMovements={() => editor.setActiveSection("stockMovements")}
             />
+          ) : null}
+          {editor.activeSection === "stockMovements" && stockMovementsProduct ? (
+            <ProductStockMovementsSection product={stockMovementsProduct} />
           ) : null}
           {editor.activeSection === "pricing" ? (
             <ProductPricingSection

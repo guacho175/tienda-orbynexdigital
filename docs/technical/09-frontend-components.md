@@ -16,7 +16,7 @@ Frontend construido con React, TanStack Start/Router, React Query y Tailwind CSS
 
 - `/admin`: listado de productos, buscador simple, activar/desactivar, editar y eliminar.
 - `/admin/new`: crear producto.
-- `/admin/edit/$id`: editar producto y ajustar inventario manual.
+- `/admin/edit/$id`: editar producto y registrar movimientos de stock.
 - `/admin/analytics`: analitica administrativa solo lectura.
 - `/admin/audit`: auditoria de cambios de productos.
 
@@ -57,6 +57,7 @@ Editor por secciones:
 
 - general;
 - inventario;
+- movimientos de stock, solo al editar productos existentes;
 - precios;
 - media;
 - organizacion;
@@ -72,11 +73,14 @@ Caracteristicas:
 
 ### `ProductStockAdjustmentPanel`
 
-Panel en `/admin/edit/$id` para:
+Panel dentro de `Movimientos de stock` en `/admin/edit/$id` para:
 
-- sumar o restar stock;
-- elegir tipo de movimiento manual;
-- registrar motivo opcional;
+- registrar entradas de stock;
+- registrar ventas externas por link de pago u otros canales;
+- sumar o rebajar correcciones;
+- registrar devoluciones;
+- bloquear resultados negativos;
+- registrar un detalle opcional;
 - ver movimientos recientes.
 
 Llama `adjustProductStock`, que usa la RPC `adjust_product_stock_admin`.

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,13 +14,13 @@ import {
   PRODUCT_AVAILABILITY_OPTIONS,
   PRODUCT_OUT_OF_STOCK_OPTIONS,
 } from "@/config/product-editor.config";
-import { ProductStockAdjustmentPanel } from "@/components/admin/ProductStockAdjustmentPanel";
 import type { Product } from "@/types/product";
 import { ProductEditorSection } from "./ProductEditorSection";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
 
 interface ProductInventorySectionProps extends ProductEditorFieldsProps {
-  stockAdjustmentProduct?: Product | null;
+  existingProduct?: Product | null;
+  onOpenStockMovements: () => void;
 }
 
 function getInventoryStatus(values: ProductEditorFieldsProps["values"]) {
@@ -50,16 +51,19 @@ export function ProductInventorySection({
   errors,
   update,
   disabled,
-  stockAdjustmentProduct,
+  existingProduct,
+  onOpenStockMovements,
 }: ProductInventorySectionProps) {
-  const status = getInventoryStatus(values);
+  const isExistingProduct = Boolean(existingProduct);
+  const registeredStock = existingProduct?.stock_quantity ?? values.stock_quantity;
+  const status = getInventoryStatus({ ...values, stock_quantity: registeredStock });
 
   return (
     <ProductEditorSection
       title="Inventario"
-      description="Controla la disponibilidad y qué debe ocurrir cuando se acaben las unidades."
+      description="Configura la disponibilidad y las reglas que se aplicarán al guardar el producto."
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-foreground">Estado resultante</p>
@@ -112,27 +116,48 @@ export function ProductInventorySection({
           />
         </div>
 
+        {isExistingProduct ? (
+          <div className="space-y-2">
+            <Label htmlFor="stock_quantity">Stock registrado</Label>
+            <Input id="stock_quantity" type="number" min={0} value={registeredStock} disabled />
+            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Para sumar, rebajar o corregir unidades usa Movimientos de stock. La configuración
+                se aplicará al guardar sin reemplazar el stock registrado.
+              </p>
+              <Button type="button" variant="outline" size="sm" onClick={onOpenStockMovements}>
+                Ir a Movimientos de stock
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
         {values.track_inventory ? (
-          <div className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="stock_quantity">Stock disponible</Label>
-                <Input
-                  id="stock_quantity"
-                  type="number"
-                  min={0}
-                  value={values.stock_quantity}
-                  disabled={disabled}
-                  aria-invalid={Boolean(errors.stock_quantity)}
-                  aria-describedby={errors.stock_quantity ? "stock-quantity-error" : undefined}
-                  onChange={(event) => update("stock_quantity", Number(event.target.value))}
-                />
-                {errors.stock_quantity ? (
-                  <p id="stock-quantity-error" className="text-xs text-destructive">
-                    {errors.stock_quantity}
+          <div className="space-y-4">
+            <div className={isExistingProduct ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
+              {!isExistingProduct ? (
+                <div className="space-y-2">
+                  <Label htmlFor="stock_quantity">Stock inicial</Label>
+                  <Input
+                    id="stock_quantity"
+                    type="number"
+                    min={0}
+                    value={registeredStock}
+                    disabled={disabled}
+                    aria-invalid={Boolean(errors.stock_quantity)}
+                    aria-describedby={errors.stock_quantity ? "stock-quantity-error" : undefined}
+                    onChange={(event) => update("stock_quantity", Number(event.target.value))}
+                  />
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Define las unidades disponibles al crear el producto.
                   </p>
-                ) : null}
-              </div>
+                  {errors.stock_quantity ? (
+                    <p id="stock-quantity-error" className="text-xs text-destructive">
+                      {errors.stock_quantity}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="space-y-2">
                 <Label htmlFor="low_stock_threshold">Umbral de pocas unidades</Label>
                 <Input
@@ -207,10 +232,6 @@ export function ProductInventorySection({
             Este producto seguirá disponible sin descontar unidades.
           </p>
         )}
-
-        {stockAdjustmentProduct ? (
-          <ProductStockAdjustmentPanel product={stockAdjustmentProduct} />
-        ) : null}
       </div>
     </ProductEditorSection>
   );
