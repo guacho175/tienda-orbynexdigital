@@ -1,9 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Container } from "@/components/layout/Container";
-import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { createProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
@@ -50,13 +49,13 @@ function NewProductPage() {
   });
 
   return (
-    <AdminShell tone="light" contentClassName="min-h-full">
-      <PageHeader
-        eyebrow="Admin"
+    <>
+      <AdminPageHeader
+        eyebrow="Producto"
         title="Nuevo producto"
-        subtitle="Crea un producto para el catálogo."
+        subtitle="Crea una ficha para publicar o gestionar dentro del catalogo."
       />
-      <Container className="py-8">
+      <Container className="py-6 lg:py-8">
         <ProductForm
           submitLabel="Crear producto"
           onSubmit={async (values) => {
@@ -65,6 +64,6 @@ function NewProductPage() {
           onCancel={() => navigate({ to: "/admin" })}
         />
       </Container>
-    </AdminShell>
+    </>
   );
 }

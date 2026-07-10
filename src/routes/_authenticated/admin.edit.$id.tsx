@@ -2,9 +2,8 @@ import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Container } from "@/components/layout/Container";
-import { AdminShell } from "@/components/admin/AdminShell";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { fetchProductByIdAdmin, updateProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
@@ -82,9 +81,13 @@ function EditProductPage() {
   });
 
   return (
-    <AdminShell tone="light" contentClassName="min-h-full">
-      <PageHeader eyebrow="Admin" title="Editar producto" subtitle={product?.name ?? ""} />
-      <Container className="py-8">
+    <>
+      <AdminPageHeader
+        eyebrow="Producto"
+        title="Editar producto"
+        subtitle={product?.name ?? "Ajusta la informacion del catalogo."}
+      />
+      <Container className="py-6 lg:py-8">
         {isLoading ? (
           <p className="text-center text-muted-foreground">Cargando...</p>
         ) : !product ? (
@@ -103,6 +106,6 @@ function EditProductPage() {
           </>
         )}
       </Container>
-    </AdminShell>
+    </>
   );
 }

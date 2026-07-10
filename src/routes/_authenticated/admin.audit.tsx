@@ -1,14 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ClipboardList } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { AdminShell } from "@/components/admin/AdminShell";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Container } from "@/components/layout/Container";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { fetchProductAuditEvents } from "@/services/product-audit.service";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
 import type { Json } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/admin/audit")({
@@ -16,42 +12,19 @@ export const Route = createFileRoute("/_authenticated/admin/audit")({
 });
 
 function AdminAuditPage() {
-  const { isAdmin } = useAdminAccess();
   const auditQuery = useQuery({
     queryKey: ["product-audit-events"],
     queryFn: () => fetchProductAuditEvents(75),
-    enabled: isAdmin === true,
   });
 
-  if (isAdmin === null) {
-    return <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>;
-  }
-
-  if (isAdmin === false) {
-    return (
-      <Container className="py-24 text-center text-muted-foreground">
-        No tienes permisos para ver esta seccion.
-      </Container>
-    );
-  }
-
   return (
-    <AdminShell>
-      <PageHeader
-        eyebrow="Admin"
-        title="Auditoria"
-        subtitle="Historial de cambios importantes en productos."
+    <>
+      <AdminPageHeader
+        eyebrow="Auditoria"
+        title="Cambios del catalogo"
+        subtitle="Historial de ajustes importantes en productos e inventario."
       />
-      <Container className="py-10">
-        <div className="mb-6">
-          <Button asChild variant="outline">
-            <Link to="/admin">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Volver
-            </Link>
-          </Button>
-        </div>
-
+      <div className="px-4 py-6 sm:px-6 lg:px-10">
         <Card className="rounded-xl border-white/10 bg-card/55 shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -116,8 +89,8 @@ function AdminAuditPage() {
             )}
           </CardContent>
         </Card>
-      </Container>
-    </AdminShell>
+      </div>
+    </>
   );
 }
 

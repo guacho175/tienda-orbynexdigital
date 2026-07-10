@@ -1,65 +1,38 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { BarChart3, ArrowLeft, PackageSearch, ShoppingCart } from "lucide-react";
+import { PackageSearch, ShoppingCart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { AdminShell } from "@/components/admin/AdminShell";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Container } from "@/components/layout/Container";
-import { PageHeader } from "@/components/layout/PageHeader";
 import {
   fetchAdminAnalytics,
   formatCurrency,
   type SalesByDateRow,
   type TopProductRow,
 } from "@/services/admin-analytics.service";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
 
 export const Route = createFileRoute("/_authenticated/admin/analytics")({
   component: AdminAnalyticsPage,
 });
 
 function AdminAnalyticsPage() {
-  const { isAdmin } = useAdminAccess();
   const analyticsQuery = useQuery({
     queryKey: ["admin-analytics"],
     queryFn: fetchAdminAnalytics,
-    enabled: isAdmin === true,
   });
-
-  if (isAdmin === null) {
-    return <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>;
-  }
-
-  if (isAdmin === false) {
-    return (
-      <Container className="py-24 text-center text-muted-foreground">
-        No tienes permisos para ver esta seccion.
-      </Container>
-    );
-  }
 
   const analytics = analyticsQuery.data;
 
   return (
-    <AdminShell>
-      <PageHeader
-        eyebrow="Admin"
-        title="Analitica"
-        subtitle="Resumen real de catalogo, ordenes pagadas y productos mas vendidos."
+    <>
+      <AdminPageHeader
+        eyebrow="Analitica"
+        title="Indicadores comerciales"
+        subtitle="Resumen de catalogo, ordenes pagadas y productos mas vendidos."
+        actions={<Badge variant="secondary">Solo lectura</Badge>}
       />
-      <Container className="py-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <Button asChild variant="outline">
-            <Link to="/admin">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Volver
-            </Link>
-          </Button>
-          <Badge variant="secondary">Solo lectura</Badge>
-        </div>
-
+      <div className="px-4 py-6 sm:px-6 lg:px-10">
         {analyticsQuery.isLoading ? (
           <p className="py-12 text-center text-muted-foreground">Cargando analitica...</p>
         ) : analyticsQuery.isError ? (
@@ -121,8 +94,8 @@ function AdminAnalyticsPage() {
             </div>
           </div>
         ) : null}
-      </Container>
-    </AdminShell>
+      </div>
+    </>
   );
 }
 

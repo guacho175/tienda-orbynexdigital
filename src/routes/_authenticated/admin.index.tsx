@@ -1,12 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Eye, LogOut, Package, Shield, Plus, Pencil, Search, Trash2 } from "lucide-react";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Container } from "@/components/layout/Container";
-import { AdminShell } from "@/components/admin/AdminShell";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Eye, Package, Plus, Pencil, Search, Trash2 } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteProduct,
@@ -37,29 +34,12 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 function AdminPage() {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [email, setEmail] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-      setEmail(userData.user.email ?? "");
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userData.user.id);
-      setIsAdmin((roles ?? []).some((r) => r.role === "admin"));
-    })();
-  }, []);
 
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
     queryFn: fetchAllProductsAdmin,
-    enabled: isAdmin === true,
   });
 
   const filteredProducts = useMemo(() => {
@@ -98,13 +78,6 @@ function AdminPage() {
         description: err.message || "Revisa permisos, dependencias o intenta nuevamente.",
       }),
   });
-
-  async function handleSignOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
-  }
 
   function renderProductActions(p: Product) {
     return (
@@ -182,43 +155,14 @@ function AdminPage() {
     return <Badge variant="outline">Stock: {p.stock_quantity}</Badge>;
   }
 
-  if (isAdmin === null) {
-    return <Container className="py-24 text-center text-muted-foreground">Cargando...</Container>;
-  }
-
-  if (isAdmin === false) {
-    return (
-      <Container className="py-24">
-        <div className="card-surface mx-auto max-w-lg p-8 text-center">
-          <Shield className="mx-auto h-10 w-10 text-accent" />
-          <h1 className="mt-4 text-2xl font-bold text-foreground">Acceso restringido</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Tu cuenta ({email}) no tiene el rol{" "}
-            <code className="rounded bg-secondary px-1">admin</code>. Solicita al administrador que
-            te asigne el rol para acceder al panel.
-          </p>
-          <Button onClick={handleSignOut} variant="outline" className="mt-6">
-            <LogOut className="mr-1 h-4 w-4" /> Cerrar sesión
-          </Button>
-        </div>
-      </Container>
-    );
-  }
-
   return (
-    <AdminShell>
-      <PageHeader
-        eyebrow="Panel"
-        title="Catalogo administrativo"
-        subtitle={`Bienvenido, ${email}. Gestiona el catalogo de productos.`}
-      />
-      <div className="px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Package className="h-4 w-4" />
-            {products?.length ?? 0} productos en total
-          </div>
-          <div className="flex gap-2">
+    <>
+      <AdminPageHeader
+        eyebrow="Catalogo"
+        title="Productos"
+        subtitle="Gestiona catalogo, precios, visibilidad e inventario operativo desde una vista compacta."
+        actions={
+          <>
             <Button asChild className="btn-hero">
               <Link to="/admin/new">
                 <Plus className="mr-1 h-4 w-4" /> Nuevo producto
@@ -227,6 +171,14 @@ function AdminPage() {
             <Button asChild variant="outline">
               <Link to="/">Ver sitio</Link>
             </Button>
+          </>
+        }
+      />
+      <div className="px-4 py-6 sm:px-6 lg:px-10">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Package className="h-4 w-4" />
+            {products?.length ?? 0} productos en total
           </div>
         </div>
 
@@ -421,6 +373,6 @@ function AdminPage() {
           </table>
         </div>
       </div>
-    </AdminShell>
+    </>
   );
 }
