@@ -29,8 +29,8 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
               max={productEditorConfig.characterLimits.slug}
             />
           </div>
-          <div className="flex overflow-hidden rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring">
-            <span className="flex items-center border-r border-input bg-secondary/40 px-3 text-sm text-muted-foreground">
+          <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white ring-offset-background focus-within:ring-2 focus-within:ring-cyan-500">
+            <span className="flex items-center border-r border-slate-200 bg-white px-3 text-sm text-slate-600">
               /producto/
             </span>
             <Input
@@ -141,7 +141,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
           )}
         </div>
 
-        <div className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-secondary/20 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="space-y-1">
             <Label htmlFor="seo_noindex">No indexar este producto</Label>
             <p className="text-xs leading-relaxed text-muted-foreground">
@@ -161,9 +161,9 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
         {productEditorConfig.featureFlags.seoPreview ? (
           <div
             aria-label="Vista previa SEO"
-            className="rounded-xl border border-cyan-400/20 bg-background/70 p-4"
+            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
           >
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
               <span>Vista previa real</span>
               <span aria-hidden="true">Â·</span>
               <span>Usa la misma cascada que {preview.path}</span>
@@ -174,12 +174,12 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
                 </>
               ) : null}
             </div>
-            <p className="mt-3 text-sm text-cyan-300">{brandConfig.name}</p>
-            <p className="mt-1 break-all text-xs text-muted-foreground">{preview.path}</p>
-            <p className="mt-3 text-base font-semibold leading-snug text-foreground">
+            <p className="mt-3 text-sm font-medium text-cyan-700">{brandConfig.name}</p>
+            <p className="mt-1 break-all text-xs text-slate-600">{preview.path}</p>
+            <p className="mt-3 text-base font-semibold leading-snug text-slate-950">
               {preview.title}
             </p>
-            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-700">
               {preview.description}
             </p>
           </div>

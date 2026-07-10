@@ -20,6 +20,7 @@ function AdminAnalyticsPage() {
   const analyticsQuery = useQuery({
     queryKey: ["admin-analytics"],
     queryFn: fetchAdminAnalytics,
+    staleTime: 60_000,
   });
 
   const analytics = analyticsQuery.data;
@@ -43,10 +44,7 @@ function AdminAnalyticsPage() {
           <div className="space-y-6">
             <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {analytics.metrics.map((metric) => (
-                <Card
-                  key={metric.label}
-                  className="rounded-xl border-white/10 bg-card/55 shadow-none"
-                >
+                <Card key={metric.label} className="rounded-xl border-slate-200 bg-white shadow-sm">
                   <CardHeader className="pb-2">
                     <CardDescription>{metric.label}</CardDescription>
                     <CardTitle className="text-3xl">{metric.value}</CardTitle>
@@ -117,7 +115,7 @@ function AnalyticsTable<T extends SalesByDateRow | TopProductRow>({
   renderRow: (row: T) => ReactNode;
 }) {
   return (
-    <Card className="rounded-xl border-white/10 bg-card/55 shadow-none">
+    <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           {icon}

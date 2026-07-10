@@ -8,7 +8,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteProduct,
   fetchAllProductsAdmin,
-  fetchProductByIdAdmin,
   toggleProductActive,
 } from "@/services/products.service";
 import { Price } from "@/components/ui-common/Price";
@@ -41,6 +40,7 @@ function AdminPage() {
   const { data: products } = useQuery({
     queryKey: ["admin-products"],
     queryFn: fetchAllProductsAdmin,
+    staleTime: 60_000,
   });
 
   const filteredProducts = useMemo(() => {
@@ -81,12 +81,8 @@ function AdminPage() {
   });
 
   function renderProductActions(p: Product) {
-    const preloadEditor = () => {
-      void queryClient.prefetchQuery({
-        queryKey: ["admin-product", p.id],
-        queryFn: () => fetchProductByIdAdmin(p.id),
-        staleTime: 30_000,
-      });
+    const prepareEditor = () => {
+      queryClient.setQueryData(["admin-product", p.id], p);
     };
 
     return (
@@ -121,9 +117,10 @@ function AdminPage() {
           <Link
             to="/admin/edit/$id"
             params={{ id: p.id }}
-            preload="render"
-            onMouseEnter={preloadEditor}
-            onFocus={preloadEditor}
+            preload="intent"
+            onPointerEnter={prepareEditor}
+            onPointerDown={prepareEditor}
+            onFocus={prepareEditor}
             aria-label={`Editar ${p.name}`}
           >
             <Pencil className="h-4 w-4" />
@@ -198,7 +195,7 @@ function AdminPage() {
           </div>
         </div>
 
-        <div className="mb-6 flex items-center gap-2 rounded-xl border border-white/10 bg-card/55 px-3 py-2">
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input
             value={searchTerm}
@@ -211,7 +208,10 @@ function AdminPage() {
 
         <div className="space-y-4 md:hidden">
           {filteredProducts.map((p) => (
-            <article key={p.id} className="card-surface p-4">
+            <article
+              key={p.id}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            >
               <div className="grid grid-cols-[4.5rem_1fr] gap-4">
                 <ProductImage
                   src={p.image_url}
@@ -255,7 +255,7 @@ function AdminPage() {
             </article>
           ))}
           {filteredProducts.length === 0 ? (
-            <div className="card-surface px-4 py-10 text-center text-muted-foreground">
+            <div className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center text-muted-foreground shadow-sm">
               {searchTerm
                 ? "No hay productos que coincidan con la busqueda."
                 : "No hay productos aun."}
@@ -263,9 +263,9 @@ function AdminPage() {
           ) : null}
         </div>
 
-        <div className="card-surface hidden overflow-x-auto md:block">
+        <div className="hidden overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm md:block">
           <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-secondary/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+            <thead className="border-b border-slate-200 bg-white text-left text-xs uppercase tracking-wider text-slate-600">
               <tr>
                 <th className="px-4 py-3">Producto</th>
                 <th className="px-4 py-3">Categoría</th>
@@ -345,21 +345,12 @@ function AdminPage() {
                         <Link
                           to="/admin/edit/$id"
                           params={{ id: p.id }}
-                          preload="render"
-                          onMouseEnter={() => {
-                            void queryClient.prefetchQuery({
-                              queryKey: ["admin-product", p.id],
-                              queryFn: () => fetchProductByIdAdmin(p.id),
-                              staleTime: 30_000,
-                            });
-                          }}
-                          onFocus={() => {
-                            void queryClient.prefetchQuery({
-                              queryKey: ["admin-product", p.id],
-                              queryFn: () => fetchProductByIdAdmin(p.id),
-                              staleTime: 30_000,
-                            });
-                          }}
+                          preload="intent"
+                          onPointerEnter={() =>
+                            queryClient.setQueryData(["admin-product", p.id], p)
+                          }
+                          onPointerDown={() => queryClient.setQueryData(["admin-product", p.id], p)}
+                          onFocus={() => queryClient.setQueryData(["admin-product", p.id], p)}
                           aria-label={`Editar ${p.name}`}
                         >
                           <Pencil className="h-4 w-4" />

@@ -8,7 +8,6 @@ import { ProductForm } from "@/components/admin/ProductForm";
 import { fetchProductByIdAdmin, updateProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
 import type { Product } from "@/types/product";
-import { fetchStockMovements } from "@/services/inventory.service";
 
 export const Route = createFileRoute("/_authenticated/admin/edit/$id")({
   component: EditProductPage,
@@ -27,22 +26,14 @@ function EditProductPage() {
       queryClient
         .getQueryData<Product[]>(["admin-products"])
         ?.find((candidate) => candidate.id === id),
-    staleTime: 30_000,
+    staleTime: 60_000,
   });
 
   useEffect(() => {
     if (product?.updated_at && !openedUpdatedAtRef.current) {
       openedUpdatedAtRef.current = product.updated_at;
     }
-
-    if (product) {
-      void queryClient.prefetchQuery({
-        queryKey: ["stock-movements", product.id],
-        queryFn: () => fetchStockMovements(product.id),
-        staleTime: 30_000,
-      });
-    }
-  }, [product, queryClient]);
+  }, [product?.updated_at]);
 
   const mutation = useMutation({
     mutationFn: async (values: Parameters<typeof updateProduct>[1]) => {
@@ -114,6 +105,7 @@ function EditProductPage() {
         ) : (
           <>
             <ProductForm
+              key={product.id}
               initial={product}
               stockMovementsProduct={product}
               submitLabel="Guardar cambios"

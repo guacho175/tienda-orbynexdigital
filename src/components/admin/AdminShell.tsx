@@ -39,7 +39,7 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
   }
 
   return (
-    <section className="mx-auto grid h-[calc(100dvh-4.5rem)] w-full overflow-hidden bg-slate-50 lg:grid-cols-[228px_minmax(0,1fr)]">
+    <section className="mx-auto grid h-[calc(100dvh-4.5rem)] w-full overflow-hidden bg-white lg:grid-cols-[228px_minmax(0,1fr)]">
       <aside className="flex shrink-0 flex-col border-b border-white/10 bg-[#061936] px-4 py-3 text-white lg:h-full lg:border-b-0 lg:border-r lg:py-5">
         <div className="flex items-center justify-between gap-3 lg:block">
           <Link to="/admin" className="flex items-center gap-3 px-1 lg:px-2">
@@ -111,7 +111,7 @@ export function AdminShell({ children, userEmail }: AdminShellProps) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-col bg-slate-50 text-slate-950 [--accent:oklch(0.70_0.16_232)] [--accent-foreground:oklch(0.99_0.005_250)] [--border:oklch(0.88_0.03_250)] [--card-foreground:oklch(0.17_0.03_260)] [--card:oklch(1_0_0)] [--foreground:oklch(0.17_0.03_260)] [--input:oklch(0.88_0.03_250)] [--muted-foreground:oklch(0.47_0.04_255)] [--muted:oklch(0.95_0.02_250)] [--popover-foreground:oklch(0.17_0.03_260)] [--popover:oklch(1_0_0)] [--secondary-foreground:oklch(0.25_0.03_260)] [--secondary:oklch(0.96_0.02_250)]">
+      <div className="flex min-h-0 min-w-0 flex-col bg-white text-slate-950 [--accent:oklch(0.58_0.18_232)] [--accent-foreground:oklch(0.99_0.005_250)] [--background:oklch(1_0_0)] [--border:oklch(0.88_0.03_250)] [--card-foreground:oklch(0.17_0.03_260)] [--card:oklch(1_0_0)] [--foreground:oklch(0.17_0.03_260)] [--input:oklch(0.88_0.03_250)] [--muted-foreground:oklch(0.42_0.04_255)] [--muted:oklch(0.97_0.01_250)] [--popover-foreground:oklch(0.17_0.03_260)] [--popover:oklch(1_0_0)] [--secondary-foreground:oklch(0.25_0.03_260)] [--secondary:oklch(0.97_0.01_250)]">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6 lg:px-8">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">

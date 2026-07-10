@@ -70,6 +70,12 @@ Caracteristicas:
 - subida de imagenes optimizadas;
 - aviso de cambios sin guardar;
 - guardado manual con boton.
+- superficies administrativas blancas con texto oscuro y contraste explicito;
+- el formulario se reinicia por `product.id` para impedir que conserve valores del producto anterior;
+- la navegacion desde el listado reutiliza el producto ya cargado en React Query;
+- la ruta de edicion se precarga por intencion, evitando precargar simultaneamente todas las filas;
+- movimientos, analitica y auditoria conservan datos frescos durante 60 segundos para evitar
+  recargas repetidas al navegar.
 
 ### `ProductStockAdjustmentPanel`
 

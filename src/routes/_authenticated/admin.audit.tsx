@@ -15,6 +15,7 @@ function AdminAuditPage() {
   const auditQuery = useQuery({
     queryKey: ["product-audit-events"],
     queryFn: () => fetchProductAuditEvents(75),
+    staleTime: 60_000,
   });
 
   return (
@@ -25,7 +26,7 @@ function AdminAuditPage() {
         subtitle="Historial de ajustes importantes en productos e inventario."
       />
       <div className="px-4 py-6 sm:px-6 lg:px-10">
-        <Card className="rounded-xl border-white/10 bg-card/55 shadow-none">
+        <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <ClipboardList className="h-5 w-5" />
@@ -43,7 +44,10 @@ function AdminAuditPage() {
             ) : (
               <div className="space-y-3">
                 {(auditQuery.data ?? []).map((event) => (
-                  <article key={event.id} className="rounded-xl border border-white/10 p-4">
+                  <article
+                    key={event.id}
+                    className="rounded-xl border border-slate-200 bg-white p-4"
+                  >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">

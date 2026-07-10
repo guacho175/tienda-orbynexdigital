@@ -67,7 +67,7 @@ export function ProductOrganizationSection({
           </div>
         </div>
 
-        <div className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-secondary/20 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex gap-3">
             <span className="mt-0.5 text-accent">
               {values.is_active ? (

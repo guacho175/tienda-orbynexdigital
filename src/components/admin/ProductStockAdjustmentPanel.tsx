@@ -88,6 +88,7 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
   const movementsQuery = useQuery({
     queryKey: ["stock-movements", product.id],
     queryFn: () => fetchStockMovements(product.id),
+    staleTime: 60_000,
   });
 
   const mutation = useMutation({
@@ -138,7 +139,7 @@ export function ProductStockAdjustmentPanel({ product }: ProductStockAdjustmentP
   const canSubmit = parsedQuantity > 0 && nextStock >= 0 && !mutation.isPending;
 
   return (
-    <Card className="rounded-xl border-slate-200 bg-slate-50 shadow-none">
+    <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
       <CardHeader className="p-4 pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <ArrowDownToLine className="h-5 w-5" />

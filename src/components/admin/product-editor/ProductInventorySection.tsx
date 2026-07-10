@@ -64,7 +64,7 @@ export function ProductInventorySection({
       description="Configura la disponibilidad y las reglas que se aplicarán al guardar el producto."
     >
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-foreground">Estado resultante</p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -99,7 +99,7 @@ export function ProductInventorySection({
           </Select>
         </div>
 
-        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div>
             <Label htmlFor="track_inventory" className="cursor-pointer text-sm font-medium">
               Controlar inventario
@@ -120,7 +120,7 @@ export function ProductInventorySection({
           <div className="space-y-2">
             <Label htmlFor="stock_quantity">Stock registrado</Label>
             <Input id="stock_quantity" type="number" min={0} value={registeredStock} disabled />
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
               <p className="text-xs leading-relaxed text-muted-foreground">
                 Para sumar, rebajar o corregir unidades usa Movimientos de stock. La configuración
                 se aplicará al guardar sin reemplazar el stock registrado.
@@ -180,7 +180,7 @@ export function ProductInventorySection({
               </div>
             </div>
 
-            <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div>
                 <Label htmlFor="allow_backorder" className="cursor-pointer text-sm font-medium">
                   Permitir venta sin stock

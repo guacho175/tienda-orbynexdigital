@@ -113,7 +113,7 @@ export function ProductMediaSection({
           </div>
 
           {imageUploadResult ? (
-            <div className="rounded-xl border border-white/10 bg-secondary/20 p-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
                 <CheckCircle2 className="h-4 w-4 text-accent" aria-hidden="true" />
                 Imagen optimizada correctamente
