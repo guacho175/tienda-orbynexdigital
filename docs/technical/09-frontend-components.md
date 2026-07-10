@@ -95,6 +95,17 @@ Llama `adjustProductStock`, que usa la RPC `adjust_product_stock_admin`.
 
 Hook compartido para validar si el usuario autenticado tiene rol `admin`.
 
+### Acceso admin por ruta
+
+La proteccion principal de `/admin` vive en la ruta `/_authenticated/admin`:
+
+- reutiliza el usuario validado por `/_authenticated`;
+- consulta `admin-access.service.ts` mediante React Query;
+- mantiene el resultado de `["admin-access", user.id]` fresco durante 60 segundos;
+- falla cerrado si `user_roles` devuelve error o no existe el rol admin.
+
+`useAdminAccess` queda como hook heredado no usado por las rutas actuales.
+
 ## Servicios Frontend
 
 - `products.service.ts`: catalogo publico y CRUD admin.
@@ -121,3 +132,18 @@ Operaciones:
 - No eliminar soporte de `payment_url`.
 - No hacer autosave agresivo en editor admin.
 - Para cambios admin sensibles, mantener guardado manual y auditoria.
+
+## Precarga y estados de carga admin
+
+- El router mantiene `defaultPreload: "intent"` y reutiliza la precarga durante 30 segundos con
+  `defaultPreloadStaleTime: 30_000`.
+- Los enlaces de edicion del listado admin conservan `preload="intent"` y siembran
+  `["admin-product", id]` con el producto del listado al enfocar, tocar o acercar el puntero.
+- El detalle de producto admin conserva `staleTime: 60_000` para evitar recargas al navegar desde
+  el listado.
+- La comprobacion de acceso admin usa la cache `["admin-access", user.id]` durante 60 segundos.
+- El listado admin distingue carga inicial, error, lista vacia real y datos cargados.
+- Durante la primera carga se muestra `AdminProductsSkeleton`, con tres tarjetas moviles y cinco
+  filas de escritorio. No se muestra `0 productos` mientras la consulta esta pendiente.
+- Durante refetch no destructivo, React Query conserva los datos existentes y la UI evita parpadeos
+  de estado vacio.

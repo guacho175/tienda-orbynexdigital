@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { brandConfig } from "@/config/brand.config";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({ meta: [{ title: "Acceso admin — " + brandConfig.name }] }),
   component: AuthPage,
 });

@@ -4,21 +4,26 @@ import { Shield } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/Container";
-import { supabase } from "@/integrations/supabase/client";
+import { getAdminAccess } from "@/services/admin-access.service";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  beforeLoad: async () => {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData.user) throw redirect({ to: "/auth" });
+  beforeLoad: async ({ context }) => {
+    const { queryClient, user } = context;
+    if (!user) throw redirect({ to: "/auth" });
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id);
+    const isAdmin = await queryClient
+      .ensureQueryData({
+        queryKey: ["admin-access", user.id],
+        queryFn: () => getAdminAccess(user.id),
+        staleTime: 60_000,
+        gcTime: 300_000,
+        retry: 1,
+      })
+      .catch(() => false);
 
     return {
-      adminEmail: userData.user.email ?? "",
-      isAdmin: (roles ?? []).some((role) => role.role === "admin"),
+      adminEmail: user.email ?? "",
+      isAdmin,
     };
   },
   component: AdminLayout,

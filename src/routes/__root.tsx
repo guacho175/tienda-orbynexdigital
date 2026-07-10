@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { GlobalBrandEffects } from "@/components/brand/BrandEffects";
@@ -146,17 +146,26 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const [hasHydrated, setHasHydrated] = useState(false);
   const isAdminRoute = useRouterState({
     select: (state) => state.location.pathname.startsWith("/admin"),
   });
+  const useAdminLayout = hasHydrated && isAdminRoute;
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        router.invalidate();
-        if (event !== "SIGNED_OUT") {
+        if (event === "SIGNED_OUT") {
+          queryClient.clear();
+        } else {
+          queryClient.invalidateQueries({ queryKey: ["admin-access"] });
           queryClient.invalidateQueries();
         }
+        router.invalidate();
       }
     });
 
@@ -169,14 +178,14 @@ function RootComponent() {
         <div
           className={cn(
             "app-shell flex min-h-screen flex-col",
-            isAdminRoute && "h-dvh overflow-hidden",
+            useAdminLayout && "h-dvh overflow-hidden",
           )}
         >
           <Navbar />
-          <main className={cn("flex-1", isAdminRoute && "min-h-0 overflow-hidden")}>
+          <main className={cn("flex-1", useAdminLayout && "min-h-0 overflow-hidden")}>
             <Outlet />
           </main>
-          {isAdminRoute ? null : <Footer />}
+          {useAdminLayout ? null : <Footer />}
         </div>
         <CartDrawer />
         <Toaster />
