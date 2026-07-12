@@ -91,7 +91,7 @@ export async function createProductAuditEvent(params: {
   productId: string;
   eventType: string;
   before: Product | Record<string, never>;
-  after: Product;
+  after: Product | Record<string, never>;
   changedFields?: string[];
 }) {
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -100,7 +100,8 @@ export async function createProductAuditEvent(params: {
   if (!userId) throw new Error("No hay usuario autenticado para registrar auditoria.");
 
   const changedFields =
-    params.changedFields ?? getChangedProductFields(params.before as Product, params.after);
+    params.changedFields ??
+    getChangedProductFields(params.before as Product, params.after as Product);
 
   const { error } = await supabase.from("product_audit_events").insert({
     product_id: params.productId,
@@ -149,12 +150,14 @@ export function getAuditProductName(event: ProductAuditEvent) {
   return (
     getSnapshotString(event.after_snapshot, "name") ??
     getSnapshotString(event.before_snapshot, "name") ??
-    event.product_id
+    event.product_id ??
+    "Producto sin nombre"
   );
 }
 
 export function getAuditChangeSummary(event: ProductAuditEvent) {
   if (event.event_type === "product_create") return "Producto creado en el catalogo.";
+  if (event.event_type === "product_delete") return "Producto eliminado del catalogo.";
   if (event.event_type === "stock_adjustment") return "Movimiento de stock registrado.";
   return "Producto actualizado.";
 }
@@ -167,6 +170,17 @@ export function getAuditChanges(event: ProductAuditEvent): ProductAuditChange[] 
         label: FIELD_LABELS.product,
         beforeValue: "No existia",
         afterValue: getSnapshotString(event.after_snapshot, "name") ?? "Producto creado",
+      },
+    ];
+  }
+
+  if (event.event_type === "product_delete") {
+    return [
+      {
+        field: "product",
+        label: FIELD_LABELS.product,
+        beforeValue: getSnapshotString(event.before_snapshot, "name") ?? "Producto existente",
+        afterValue: "Producto eliminado",
       },
     ];
   }

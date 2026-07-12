@@ -17,7 +17,7 @@ export type Database = {
           created_by: string | null;
           event_type: string;
           id: string;
-          product_id: string;
+          product_id: string | null;
         };
         Insert: {
           after_snapshot?: Json;
@@ -27,7 +27,7 @@ export type Database = {
           created_by?: string | null;
           event_type?: string;
           id?: string;
-          product_id: string;
+          product_id?: string | null;
         };
         Update: {
           after_snapshot?: Json;
@@ -37,7 +37,7 @@ export type Database = {
           created_by?: string | null;
           event_type?: string;
           id?: string;
-          product_id?: string;
+          product_id?: string | null;
         };
         Relationships: [
           {
@@ -507,6 +507,19 @@ export type Database = {
           p_product_id: string;
           p_quantity_delta: number;
           p_reason?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["products"]["Row"];
+      };
+      delete_product_with_audit: {
+        Args: {
+          p_product_id: string;
+        };
+        Returns: undefined;
+      };
+      set_product_active_with_audit: {
+        Args: {
+          p_is_active: boolean;
+          p_product_id: string;
         };
         Returns: Database["public"]["Tables"]["products"]["Row"];
       };

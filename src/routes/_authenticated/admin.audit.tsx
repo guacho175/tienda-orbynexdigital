@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   fetchProductAuditEvents,
   getAuditChangeSummary,
   getAuditChanges,
@@ -71,26 +77,24 @@ function AdminAuditPage() {
               </div>
             ) : (
               <>
-                <div className="space-y-3">
+                <Accordion type="multiple" className="space-y-2">
                   {events.map((event) => (
-                    <AuditEventCard key={event.id} event={event} />
+                    <AuditEventItem key={event.id} event={event} />
                   ))}
                   {events.length === 0 ? (
                     <p className="py-10 text-center text-muted-foreground">
                       Todavia no hay eventos de auditoria.
                     </p>
                   ) : null}
-                </div>
+                </Accordion>
 
-                {total > AUDIT_PAGE_SIZE ? (
-                  <AuditPagination
-                    page={page}
-                    totalPages={totalPages}
-                    isFetching={auditQuery.isFetching}
-                    onPrevious={() => setPage((current) => Math.max(0, current - 1))}
-                    onNext={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
-                  />
-                ) : null}
+                <AuditPagination
+                  page={page}
+                  totalPages={totalPages}
+                  isFetching={auditQuery.isFetching}
+                  onPrevious={() => setPage((current) => Math.max(0, current - 1))}
+                  onNext={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
+                />
               </>
             )}
           </CardContent>
@@ -100,52 +104,71 @@ function AdminAuditPage() {
   );
 }
 
-function AuditEventCard({
+function AuditEventItem({
   event,
 }: {
   event: Awaited<ReturnType<typeof fetchProductAuditEvents>>["events"][number];
 }) {
   const changes = useMemo(() => getAuditChanges(event), [event]);
+  const productName = getAuditProductName(event);
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{formatEventType(event.event_type)}</Badge>
-            <span className="text-xs text-muted-foreground">{formatDate(event.created_at)}</span>
-          </div>
-          <h2 className="mt-2 font-semibold text-foreground">{getAuditProductName(event)}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{getAuditChangeSummary(event)}</p>
-        </div>
-        <Link
-          to="/admin/edit/$id"
-          params={{ id: event.product_id }}
-          className="text-sm font-medium text-accent hover:underline"
-        >
-          Abrir producto
-        </Link>
-      </div>
-
-      <div className="mt-4 grid gap-3">
-        {changes.map((change) => (
-          <div
-            key={change.field}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-          >
-            <p className="text-sm font-medium text-slate-950">{change.label}</p>
-            <div className="mt-2 grid gap-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
-              <ValueBlock label="Antes" value={change.beforeValue} />
-              <span className="hidden text-muted-foreground sm:block">-&gt;</span>
-              <ValueBlock label="Despues" value={change.afterValue} />
+    <AccordionItem value={event.id} className="rounded-lg border border-slate-200 bg-white px-3">
+      <AccordionTrigger className="gap-3 py-3 hover:no-underline">
+        <div className="grid w-full gap-2 text-left sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="truncate font-semibold text-foreground">{productName}</h2>
+              <span className="text-xs text-muted-foreground">{formatDate(event.created_at)}</span>
             </div>
+            <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+              {getAuditChangeSummary(event)}
+            </p>
           </div>
-        ))}
-        {changes.length === 0 ? (
-          <span className="text-sm text-muted-foreground">Sin campos modificados registrados.</span>
-        ) : null}
-      </div>
-    </article>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <Badge variant="secondary">{formatEventType(event.event_type)}</Badge>
+            <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+              Ver actividad
+            </span>
+          </div>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="pb-3">
+        <div className="grid gap-2 border-t border-slate-200 pt-3">
+          {changes.map((change) => (
+            <div
+              key={change.field}
+              className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
+            >
+              <p className="text-sm font-medium text-slate-950">{change.label}</p>
+              <div className="mt-2 grid gap-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+                <ValueBlock label="Antes" value={change.beforeValue} />
+                <span className="hidden text-muted-foreground sm:block">-&gt;</span>
+                <ValueBlock label="Despues" value={change.afterValue} />
+              </div>
+            </div>
+          ))}
+          {changes.length === 0 ? (
+            <span className="text-sm text-muted-foreground">
+              Sin campos modificados registrados.
+            </span>
+          ) : null}
+          {event.product_id ? (
+            <Link
+              to="/admin/edit/$id"
+              params={{ id: event.product_id }}
+              className="mt-1 w-fit text-sm font-medium text-accent hover:underline"
+            >
+              Abrir producto
+            </Link>
+          ) : (
+            <p className="mt-1 text-sm text-muted-foreground">
+              Este producto ya no existe en el catalogo.
+            </p>
+          )}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
 
@@ -197,6 +220,7 @@ function formatEventType(value: string) {
   if (value === "product_update") return "Edicion";
   if (value === "stock_adjustment") return "Stock";
   if (value === "product_create") return "Creacion";
+  if (value === "product_delete") return "Eliminacion";
   return value;
 }
 
