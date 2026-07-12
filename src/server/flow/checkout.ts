@@ -60,7 +60,13 @@ export function parseCreatePaymentBody(input: unknown): CreatePaymentBody {
   if (!result.success) {
     throw new ApiError(400, "Invalid checkout payload");
   }
-  return result.data;
+  return {
+    ...result.data,
+    customer: {
+      ...result.data.customer,
+      email: result.data.customer.email.trim().toLowerCase(),
+    },
+  };
 }
 
 export function aggregateRequestedItems(items: CreatePaymentBody["items"]) {

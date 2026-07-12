@@ -66,6 +66,8 @@ FLOW_BASE_URL=https://sandbox.flow.cl/api
 
 # URLs de Retorno de la Aplicación
 APP_PUBLIC_URL=http://localhost:5173
+VITE_APP_PUBLIC_URL=http://localhost:5173
+VITE_ALLOW_REMOTE_AUTH_SIGNUP_FROM_LOCAL=false
 FLOW_RETURN_URL=http://localhost:5173/checkout/resultado
 FLOW_CONFIRMATION_URL=https://tu-tunel-ngrok.ngrok-free.app/api/flow/confirm
 ```

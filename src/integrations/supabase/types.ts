@@ -478,6 +478,15 @@ export type Database = {
         };
         Returns: boolean;
       };
+      link_guest_orders_to_user: {
+        Args: {
+          p_email: string;
+          p_user_id: string;
+        };
+        Returns: {
+          linked_orders: number;
+        }[];
+      };
       release_order_stock_reservations: {
         Args: {
           p_flow_status?: Json;

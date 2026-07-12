@@ -51,6 +51,8 @@ Configurar equivalentes productivos de:
 - `FLOW_API_KEY`
 - `FLOW_SECRET_KEY`
 - `APP_PUBLIC_URL`
+- `VITE_APP_PUBLIC_URL`
+- `VITE_ALLOW_REMOTE_AUTH_SIGNUP_FROM_LOCAL`
 - `FLOW_RETURN_URL`
 - `FLOW_CONFIRMATION_URL`
 - `CRON_SECRET`
@@ -82,6 +84,7 @@ Para pasar de sandbox a produccion:
 2. Reemplazar `FLOW_API_KEY` y `FLOW_SECRET_KEY` por credenciales reales.
 3. Confirmar URLs publicas:
    - `APP_PUBLIC_URL`
+   - `VITE_APP_PUBLIC_URL`
    - `FLOW_RETURN_URL`
    - `FLOW_CONFIRMATION_URL`
 

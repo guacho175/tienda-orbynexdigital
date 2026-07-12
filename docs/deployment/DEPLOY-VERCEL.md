@@ -50,6 +50,8 @@ FLOW_BASE_URL=https://sandbox.flow.cl/api
 FLOW_RETURN_URL=https://tienda-orbynexdigital.vercel.app/checkout/resultado
 FLOW_CONFIRMATION_URL=https://tienda-orbynexdigital.vercel.app/api/flow/confirm
 APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+VITE_APP_PUBLIC_URL=https://tienda-orbynexdigital.vercel.app
+VITE_ALLOW_REMOTE_AUTH_SIGNUP_FROM_LOCAL=false
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_PUBLISHABLE_KEY=
 ```
@@ -84,6 +86,7 @@ En Supabase, configurar:
 - Site URL: `https://tu-dominio.com`
 - Redirect URLs:
   - `https://tu-dominio.com/auth`
+  - `https://tu-dominio.com/cuenta`
   - `https://tu-dominio.com/admin`
   - `https://tu-dominio.com/*`
   - URL local de desarrollo si se usa para pruebas, por ejemplo `http://localhost:5173/*`
