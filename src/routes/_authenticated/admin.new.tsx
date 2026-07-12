@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/Container";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { createProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
+import { getProductSaveErrorMessage } from "@/services/product-error-messages";
 
 export const Route = createFileRoute("/_authenticated/admin/new")({
   component: NewProductPage,
@@ -43,7 +44,7 @@ function NewProductPage() {
     },
     onError: (err: Error) => {
       toast.error("No se pudo crear el producto", {
-        description: err.message || "Revisa los campos e intenta nuevamente.",
+        description: getProductSaveErrorMessage(err),
       });
     },
   });

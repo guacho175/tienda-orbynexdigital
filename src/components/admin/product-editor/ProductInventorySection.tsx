@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   PRODUCT_AVAILABILITY_OPTIONS,
   PRODUCT_OUT_OF_STOCK_OPTIONS,
+  productEditorConfig,
 } from "@/config/product-editor.config";
 import type { Product } from "@/types/product";
 import { ProductEditorSection } from "./ProductEditorSection";
@@ -24,26 +25,32 @@ interface ProductInventorySectionProps extends ProductEditorFieldsProps {
 }
 
 function getInventoryStatus(values: ProductEditorFieldsProps["values"]) {
+  const statusCopy = productEditorConfig.copy.inventory.status;
+
   if (values.availability === "out_of_stock") {
-    return { label: "Agotado manualmente", className: "border-destructive/40 text-destructive" };
+    return {
+      ...statusCopy.manuallySoldOut,
+      className: "border-destructive/40 text-destructive",
+    };
   }
   if (!values.track_inventory) {
-    return { label: "Sin control de stock", className: "border-accent/30 text-accent" };
+    return { ...statusCopy.untracked, className: "border-accent/30 text-accent" };
   }
   if (values.stock_quantity <= 0 && values.allow_backorder) {
-    return { label: "Venta sin stock permitida", className: "border-amber-300/40 text-amber-200" };
+    return { ...statusCopy.backorder, className: "border-amber-300/40 text-amber-700" };
   }
   if (values.stock_quantity <= 0) {
     return {
-      label:
-        values.out_of_stock_behavior === "hide_product" ? "Agotado y oculto" : "Agotado y visible",
+      ...(values.out_of_stock_behavior === "hide_product"
+        ? statusCopy.soldOutHidden
+        : statusCopy.soldOutVisible),
       className: "border-destructive/40 text-destructive",
     };
   }
   if (!values.allow_backorder && values.stock_quantity <= values.low_stock_threshold) {
-    return { label: "Pocas unidades", className: "border-amber-300/40 text-amber-200" };
+    return { ...statusCopy.lowStock, className: "border-amber-300/40 text-amber-700" };
   }
-  return { label: "Disponible", className: "border-accent/30 text-accent" };
+  return { ...statusCopy.available, className: "border-accent/30 text-accent" };
 }
 
 export function ProductInventorySection({
@@ -54,23 +61,19 @@ export function ProductInventorySection({
   existingProduct,
   onOpenStockMovements,
 }: ProductInventorySectionProps) {
+  const copy = productEditorConfig.copy.inventory;
   const isExistingProduct = Boolean(existingProduct);
   const registeredStock = existingProduct?.stock_quantity ?? values.stock_quantity;
   const status = getInventoryStatus({ ...values, stock_quantity: registeredStock });
 
   return (
-    <ProductEditorSection
-      title="Inventario"
-      description="Configura la disponibilidad y las reglas que se aplicarán al guardar el producto."
-    >
+    <ProductEditorSection title="Inventario" description={copy.sectionDescription}>
       <div className="space-y-4">
-        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-foreground">Estado resultante</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              La disponibilidad manual tiene prioridad. Después se aplican control de stock,
-              backorder y visibilidad al agotarse.
-            </p>
+            <p className="text-sm font-medium text-foreground">{copy.resultTitle}</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{copy.resultHelp}</p>
+            <p className="mt-2 text-sm leading-relaxed text-slate-700">{status.description}</p>
           </div>
           <Badge variant="outline" className={status.className}>
             {status.label}
@@ -78,7 +81,7 @@ export function ProductInventorySection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="availability">Disponibilidad comercial</Label>
+          <Label htmlFor="availability">{copy.availabilityLabel}</Label>
           <Select
             value={values.availability}
             disabled={disabled}
@@ -97,15 +100,16 @@ export function ProductInventorySection({
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs leading-relaxed text-muted-foreground">{copy.availabilityHelp}</p>
         </div>
 
         <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div>
             <Label htmlFor="track_inventory" className="cursor-pointer text-sm font-medium">
-              Controlar inventario
+              {copy.trackInventoryLabel}
             </Label>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Desactívalo para servicios o productos sin límite de unidades.
+              {copy.trackInventoryHelp}
             </p>
           </div>
           <Switch
@@ -118,15 +122,14 @@ export function ProductInventorySection({
 
         {isExistingProduct ? (
           <div className="space-y-2">
-            <Label htmlFor="stock_quantity">Stock registrado</Label>
+            <Label htmlFor="stock_quantity">{copy.registeredStockLabel}</Label>
             <Input id="stock_quantity" type="number" min={0} value={registeredStock} disabled />
             <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Para sumar, rebajar o corregir unidades usa Movimientos de stock. La configuración
-                se aplicará al guardar sin reemplazar el stock registrado.
+                {copy.registeredStockHelp}
               </p>
               <Button type="button" variant="outline" size="sm" onClick={onOpenStockMovements}>
-                Ir a Movimientos de stock
+                {copy.stockMovementsButton}
               </Button>
             </div>
           </div>
@@ -137,7 +140,7 @@ export function ProductInventorySection({
             <div className={isExistingProduct ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
               {!isExistingProduct ? (
                 <div className="space-y-2">
-                  <Label htmlFor="stock_quantity">Stock inicial</Label>
+                  <Label htmlFor="stock_quantity">{copy.initialStockLabel}</Label>
                   <Input
                     id="stock_quantity"
                     type="number"
@@ -149,7 +152,7 @@ export function ProductInventorySection({
                     onChange={(event) => update("stock_quantity", Number(event.target.value))}
                   />
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Define las unidades disponibles al crear el producto.
+                    {copy.initialStockHelp}
                   </p>
                   {errors.stock_quantity ? (
                     <p id="stock-quantity-error" className="text-xs text-destructive">
@@ -159,7 +162,7 @@ export function ProductInventorySection({
                 </div>
               ) : null}
               <div className="space-y-2">
-                <Label htmlFor="low_stock_threshold">Umbral de pocas unidades</Label>
+                <Label htmlFor="low_stock_threshold">{copy.lowStockThresholdLabel}</Label>
                 <Input
                   id="low_stock_threshold"
                   type="number"
@@ -168,7 +171,7 @@ export function ProductInventorySection({
                   disabled={disabled}
                   aria-invalid={Boolean(errors.low_stock_threshold)}
                   aria-describedby={
-                    errors.low_stock_threshold ? "low-stock-threshold-error" : undefined
+                    errors.low_stock_threshold ? "low-stock-threshold-error" : "low-stock-help"
                   }
                   onChange={(event) => update("low_stock_threshold", Number(event.target.value))}
                 />
@@ -176,17 +179,21 @@ export function ProductInventorySection({
                   <p id="low-stock-threshold-error" className="text-xs text-destructive">
                     {errors.low_stock_threshold}
                   </p>
-                ) : null}
+                ) : (
+                  <p id="low-stock-help" className="text-xs leading-relaxed text-muted-foreground">
+                    {copy.lowStockThresholdHelp}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
               <div>
                 <Label htmlFor="allow_backorder" className="cursor-pointer text-sm font-medium">
-                  Permitir venta sin stock
+                  {copy.allowBackorderLabel}
                 </Label>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Permite comprar aunque el stock registrado sea cero.
+                  {copy.allowBackorderHelp}
                 </p>
               </div>
               <Switch
@@ -198,7 +205,7 @@ export function ProductInventorySection({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="out_of_stock_behavior">Cuando no haya stock</Label>
+              <Label htmlFor="out_of_stock_behavior">{copy.outOfStockBehaviorLabel}</Label>
               <Select
                 value={values.out_of_stock_behavior}
                 disabled={disabled || values.allow_backorder}
@@ -220,16 +227,16 @@ export function ProductInventorySection({
                   ))}
                 </SelectContent>
               </Select>
-              {values.allow_backorder ? (
-                <p className="text-xs text-muted-foreground">
-                  Esta regla no se aplica mientras la venta sin stock esté permitida.
-                </p>
-              ) : null}
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {values.allow_backorder
+                  ? copy.backorderOverridesVisibility
+                  : copy.outOfStockBehaviorHelp}
+              </p>
             </div>
           </div>
         ) : (
-          <p className="rounded-xl border border-accent/20 bg-accent/8 p-4 text-sm text-accent">
-            Este producto seguirá disponible sin descontar unidades.
+          <p className="rounded-xl border border-accent/20 bg-accent/8 p-4 text-sm leading-relaxed text-accent">
+            {copy.untrackedResult}
           </p>
         )}
       </div>

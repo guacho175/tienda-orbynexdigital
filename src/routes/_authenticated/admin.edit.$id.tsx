@@ -7,6 +7,7 @@ import { Container } from "@/components/layout/Container";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { fetchProductByIdAdmin, updateProduct } from "@/services/products.service";
 import { createProductAuditEvent } from "@/services/product-audit.service";
+import { getProductSaveErrorMessage } from "@/services/product-error-messages";
 import type { Product } from "@/types/product";
 
 export const Route = createFileRoute("/_authenticated/admin/edit/$id")({
@@ -85,7 +86,7 @@ function EditProductPage() {
     },
     onError: (err: Error) => {
       toast.error("No se pudo actualizar el producto", {
-        description: err.message || "Revisa los campos e intenta nuevamente.",
+        description: getProductSaveErrorMessage(err),
       });
     },
   });

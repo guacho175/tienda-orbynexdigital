@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { commerceConfig } from "@/config/commerce.config";
 import { productEditorConfig } from "@/config/product-editor.config";
 import { formatCurrency } from "@/utils/currency";
@@ -20,6 +21,7 @@ export function ProductPricingSection({
   update,
   disabled,
 }: ProductEditorFieldsProps) {
+  const copy = productEditorConfig.copy.pricing;
   const formattedPrice = formatCurrency(
     Number.isFinite(values.price) ? values.price : 0,
     values.currency,
@@ -29,10 +31,7 @@ export function ProductPricingSection({
   const hasUnsupportedCurrency = !supportedCurrencies.includes(values.currency);
 
   return (
-    <ProductEditorSection
-      title="Precios y pago"
-      description="Configura el valor publicado y conserva el enlace de pago alternativo."
-    >
+    <ProductEditorSection title="Precios y pago" description={copy.sectionDescription}>
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
           <div className="space-y-2">
@@ -77,7 +76,7 @@ export function ProductPricingSection({
               <SelectContent>
                 {hasUnsupportedCurrency ? (
                   <SelectItem value={values.currency} disabled>
-                    {values.currency} · no compatible
+                    {values.currency} - no compatible
                   </SelectItem>
                 ) : null}
                 {supportedCurrencies.map((currency) => (
@@ -102,55 +101,98 @@ export function ProductPricingSection({
         </div>
 
         <div className="border-t border-white/8 pt-5">
-          <h3 className="text-sm font-semibold text-foreground">Pago alternativo</h3>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Mantén esta opción disponible para productos que usan un enlace externo.
-          </p>
+          <h3 className="text-sm font-semibold text-foreground">{copy.externalPayment.title}</h3>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="payment_url">URL de pago externo</Label>
-          <Input
-            id="payment_url"
-            value={values.payment_url}
-            placeholder="https://..."
-            disabled={disabled}
-            aria-invalid={Boolean(errors.payment_url)}
-            aria-describedby={errors.payment_url ? "payment-url-error" : undefined}
-            onChange={(event) => update("payment_url", event.target.value)}
-          />
-          {errors.payment_url ? (
-            <p id="payment-url-error" className="text-xs text-destructive">
-              {errors.payment_url}
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div>
+            <Label
+              htmlFor="payment_external_enabled"
+              className="cursor-pointer text-sm font-medium"
+            >
+              {copy.externalPayment.toggleLabel}
+            </Label>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              {copy.externalPayment.toggleHelp}
             </p>
-          ) : null}
+          </div>
+          <Switch
+            id="payment_external_enabled"
+            checked={values.payment_external_enabled}
+            disabled={disabled}
+            onCheckedChange={(checked) => {
+              update("payment_external_enabled", checked);
+              if (!checked) {
+                update("payment_url", "");
+                update("payment_button_label", "");
+              }
+            }}
+          />
         </div>
 
-        {values.payment_url || errors.payment_button_label ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="payment_button_label">Texto del botón de pago</Label>
-              <ProductEditorCharacterCounter
-                value={values.payment_button_label}
-                max={productEditorConfig.characterLimits.payment_button_label}
-              />
+        {values.payment_external_enabled ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-amber-300/40 bg-amber-50 p-4 text-sm text-amber-950">
+              <p className="font-semibold">{copy.externalPayment.warningTitle}</p>
+              <p className="mt-1 leading-relaxed">{copy.externalPayment.warningDescription}</p>
             </div>
-            <Input
-              id="payment_button_label"
-              value={values.payment_button_label}
-              maxLength={productEditorConfig.characterLimits.payment_button_label}
-              disabled={disabled}
-              aria-invalid={Boolean(errors.payment_button_label)}
-              aria-describedby={
-                errors.payment_button_label ? "payment-button-label-error" : undefined
-              }
-              onChange={(event) => update("payment_button_label", event.target.value)}
-            />
-            {errors.payment_button_label ? (
-              <p id="payment-button-label-error" className="text-xs text-destructive">
-                {errors.payment_button_label}
-              </p>
-            ) : null}
+
+            <div className="space-y-2">
+              <Label htmlFor="payment_url">{copy.externalPayment.urlLabel}</Label>
+              <Input
+                id="payment_url"
+                value={values.payment_url}
+                placeholder="https://..."
+                disabled={disabled}
+                aria-invalid={Boolean(errors.payment_url)}
+                aria-describedby={errors.payment_url ? "payment-url-error" : "payment-url-help"}
+                onChange={(event) => update("payment_url", event.target.value)}
+              />
+              {errors.payment_url ? (
+                <p id="payment-url-error" className="text-xs text-destructive">
+                  {errors.payment_url}
+                </p>
+              ) : (
+                <p id="payment-url-help" className="text-xs leading-relaxed text-muted-foreground">
+                  {copy.externalPayment.urlHelp}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="payment_button_label">{copy.externalPayment.buttonLabel}</Label>
+                <ProductEditorCharacterCounter
+                  value={values.payment_button_label}
+                  max={productEditorConfig.characterLimits.payment_button_label}
+                />
+              </div>
+              <Input
+                id="payment_button_label"
+                value={values.payment_button_label}
+                maxLength={productEditorConfig.characterLimits.payment_button_label}
+                disabled={disabled}
+                aria-invalid={Boolean(errors.payment_button_label)}
+                aria-describedby={
+                  errors.payment_button_label
+                    ? "payment-button-label-error"
+                    : "payment-button-label-help"
+                }
+                onChange={(event) => update("payment_button_label", event.target.value)}
+              />
+              {errors.payment_button_label ? (
+                <p id="payment-button-label-error" className="text-xs text-destructive">
+                  {errors.payment_button_label}
+                </p>
+              ) : (
+                <p
+                  id="payment-button-label-help"
+                  className="text-xs leading-relaxed text-muted-foreground"
+                >
+                  {copy.externalPayment.buttonHelp}
+                </p>
+              )}
+            </div>
           </div>
         ) : null}
       </div>
