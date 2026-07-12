@@ -16,15 +16,21 @@ export default defineConfig({
       "react/jsx-runtime",
       "react/jsx-dev-runtime",
       "@tanstack/react-query",
-      "@tanstack/query-core"
-    ]
+      "@tanstack/query-core",
+    ],
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
-    ignoreOutdatedRequests: true
+    include: [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+    ],
+    ignoreOutdatedRequests: true,
   },
   css: {
-    transformer: "lightningcss"
+    transformer: "lightningcss",
   },
   server: {
     host: "::",
@@ -32,9 +38,9 @@ export default defineConfig({
     watch: {
       awaitWriteFinish: {
         stabilityThreshold: 1000,
-        pollInterval: 100
-      }
-    }
+        pollInterval: 100,
+      },
+    },
   },
   plugins: [
     tailwindcss(),
@@ -44,14 +50,14 @@ export default defineConfig({
       importProtection: {
         behavior: "error",
         client: {
-          files: ["**/server/**"],
-          specifiers: ["server-only"]
-        }
-      }
+          files: ["**/server/**", "**/*.server.ts", "**/*.server.tsx"],
+          specifiers: ["server-only"],
+        },
+      },
     }),
     nitro({
-      preset: "vercel"
+      preset: "vercel",
     }),
-    react()
-  ]
+    react(),
+  ],
 });

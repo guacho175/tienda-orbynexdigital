@@ -68,6 +68,7 @@ function AdminPage() {
       toggleProductActive(id, isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-audit-events"] });
     },
     onError: (err: Error) =>
       toast.error("No se pudo cambiar el estado", {
@@ -79,6 +80,7 @@ function AdminPage() {
     mutationFn: (id: string) => deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      queryClient.invalidateQueries({ queryKey: ["product-audit-events"] });
       toast.success("Producto eliminado", {
         description: "El catalogo se actualizo correctamente.",
       });

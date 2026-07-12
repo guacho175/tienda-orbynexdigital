@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { CreditCard, ExternalLink, Loader2, ShoppingBag } from "lucide-react";
@@ -18,6 +18,7 @@ import { fetchProductsByIds, PRODUCTS_STALE_TIME_MS } from "@/services/products.
 import { commerceConfig } from "@/config/commerce.config";
 import { brandConfig } from "@/config/brand.config";
 import { getCartInventoryIssues } from "@/utils/inventory";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
@@ -54,6 +55,17 @@ function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [flowError, setFlowError] = useState<string | null>(null);
   const [isCreatingFlowPayment, setIsCreatingFlowPayment] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const userEmail = data.user?.email;
+      if (!userEmail) return;
+      setForm((current) => ({
+        ...current,
+        email: current.email || userEmail,
+      }));
+    });
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -116,9 +128,15 @@ function CheckoutPage() {
     setIsCreatingFlowPayment(true);
 
     try {
-      const response = await fetch("/api/flow/create-payment", {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const headers = new Headers({ "Content-Type": "application/json" });
+      if (sessionData.session?.access_token) {
+        headers.set("Authorization", `Bearer ${sessionData.session.access_token}`);
+      }
+
+      const response = await fetch(commerceConfig.endpointCreatePayment, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           items: items.map((item) => ({
             productId: item.productId,
@@ -126,7 +144,7 @@ function CheckoutPage() {
           })),
           customer: {
             name: parsed.name,
-            email: parsed.email,
+            email: parsed.email.toLowerCase(),
             phone: parsed.phone,
             comment: parsed.comment || undefined,
           },

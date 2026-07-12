@@ -3,6 +3,9 @@ import { brandConfig } from "./brand.config";
 export const commerceConfig = {
   currency: brandConfig.currency,
   locale: brandConfig.locale,
+  taxIdName: "RUT",
+  taxIdPlaceholder: "11.111.111-1",
+  endpointCreatePayment: "/api/flow/create-payment",
   enableCart: true,
   enableExternalPaymentLinks: true,
   enableWhatsappCheckout: true,

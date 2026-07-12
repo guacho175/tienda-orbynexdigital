@@ -39,6 +39,7 @@ export function createProductEditorValues(initial?: Product | null): ProductEdit
     allow_backorder: initial?.allow_backorder ?? false,
     low_stock_threshold: initial?.low_stock_threshold ?? 3,
     out_of_stock_behavior: initial?.out_of_stock_behavior ?? "show_sold_out",
+    payment_external_enabled: Boolean(initial?.payment_url),
     payment_url: initial?.payment_url ?? "",
     payment_button_label: initial?.payment_button_label ?? "",
     display_order: initial?.display_order ?? 0,
@@ -46,8 +47,10 @@ export function createProductEditorValues(initial?: Product | null): ProductEdit
 }
 
 export function toProductInput(values: ProductEditorValues): ProductInput {
+  const { payment_external_enabled: _paymentExternalEnabled, ...productValues } = values;
+
   return {
-    ...values,
+    ...productValues,
     short_description: values.short_description || null,
     description: values.description || null,
     meta_title: values.meta_title || null,
@@ -58,7 +61,9 @@ export function toProductInput(values: ProductEditorValues): ProductInput {
     image_url_thumb: values.image_url_thumb || null,
     image_url_card: values.image_url_card || null,
     image_url_detail: values.image_url_detail || null,
-    payment_url: values.payment_url || null,
-    payment_button_label: values.payment_button_label || null,
+    payment_url: values.payment_external_enabled ? values.payment_url || null : null,
+    payment_button_label: values.payment_external_enabled
+      ? values.payment_button_label || null
+      : null,
   };
 }

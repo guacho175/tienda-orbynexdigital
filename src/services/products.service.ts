@@ -248,12 +248,15 @@ export async function updateProduct(id: string, input: Partial<ProductInput>): P
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const { error } = await supabase.from("products").delete().eq("id", id);
+  const { error } = await supabase.rpc("delete_product_with_audit", { p_product_id: id });
   if (error) throw error;
 }
 
 export async function toggleProductActive(id: string, isActive: boolean): Promise<void> {
-  const { error } = await supabase.from("products").update({ is_active: isActive }).eq("id", id);
+  const { error } = await supabase.rpc("set_product_active_with_audit", {
+    p_is_active: isActive,
+    p_product_id: id,
+  });
   if (error) throw error;
 }
 

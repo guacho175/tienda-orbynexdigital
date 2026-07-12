@@ -1,11 +1,14 @@
 # Logs
 logs
 *.log
+.logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+tmp-*
+tmp-*/
 
 node_modules
 dist
@@ -37,3 +40,4 @@ dist-ssr
 *.sw?
 demo-product-images/
 stitch_compact_product_editor/
+supabase/.temp/

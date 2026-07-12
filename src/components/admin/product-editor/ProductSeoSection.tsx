@@ -10,20 +10,18 @@ import { slugifyProductName } from "./product-editor.mappers";
 import type { ProductEditorFieldsProps } from "./product-editor.types";
 
 export function ProductSeoSection({ values, errors, update, disabled }: ProductEditorFieldsProps) {
+  const copy = productEditorConfig.copy.seo;
   const preview = buildProductSeoMetadata({
     ...values,
     slug: values.slug || slugifyProductName(values.name),
   });
 
   return (
-    <ProductEditorSection
-      title="SEO"
-      description="Define la direccion publica y los metadatos que usara la ficha del producto."
-    >
+    <ProductEditorSection title={copy.title} description={copy.sectionDescription}>
       <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="slug">Slug *</Label>
+            <Label htmlFor="slug">{copy.slugLabel} *</Label>
             <ProductEditorCharacterCounter
               value={values.slug}
               max={productEditorConfig.characterLimits.slug}
@@ -50,8 +48,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
             </p>
           ) : (
             <p id="slug-help" className="text-xs leading-relaxed text-muted-foreground">
-              Usa una direccion breve, estable y facil de reconocer. Cambiarla modifica el enlace
-              publico del producto.
+              {copy.slugHelp}
             </p>
           )}
         </div>
@@ -59,7 +56,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="meta_title">Titulo SEO</Label>
+              <Label htmlFor="meta_title">{copy.metaTitleLabel}</Label>
               <ProductEditorCharacterCounter
                 value={values.meta_title}
                 max={productEditorConfig.characterLimits.meta_title}
@@ -81,13 +78,13 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
               </p>
             ) : (
               <p id="meta-title-help" className="text-xs leading-relaxed text-muted-foreground">
-                Si queda vacio, la ficha publica usara el nombre del producto.
+                {copy.metaTitleHelp}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="og_image_url">Imagen OpenGraph opcional</Label>
+            <Label htmlFor="og_image_url">{copy.ogImageLabel}</Label>
             <Input
               id="og_image_url"
               value={values.og_image_url}
@@ -104,7 +101,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
               </p>
             ) : (
               <p id="og-image-url-help" className="text-xs leading-relaxed text-muted-foreground">
-                Si queda vacia, se usara la imagen de detalle, tarjeta o fallback global.
+                {copy.ogImageHelp}
               </p>
             )}
           </div>
@@ -112,7 +109,7 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
 
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="meta_description">Descripcion SEO</Label>
+            <Label htmlFor="meta_description">{copy.metaDescriptionLabel}</Label>
             <ProductEditorCharacterCounter
               value={values.meta_description}
               max={productEditorConfig.characterLimits.meta_description}
@@ -136,40 +133,39 @@ export function ProductSeoSection({ values, errors, update, disabled }: ProductE
             </p>
           ) : (
             <p id="meta-description-help" className="text-xs leading-relaxed text-muted-foreground">
-              Si queda vacia, se usara la descripcion corta o la descripcion completa.
+              {copy.metaDescriptionHelp}
             </p>
           )}
         </div>
 
         <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="space-y-1">
-            <Label htmlFor="seo_noindex">No indexar este producto</Label>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Publica robots noindex,nofollow en la ficha publica sin cambiar su visibilidad en la
-              tienda.
-            </p>
+            <Label htmlFor="seo_noindex">{copy.noIndexLabel}</Label>
+            <p className="text-xs leading-relaxed text-muted-foreground">{copy.noIndexHelp}</p>
           </div>
           <Switch
             id="seo_noindex"
             checked={values.seo_noindex}
             disabled={disabled}
-            aria-label="No indexar este producto"
+            aria-label={copy.noIndexLabel}
             onCheckedChange={(checked) => update("seo_noindex", checked)}
           />
         </div>
 
         {productEditorConfig.featureFlags.seoPreview ? (
           <div
-            aria-label="Vista previa SEO"
+            aria-label={copy.previewLabel}
             className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
           >
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-              <span>Vista previa real</span>
-              <span aria-hidden="true">Â·</span>
-              <span>Usa la misma cascada que {preview.path}</span>
+              <span>{copy.previewLabel}</span>
+              <span aria-hidden="true">-</span>
+              <span>
+                {copy.previewHelp} {preview.path}
+              </span>
               {preview.robots ? (
                 <>
-                  <span aria-hidden="true">Â·</span>
+                  <span aria-hidden="true">-</span>
                   <span>{preview.robots}</span>
                 </>
               ) : null}

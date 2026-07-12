@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useState } from "react";
 import { brandConfig } from "@/config/brand.config";
+import { accountConfig } from "@/config/account.config";
 import { navigationConfig } from "@/config/navigation.config";
 import { useCart } from "@/store/cart.store";
 import { Container } from "./Container";
@@ -40,6 +41,14 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            to={accountConfig.routes.account}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            aria-label={accountConfig.navigation.accountAriaLabel}
+          >
+            <User className="h-5 w-5" />
+            <span className="hidden sm:inline">{accountConfig.navigation.accountLabel}</span>
+          </Link>
           <button
             type="button"
             className="relative inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-medium text-foreground transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -81,6 +90,13 @@ export function Navbar() {
               {item.label}
             </Link>
           ))}
+          <Link
+            to={accountConfig.routes.account}
+            onClick={() => setOpen(false)}
+            className="w-full max-w-sm rounded-full border border-white/6 bg-white/4 px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/8 hover:text-foreground"
+          >
+            {accountConfig.navigation.accountLabel}
+          </Link>
         </Container>
       </div>
     </header>

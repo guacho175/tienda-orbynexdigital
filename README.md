@@ -1,110 +1,134 @@
-# Orbynex Digital — Tienda Digital E-Commerce
+# Orbynex Mini-Commerce
 
-Tienda en línea premium diseñada para la comercialización de servicios y productos digitales, desarrollada utilizando un stack moderno, responsivo y de alto rendimiento.
-
----
-
-## 🚀 Características Principales
-
-*   **Catálogo Dinámico & Detalle**: Presentación fluida de productos y servicios con selección inteligente de imágenes optimizadas.
-*   **Carrito e Inventario Avanzado**: Control de inventario en tiempo real con sistema de reservas de stock de 10 minutos para evitar ventas duplicadas (Double-selling prevention).
-*   **Checkout & Pagos Integrados**: Soporte nativo para pagos en línea con Flow (Webpay Sandbox/Producción), enlaces de pago externos y checkout rápido por WhatsApp.
-*   **Panel de Administración**: Gestión completa de productos (CRUD), control de activación y subida/optimización automática de imágenes.
-*   **Aero-Estética Premium**: Animaciones sutiles, micro-interacciones interactivas, soporte para tema oscuro y diseño responsivo adaptado a dispositivos móviles.
+Este proyecto es una plantilla de desarrollo (boilerplate) moderna, modular y de altísimo rendimiento para la creación rápida de comercios electrónicos ligeros (mini-commerce). Está diseñada para soportar cargas ultra-rápidas, administración del catálogo, control de stock en tiempo real y confirmación transaccional de pagos.
 
 ---
 
-## 🛠️ Tecnologías y Stack
+## 1. Stack Tecnológico
 
-*   **Frontend**: [React 19](https://react.dev/), [TanStack Start](https://tanstack.com/router/v1/docs/start/overview), [Vite 8](https://vite.dev/), [Tailwind CSS v4](https://tailwindcss.com/)
-*   **Backend Serverless**: [Vercel Serverless Functions](https://vercel.com/docs/functions) (Endpoints de API en `/api/*`)
-*   **Base de Datos y Auth**: [Supabase](https://supabase.com/) (PostgreSQL con Row Level Security (RLS) y RPCs de base de datos)
-*   **Pasarela de Pago**: [Flow.cl](https://www.flow.cl/) (API REST para cobros locales)
-*   **Tareas Programadas**: [Vercel Cron Jobs](https://vercel.com/docs/cron-jobs) (Limpieza de reservas de stock)
+La aplicación está construida sobre una arquitectura moderna que distribuye el trabajo de manera eficiente entre el cliente y el servidor:
 
----
+### Frontend & Core: React 19 + TanStack Start (Vinxi)
+*   **React 19:** La biblioteca líder para interfaces de usuario, optimizada para Server Components y mayor velocidad.
+*   **TanStack Start:** Framework que gestiona todo el ciclo de vida del frontend y backend de la aplicación. Utiliza el motor de empaquetado **Vinxi** y **Vite** para ofrecer renderizado híbrido. Esto significa que combina la velocidad de carga de un sitio pre-renderizado en el servidor (**SSR** - ideal para SEO) con la fluidez interactiva de una aplicación de página única (**SPA** - ideal para el carrito y el panel de administración).
+*   **Tailwind CSS v4:** Motor de estilos altamente optimizado y rápido para estructurar el diseño visual mediante variables CSS HSL nativas.
+*   **Shadcn UI + Radix:** Colección de componentes de interfaz accesibles y pre-diseñados (botones, menús, diálogos).
 
-## 🟢 Estado Actual del Sistema
+### Backend & Base de Datos: Supabase
+**Supabase** actúa como la infraestructura de backend en la nube (Backend-as-a-Service o BaaS) del proyecto. Provee:
+*   **Base de datos relacional PostgreSQL:** Almacenamiento estructurado de productos, clientes, pedidos e inventarios.
+*   **Autenticación integrada (Supabase Auth):** Registro e inicio de sesión de usuarios y administradores con cifrado industrial y tokens JWT.
+*   **Seguridad RLS (Row Level Security):** Reglas integradas directamente en las tablas de PostgreSQL que aseguran que solo usuarios autorizados (ej. administradores) puedan leer o escribir registros específicos, previniendo bypasses maliciosos desde el navegador del cliente.
+*   **Storage (Almacenamiento de archivos):** Para guardar y servir de manera rápida las imágenes del catálogo de productos.
 
-### Backend (Estabilizado - Solo Lectura / Mantenimiento)
-*   **Base de Datos**: PostgreSQL estructurado y protegido mediante RLS. Las tablas principales (`products`, `orders`, `order_items`, `stock_reservations`, `user_roles`) y relaciones de llaves foráneas están completamente funcionales.
-*   **RPCsSQL de Confianza**: La lógica crítica de concurrencia e inventario se ejecuta mediante funciones PostgreSQL RPC (`create_order_with_stock_reservation`, `confirm_order_payment_and_capture_stock`, `release_order_stock_reservations`) con privilegios `SECURITY DEFINER` restringidos al rol `service_role`.
-*   **Expirador Automático**: Sincronización del cron-job en Vercel cada 1 minuto para liberar reservas obsoletas.
-
-### Frontend (Desarrollo Activo / Prioritario)
-*   **Enrutamiento**: TanStack Router con carga bajo demanda y controles SSR deshabilitados para garantizar compatibilidad SPA estricta.
-*   **Sincronización en Caliente**: Catálogo y checkout integrados dinámicamente con la API de disponibilidad para descontar reservas temporales de stock en tiempo real.
-*   **Carga de Imágenes**: Optimización, compresión y redimensionamiento pre-subida integrado en el cliente (`storage.service.ts`), convirtiendo toda imagen del panel administrativo a WebP antes del envío a Supabase.
+### Pasarela de Pagos: Flow API
+*   Integración transaccional de pagos a través de la pasarela Flow (soporta Webpay de Transbank). El entorno por defecto está preconfigurado para el ambiente de pruebas (sandbox).
 
 ---
 
-## 🔒 Advertencias de Seguridad Importantes
+## 2. Configuración de Variables de Entorno
 
-> [!WARNING]
-> *   **Uso Seguro de Credenciales**: La variable `SUPABASE_SERVICE_ROLE_KEY` otorga bypass total sobre las políticas RLS. **Nunca** debe ser incluida ni cargada en código cliente del frontend (carpeta `/src/routes/` o `/src/components/`). Su instanciación está estrictamente restringida a endpoints del servidor (`/api/` o utilitarios `.server.ts`).
-> *   **Integridad de Transacciones**: La validación de montos y estados en Flow en el webhook de confirmación (`/api/flow/confirm.ts`) se ejecuta del lado del servidor consultando la API oficial de Flow. No se debe confiar en los parámetros del payload HTTP del cliente para actualizar el estado de órdenes.
+Para iniciar el proyecto, crea un archivo `.env` en la raíz del proyecto basándote en el archivo [.env.example](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/.env.example). Las siguientes variables son necesarias:
 
----
+```ini
+# Configuración pública de Supabase (Frontend y Backend)
+SUPABASE_PROJECT_ID=           # Identificador del proyecto de Supabase
+SUPABASE_URL=                  # Endpoint HTTP de conexión de Supabase
+SUPABASE_PUBLISHABLE_KEY=      # Clave API pública (segura para usar en el cliente)
 
-## ⚙️ Variables de Entorno Requeridas
+# Configuración del servidor de desarrollo Vite (Duplicada para empaquetado)
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 
-Crea un archivo `.env` (o `.env.local` para desarrollo local) en la raíz del proyecto basándote en [.env.example](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/.env.example):
+# Claves de Servidor y Base de Datos (EXCLUSIVAS DE BACKEND)
+# ATENCIÓN: La clave Service Role bypassa RLS. NUNCA la importes en componentes cliente (.tsx).
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_DB_URL=               # Cadena de conexión directa a PostgreSQL (ej. postgresql://...)
+CRON_SECRET=                   # Token para validar y asegurar ejecuciones automáticas de tareas de cron
 
-```bash
-# Supabase Local/Remoto
-SUPABASE_PROJECT_ID=tu_project_id
-SUPABASE_URL=https://tu_proyecto.supabase.co
-SUPABASE_PUBLISHABLE_KEY=tu_public_key
-SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+# Credenciales de Flow (Pagos)
+FLOW_API_KEY=                  # Identificador del comercio en Flow
+FLOW_SECRET_KEY=               # Clave secreta transaccional de Flow
+FLOW_BASE_URL=https://sandbox.flow.cl/api # Usar www.flow.cl/api en producción
 
-# Replicación para Vite (Client-side)
-VITE_SUPABASE_PROJECT_ID=tu_project_id
-VITE_SUPABASE_URL=https://tu_proyecto.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=tu_public_key
-
-# Configuración del Cron
-CRON_SECRET=clave_segura_de_cron
-
-# API de Flow
-FLOW_API_KEY=tu_api_key_flow
-FLOW_SECRET_KEY=tu_secret_key_flow
-FLOW_BASE_URL=https://sandbox.flow.cl/api # O https://www.flow.cl/api en producción
-APP_PUBLIC_URL=https://tu-tienda.vercel.app
-FLOW_RETURN_URL=https://tu-tienda.vercel.app/checkout/resultado
-FLOW_CONFIRMATION_URL=https://tu-tienda.vercel.app/api/flow/confirm
+# URLs de retorno y webhooks
+APP_PUBLIC_URL=                # Dirección URL pública de tu frontend (ej. http://localhost:8080)
+FLOW_RETURN_URL=               # URL a la que vuelve el cliente tras pagar
+FLOW_CONFIRMATION_URL=         # Endpoint API donde Flow confirma la transacción (Webhook)
 ```
 
 ---
 
-## 💻 Desarrollo Local
+## 3. Guía de Ejecución Local
 
-Para correr el proyecto localmente, asegúrate de tener instalado [Bun](https://bun.sh/) o Node.js.
+### Prerrequisitos
+*   Tener instalado **Node.js** (versión 18 o superior).
+*   Se recomienda el uso de **pnpm** como gestor de paquetes.
 
-1.  **Instalar dependencias**:
-    ```bash
-    bun install
-    ```
-2.  **Correr servidor de desarrollo**:
-    ```bash
-    bun run dev
-    ```
-    El sitio estará disponible por defecto en `http://localhost:5173` (o la dirección que asigne Vite).
-3.  **Compilar para producción**:
-    ```bash
-    bun run build
-    ```
-4.  **Ejecutar formateador y linter**:
-    ```bash
-    bun run format
-    bun run lint
-    ```
+### Paso 1: Instalar dependencias
+Instala las librerías necesarias con el siguiente comando en la terminal:
+```bash
+pnpm install
+```
+
+### Paso 2: Configurar las variables
+Copia el archivo de ejemplo a tu entorno local:
+```bash
+cp .env.example .env
+```
+*Nota: Rellena los valores en el archivo `.env` con tus credenciales de prueba de Supabase y Flow.*
+
+### Paso 3: Iniciar el servidor de desarrollo
+Corre la aplicación de forma local:
+```bash
+pnpm dev
+```
+La consola indicará la dirección local (por defecto `http://localhost:8080`) donde podrás ver la tienda interactiva.
 
 ---
 
-## 📚 Documentación Técnica Detallada
+## 4. Validación de Código y Construcción
 
-El proyecto cuenta con una amplia documentación estructurada:
+Para garantizar que el código se encuentra limpio, cumple los estándares de tipos y compila correctamente antes de desplegarlo, ejecuta los siguientes comandos de validación:
 
-*   **[Índice General de Documentos (docs/INDEX.md)](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/INDEX.md)**: Acceso directo a los reportes de desarrollo y análisis históricos.
-*   **[Índice de Módulos Técnicos (docs/technical/README.md)](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/technical/README.md)**: Directorio para la arquitectura, modelo de dominio, flujos de pago, seguridad y guías de mantenimiento.
-*   **[Manual para Agentes (Handoff) (docs/AGENT-HANDOFF.md)](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/AGENT-HANDOFF.md)**: Resumen operativo rápido para futuros asistentes de IA.
+*   **Limpiar Logs Temporales:**
+    ```bash
+    pnpm run clean:logs
+    ```
+*   **Verificar formato de código (Prettier):**
+    ```bash
+    pnpm format
+    ```
+*   **Analizar el código en busca de malas prácticas y bugs comunes (ESLint):**
+    ```bash
+    pnpm lint
+    ```
+*   **Validar los tipos estáticos de TypeScript:**
+    ```bash
+    pnpm exec tsc --noEmit
+    ```
+*   **Construir el bundle de producción (Build):**
+    ```bash
+    pnpm build
+    ```
+    _Este comando compila toda la aplicación y genera la estructura optimizada para producción dentro del directorio `.output`._
+
+---
+
+## 5. Índice de Documentación Relacionada
+
+Para detalles más profundos, la documentación técnica se encuentra ordenada de la siguiente manera:
+
+*   **[Índice General de Documentación](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/README.md):** Mapa central de acceso a especificaciones y guías operativas.
+*   **[Gestión de Secretos y Entornos](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/security/GESTION-DE-SECRETOS-Y-ENTORNOS.md):** Directrices de seguridad aplicativa e inyección de variables.
+*   **[Guía de Personalización para Nuevos Clientes](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/development/PERSONALIZACION-CLIENTE.md):** Manual detallado para reutilizar y reciclar la plantilla para otros comercios.
+*   **[Despliegue en Vercel](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/deployment/DEPLOY-VERCEL.md):** Flujo de despliegue y checklists pre-producción.
+
+---
+
+## 6. Advertencias Importantes de Seguridad
+
+1.  **Exposición de secretos:** Nunca subas el archivo `.env` o archivos de configuración local a repositorios de GitHub. Asegúrate de verificar que el `.gitignore` esté activo y cubra `.env` y `.env.local`.
+2.  **Clave Service Role:** El token `SUPABASE_SERVICE_ROLE_KEY` otorga acceso total de borrado, escritura y lectura sin restricciones RLS a toda tu base de datos. Bajo ninguna circunstancia importes `src/integrations/supabase/client.server.ts` dentro de componentes visuales o archivos del frontend (`.tsx`). Debe restringirse exclusivamente a archivos de backend y server components (`.server.ts`), protegidos estáticamente por la directiva `importProtection` en `vite.config.ts`.
+3.  **Ambiente de producción:** Asegúrate de cambiar `FLOW_BASE_URL` a la URL de producción de Flow e invalidar todas las credenciales de prueba del sandbox en el hosting (ej. Vercel) al lanzar la tienda para un cliente final.
