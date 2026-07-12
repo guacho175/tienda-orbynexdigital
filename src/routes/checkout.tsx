@@ -116,7 +116,7 @@ function CheckoutPage() {
     setIsCreatingFlowPayment(true);
 
     try {
-      const response = await fetch("/api/flow/create-payment", {
+      const response = await fetch(commerceConfig.endpointCreatePayment, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

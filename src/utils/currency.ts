@@ -1,7 +1,9 @@
+import { commerceConfig } from "@/config/commerce.config";
+
 export function formatCurrency(
   value: number,
-  currency = "CLP",
-  locale = "es-CL",
+  currency = commerceConfig.currency,
+  locale = commerceConfig.locale,
 ): string {
   try {
     return new Intl.NumberFormat(locale, {
