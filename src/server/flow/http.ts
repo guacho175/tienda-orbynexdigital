@@ -16,11 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-export function sendJson(
-  res: ApiResponse,
-  statusCode: number,
-  payload: Record<string, unknown>,
-) {
+export function sendJson(res: ApiResponse, statusCode: number, payload: Record<string, unknown>) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(payload));
@@ -42,9 +38,7 @@ export async function parseJsonBody(req: ApiRequest): Promise<unknown> {
   return JSON.parse(raw);
 }
 
-export async function parseFormBody(
-  req: ApiRequest,
-): Promise<Record<string, string>> {
+export async function parseFormBody(req: ApiRequest): Promise<Record<string, string>> {
   if (req.body !== undefined) {
     if (typeof req.body === "string") {
       return Object.fromEntries(new URLSearchParams(req.body));
