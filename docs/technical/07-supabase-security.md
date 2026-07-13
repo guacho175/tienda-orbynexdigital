@@ -50,6 +50,15 @@ Politica SELECT consolidada:
 
 No hay insert/update/delete directos para clientes.
 
+La ruta `/admin/orders` usa el cliente Supabase normal y depende de estas politicas RLS. No usa
+`service_role`, no consulta tokens internos de Flow y no agrega permisos de escritura sobre
+`orders` ni `order_items`.
+
+La ruta `/admin/users` consume `api/admin/users.ts`. Ese endpoint usa cliente admin solo en
+backend para listar usuarios Auth y agregar compras; antes valida `auth.getUser(jwt)` y exige una
+fila `user_roles.role = 'admin'` para el solicitante. La respuesta no incluye tokens de Flow,
+`flow_raw_status`, `flow_token`, metadata cruda de Auth ni llaves de servidor.
+
 ### `public.stock_reservations`
 
 - RLS activo.
@@ -126,3 +135,19 @@ Resultado:
   operaciones contra Supabase quedan bloqueadas inmediatamente por las politicas RLS vigentes.
 - Al cerrar sesion se limpia la cache de React Query. Al iniciar sesion o actualizar usuario se
   invalida explicitamente `["admin-access"]` junto con las consultas dependientes de usuario.
+- La vista `/cuenta` puede mostrar un boton hacia `/admin` si `["admin-access", user.id]` devuelve
+  rol admin. Ese boton es solo navegacion; no reemplaza la proteccion de ruta ni RLS.
+
+## API admin server-only de usuarios
+
+- `api/admin/users.ts` requiere `Authorization: Bearer <access_token>`.
+- El access token se valida con Supabase Auth mediante `auth.getUser(jwt)`.
+- La autorizacion de administrador se comprueba contra `public.user_roles`, no contra metadata de
+  usuario ni claims editables.
+- `auth.admin.listUsers()` se ejecuta solamente en servidor con variables `SUPABASE_URL` y
+  `SUPABASE_SERVICE_ROLE_KEY`.
+- Los filtros avanzados pueden escanear hasta 500 usuarios iniciales para no hacer barridos
+  indefinidos. Si la base crece, se debe migrar a una tabla `profiles`/`customers` indexada o a una
+  vista segura no expuesta.
+- La conciliacion de `status = 'redirected'` se mantiene como diagnostico. No hay migracion ni
+  boton de cancelacion masiva que cambie estados sin consultar primero Flow.

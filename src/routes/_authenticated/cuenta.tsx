@@ -16,6 +16,7 @@ import {
   type AccountOrder,
 } from "@/services/account-orders.service";
 import { brandConfig } from "@/config/brand.config";
+import { getAdminAccess } from "@/services/admin-access.service";
 import { supabase } from "@/integrations/supabase/client";
 
 type ConfirmableUser = {
@@ -34,6 +35,13 @@ function AccountPage() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const emailConfirmed = isEmailConfirmed(user);
+
+  const adminAccessQuery = useQuery({
+    queryKey: ["admin-access", user.id],
+    queryFn: () => getAdminAccess(user.id),
+    staleTime: 60_000,
+    retry: 1,
+  });
 
   const ordersQuery = useQuery({
     queryKey: ["account-orders", user.id],
@@ -83,7 +91,11 @@ function AccountPage() {
             </div>
 
             <TabsContent value="profile" className="mt-8">
-              <ProfilePanel email={user.email ?? ""} emailConfirmed={emailConfirmed} />
+              <ProfilePanel
+                email={user.email ?? ""}
+                emailConfirmed={emailConfirmed}
+                isAdmin={adminAccessQuery.data === true}
+              />
             </TabsContent>
 
             <TabsContent value="orders" className="mt-8">
@@ -96,7 +108,15 @@ function AccountPage() {
   );
 }
 
-function ProfilePanel({ email, emailConfirmed }: { email: string; emailConfirmed: boolean }) {
+function ProfilePanel({
+  email,
+  emailConfirmed,
+  isAdmin,
+}: {
+  email: string;
+  emailConfirmed: boolean;
+  isAdmin: boolean;
+}) {
   return (
     <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
       <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
@@ -118,6 +138,11 @@ function ProfilePanel({ email, emailConfirmed }: { email: string; emailConfirmed
               ? accountConfig.dashboard.profile.emailConfirmed
               : accountConfig.dashboard.profile.emailPending}
           </div>
+          {isAdmin ? (
+            <Button asChild className="mt-1 rounded-full">
+              <Link to="/admin">{accountConfig.dashboard.profile.adminPanelButton}</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
       <div className="rounded-2xl border border-white/8 bg-white/4 p-5 text-sm text-muted-foreground">

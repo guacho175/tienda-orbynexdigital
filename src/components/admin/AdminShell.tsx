@@ -1,6 +1,15 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, ClipboardList, LogOut, Package, ShoppingBag, Store } from "lucide-react";
+import {
+  BarChart3,
+  ClipboardList,
+  LogOut,
+  Package,
+  ReceiptText,
+  ShoppingBag,
+  Store,
+  Users,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,6 +22,8 @@ interface AdminShellProps {
 
 const ADMIN_NAV_ITEMS = [
   { label: "Productos", to: "/admin", icon: ShoppingBag },
+  { label: "Pedidos", to: "/admin/orders", icon: ReceiptText },
+  { label: "Clientes", to: "/admin/users", icon: Users },
   { label: "Analitica", to: "/admin/analytics", icon: BarChart3 },
   { label: "Auditoria", to: "/admin/audit", icon: ClipboardList },
   { label: "Tienda", to: "/catalogo", icon: Package },

@@ -48,6 +48,28 @@ Reglas:
 
 - Un usuario autenticado solo puede leer sus propios roles.
 - Las politicas admin revisan `user_roles` directamente.
+- La vista `/admin/users` cruza estos roles con usuarios Auth listados server-side para distinguir
+  clientes y administradores sin exponer metadata cruda ni llaves privilegiadas.
+
+### `auth.users`
+
+Tabla administrada por Supabase Auth. No se consulta desde el cliente.
+
+Campos usados en vistas admin:
+
+- `id`
+- `email`
+- `created_at`
+- `last_sign_in_at`
+- `email_confirmed_at` / `confirmed_at`
+
+Reglas:
+
+- La API `api/admin/users.ts` lista usuarios con `auth.admin.listUsers()` solo en servidor.
+- El endpoint valida primero el JWT con `auth.getUser(jwt)` y luego confirma rol `admin` en
+  `public.user_roles`.
+- No se expone `raw_user_meta_data` ni `raw_app_meta_data`; el nombre visible se infiere desde la
+  ultima orden asociada cuando existe.
 
 ### `public.orders`
 
@@ -72,6 +94,13 @@ Reglas:
 - La API/RPC crea ordenes y confirma pagos.
 - Usuarios autenticados pueden leer sus propias ordenes.
 - Admin puede leer todas las ordenes.
+- La vista cliente `/cuenta` muestra solo pedidos asociados al usuario autenticado.
+- La vista admin `/admin/orders` muestra pedidos globales en modo solo lectura, bajo la misma RLS admin.
+- La vista admin `/admin/users` agrega metricas por usuario desde pedidos vinculados por `user_id`
+  o por `customer_email` exacto para compras invitadas asociables.
+- `redirected` representa "Pago iniciado" y es transitorio. La vista de usuarios lo marca como
+  antiguo si supera una ventana de gracia de 30 minutos sin `paid_at` ni `failed_at`; no cambia
+  estados historicos automaticamente.
 
 ### `public.order_items`
 
@@ -83,6 +112,7 @@ Reglas:
 - Clientes no escriben directamente.
 - Usuarios autenticados pueden leer items de sus propias ordenes.
 - Admin puede leer todos los items.
+- `/admin/orders` reutiliza estos items para detalle operativo sin permitir cambios de estado ni edicion.
 
 ### `public.stock_reservations`
 

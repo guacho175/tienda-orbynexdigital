@@ -17,8 +17,13 @@ Frontend construido con React, TanStack Start/Router, React Query y Tailwind CSS
 - `/admin`: listado de productos, buscador simple, activar/desactivar, editar y eliminar.
 - `/admin/new`: crear producto.
 - `/admin/edit/$id`: editar producto y registrar movimientos de stock.
+- `/admin/orders`: listado operativo de pedidos y compras, solo lectura.
+- `/admin/users`: listado de usuarios/clientes con metricas de compras y alertas de conciliacion,
+  solo lectura.
 - `/admin/analytics`: analitica administrativa solo lectura.
 - `/admin/audit`: auditoria de cambios de productos.
+- `/cuenta`: perfil protegido del cliente, pedidos propios y acceso al admin solo si el usuario
+  tiene rol `admin`.
 
 ## Componentes Publicos Clave
 
@@ -95,6 +100,32 @@ Llama `adjustProductStock`, que usa la RPC `adjust_product_stock_admin`.
 
 Hook compartido para validar si el usuario autenticado tiene rol `admin`.
 
+### `admin-orders.service.ts`
+
+Servicio de lectura para `/admin/orders`.
+
+Caracteristicas:
+
+- usa el cliente Supabase normal;
+- consulta `orders` y `order_items` con RLS vigente;
+- pagina resultados;
+- filtra por estado, texto y fechas;
+- excluye tokens internos de Flow del listado;
+- no escribe en tablas comerciales.
+
+### `admin-users.service.ts`
+
+Servicio de lectura para `/admin/users`.
+
+Caracteristicas:
+
+- obtiene la sesion actual y envia el access token al endpoint server-only `api/admin/users.ts`;
+- no importa clientes server ni usa `service_role` en frontend;
+- pagina usuarios;
+- filtra por busqueda, rol, correo confirmado, compras, revision y `Pago iniciado` antiguo;
+- muestra metricas por usuario: compras totales, pagadas, monto pagado, compras invitadas
+  asociadas por correo, ultimas ordenes y alertas.
+
 ### Acceso admin por ruta
 
 La proteccion principal de `/admin` vive en la ruta `/_authenticated/admin`:
@@ -109,6 +140,8 @@ La proteccion principal de `/admin` vive en la ruta `/_authenticated/admin`:
 ## Servicios Frontend
 
 - `products.service.ts`: catalogo publico y CRUD admin.
+- `admin-orders.service.ts`: pedidos admin, solo lectura, con paginacion y filtros.
+- `admin-users.service.ts`: usuarios/clientes admin via API server-only, solo lectura.
 - `admin-analytics.service.ts`: metricas de productos, ordenes pagadas y top productos.
 - `product-audit.service.ts`: eventos de auditoria.
 - `inventory.service.ts`: ajustes manuales e historial de movimientos.
@@ -142,6 +175,8 @@ Operaciones:
 - El detalle de producto admin conserva `staleTime: 60_000` para evitar recargas al navegar desde
   el listado.
 - La comprobacion de acceso admin usa la cache `["admin-access", user.id]` durante 60 segundos.
+- `/cuenta` reutiliza esa misma clave para mostrar el boton `Ir al panel de administrador` solo a
+  usuarios admin. El boton no concede permisos; `/admin` sigue validando acceso.
 - El listado admin distingue carga inicial, error, lista vacia real y datos cargados.
 - Durante la primera carga se muestra `AdminProductsSkeleton`, con tres tarjetas moviles y cinco
   filas de escritorio. No se muestra `0 productos` mientras la consulta esta pendiente.

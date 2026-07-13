@@ -49,6 +49,7 @@ export const accountConfig = {
       emailLabel: "Correo",
       emailConfirmed: "Correo confirmado",
       emailPending: "Correo pendiente de confirmacion",
+      adminPanelButton: "Ir al panel de administrador",
       roleNote:
         "Esta cuenta se usa para consultar pedidos. Los permisos especiales se asignan por rol interno.",
     },
