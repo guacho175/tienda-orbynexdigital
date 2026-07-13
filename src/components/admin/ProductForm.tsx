@@ -24,6 +24,7 @@ import { ProductOrganizationSection } from "./product-editor/ProductOrganization
 import { ProductPricingSection } from "./product-editor/ProductPricingSection";
 import { ProductSeoSection } from "./product-editor/ProductSeoSection";
 import { useProductEditor } from "./product-editor/useProductEditor";
+import { formatDateTimeCL } from "@/utils/date";
 
 export interface ProductFormProps {
   initial?: Product | null;
@@ -37,10 +38,7 @@ function formatUpdatedAt(value: string | undefined) {
   if (!value) return null;
 
   try {
-    return new Intl.DateTimeFormat("es-CL", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(value));
+    return formatDateTimeCL(value);
   } catch {
     return null;
   }

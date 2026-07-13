@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { chileDateInputToUtcIso } from "@/utils/date";
 
 export const ADMIN_ORDER_STATUSES = [
   "pending",
@@ -125,11 +126,13 @@ export async function fetchAdminOrders({
   }
 
   if (from) {
-    query = query.gte("created_at", `${from}T00:00:00.000Z`);
+    const fromIso = chileDateInputToUtcIso(from, "start");
+    if (fromIso) query = query.gte("created_at", fromIso);
   }
 
   if (to) {
-    query = query.lte("created_at", `${to}T23:59:59.999Z`);
+    const toIso = chileDateInputToUtcIso(to, "end");
+    if (toIso) query = query.lte("created_at", toIso);
   }
 
   const sanitizedSearch = sanitizeSearch(search);

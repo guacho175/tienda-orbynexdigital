@@ -18,6 +18,7 @@ import {
   getAuditChanges,
   getAuditProductName,
 } from "@/services/product-audit.service";
+import { formatDateTimeCL } from "@/utils/date";
 
 const AUDIT_PAGE_SIZE = 20;
 
@@ -224,9 +225,4 @@ function formatEventType(value: string) {
   return value;
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+const formatDate = formatDateTimeCL;

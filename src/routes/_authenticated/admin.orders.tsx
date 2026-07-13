@@ -33,7 +33,7 @@ import {
   type AdminOrder,
   type AdminOrderStatus,
 } from "@/services/admin-orders.service";
-import { brandConfig } from "@/config/brand.config";
+import { formatDateTimeCL } from "@/utils/date";
 
 const ADMIN_ORDERS_PAGE_SIZE = 20;
 
@@ -622,9 +622,4 @@ function getItemsCount(order: AdminOrder) {
   return order.order_items.reduce((total, item) => total + Number(item.quantity), 0);
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(brandConfig.locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+const formatDate = formatDateTimeCL;

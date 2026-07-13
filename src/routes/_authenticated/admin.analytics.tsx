@@ -11,6 +11,7 @@ import {
   type SalesByDateRow,
   type TopProductRow,
 } from "@/services/admin-analytics.service";
+import { formatChileDateKey } from "@/utils/date";
 
 export const Route = createFileRoute("/_authenticated/admin/analytics")({
   component: AdminAnalyticsPage,
@@ -67,7 +68,7 @@ function AdminAnalyticsPage() {
                 rows={analytics.salesByDate}
                 renderRow={(row) => (
                   <tr key={row.date} className="border-t border-border/50">
-                    <td className="px-4 py-3">{row.date}</td>
+                    <td className="px-4 py-3">{formatChileDateKey(row.date)}</td>
                     <td className="px-4 py-3 text-right">{row.orderCount}</td>
                     <td className="px-4 py-3 text-right">{formatCurrency(row.total)}</td>
                   </tr>

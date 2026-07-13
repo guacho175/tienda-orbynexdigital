@@ -18,6 +18,7 @@ import {
 import { brandConfig } from "@/config/brand.config";
 import { getAdminAccess } from "@/services/admin-access.service";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDateTimeCL } from "@/utils/date";
 
 type ConfirmableUser = {
   email_confirmed_at?: string | null;
@@ -276,12 +277,7 @@ function getStatusLabel(status: string) {
   );
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(brandConfig.locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+const formatDate = formatDateTimeCL;
 
 function isEmailConfirmed(user: ConfirmableUser) {
   return Boolean(user.email_confirmed_at || user.confirmed_at);

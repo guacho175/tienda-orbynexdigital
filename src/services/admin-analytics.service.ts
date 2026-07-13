@@ -1,6 +1,7 @@
 import { fetchAllProductsAdmin } from "@/services/products.service";
 import { supabase } from "@/integrations/supabase/client";
 import { isLowStock, isSoldOut } from "@/utils/inventory";
+import { toChileDateKey } from "@/utils/date";
 import type { Tables } from "@/integrations/supabase/types";
 
 type OrderRow = Pick<Tables<"orders">, "id" | "status" | "total" | "created_at" | "paid_at">;
@@ -91,7 +92,7 @@ function buildSalesByDate(orders: OrderRow[]): SalesByDateRow[] {
   const rows = new Map<string, SalesByDateRow>();
 
   for (const order of orders) {
-    const date = toDateKey(order.paid_at ?? order.created_at);
+    const date = toChileDateKey(order.paid_at ?? order.created_at);
     const current = rows.get(date) ?? { date, orderCount: 0, total: 0 };
     current.orderCount += 1;
     current.total += Number(order.total);
@@ -125,10 +126,6 @@ function buildTopProducts(items: OrderItemRow[]): TopProductRow[] {
 
 function sumBy<T>(rows: T[], getValue: (row: T) => number) {
   return rows.reduce((total, row) => total + getValue(row), 0);
-}
-
-function toDateKey(value: string) {
-  return value.slice(0, 10);
 }
 
 export function formatCurrency(value: number) {

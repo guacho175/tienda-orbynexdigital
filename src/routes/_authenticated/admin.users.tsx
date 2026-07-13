@@ -29,13 +29,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Price } from "@/components/ui-common/Price";
-import { brandConfig } from "@/config/brand.config";
 import {
   fetchAdminUsers,
   type AdminUserRow,
   type AdminUserRole,
   type AdminUsersBooleanFilter,
 } from "@/services/admin-users.service";
+import { formatDateTimeCL } from "@/utils/date";
 
 const ADMIN_USERS_PAGE_SIZE = 20;
 
@@ -193,8 +193,8 @@ function AdminUsersPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 xl:grid-cols-[minmax(0,1.4fr)_180px_170px_170px_170px_190px_auto] xl:items-end">
-              <label className="grid gap-1.5 text-sm font-medium text-slate-700">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.6fr)_repeat(5,minmax(10rem,1fr))] xl:items-end">
+              <label className="grid gap-1.5 text-sm font-medium text-slate-700 md:col-span-2 xl:col-span-1">
                 Buscar
                 <Input
                   value={searchInput}
@@ -262,7 +262,7 @@ function AdminUsersPage() {
                 options={BOOLEAN_LABELS}
               />
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 md:col-span-2 xl:col-span-6">
                 <Button type="button" onClick={applyFilters} className="gap-2">
                   <Search className="h-4 w-4" />
                   Aplicar
@@ -724,9 +724,4 @@ function UsersPagination({
   );
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat(brandConfig.locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+const formatDate = formatDateTimeCL;
