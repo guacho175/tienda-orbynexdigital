@@ -54,7 +54,7 @@ Este documento detalla la especificación de los endpoints HTTP serverless imple
 
 ## 2. Confirmación de Pago Webhook (`api/flow/confirm.ts`)
 
-- **Método**: `POST` (ejecutado por Flow al procesar el pago) o `GET` (invocado por el cliente para forzar sincronización).
+- **Método**: `POST`.
 - **Seguridad**: Validaciones criptográficas internas de firma HMAC. No requiere autorización HTTP, pero valida el token recibido contra la API de Flow de forma segura en servidor.
 
 ### Parámetros de Entrada (Form-urlencoded o Query String)
@@ -163,11 +163,14 @@ Si la transacción fue pagada en Flow pero la reserva de stock ya había expirad
 
 ---
 
-## 5. Expirar Reservas Cron (`api/stock/expire-reservations.ts`)
+## 5. Expirar Reservas Manualmente (`api/stock/expire-reservations.ts`)
 
 - **Método**: `GET`
 - **Seguridad**: Protegido por firma de Token de Autorización (`Authorization: Bearer <CRON_SECRET>`).
-- **Función**: Ejecuta periódicamente la liberación de reservas expiradas.
+- **Función**: Respaldo operativo para ejecutar manualmente la liberación de reservas expiradas.
+- **Programación declarada**: la migración de Supabase Cron invoca directamente
+  `public.expire_stock_reservations()` cada 10 minutos. No usa este endpoint, `CRON_SECRET`,
+  GitHub Actions ni Vercel Cron. La activación remota se verifica durante el despliegue.
 
 ### Respuesta Exitosa (Output HTTP 200)
 
@@ -248,3 +251,26 @@ Si la transacción fue pagada en Flow pero la reserva de stock ya había expirad
 - `auth.admin.listUsers()` se ejecuta solo en servidor.
 - No se devuelve `raw_user_meta_data`, `raw_app_meta_data`, `flow_token`, `flow_raw_status` ni llaves internas.
 - `status = "redirected"` antiguo se reporta como diagnostico. El endpoint no cancela ni migra ordenes.
+
+---
+
+## 7. Asociar Pedidos Invitados (`api/account/link-orders.ts`)
+
+- **Método**: `POST`.
+- **Seguridad**: requiere `Authorization: Bearer <access_token>`.
+- **Función**: valida la sesión y el correo confirmado, luego asocia al usuario autenticado las
+  órdenes invitadas con el mismo correo mediante `link_guest_orders_to_user`.
+
+### Respuesta Exitosa
+
+```json
+{
+  "linkedOrders": 2
+}
+```
+
+### Errores
+
+- **401 Unauthorized**: sesión ausente o inválida.
+- **403 Forbidden**: correo aún no confirmado.
+- **500 Internal Server Error**: no fue posible asociar los pedidos.

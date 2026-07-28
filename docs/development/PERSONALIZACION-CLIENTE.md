@@ -10,7 +10,8 @@ Para cada nuevo cliente, es obligatorio aprovisionar e integrar instancias indep
 
 ### A. Base de Datos y Backend (Supabase)
 1.  Crear una nueva organización y proyecto en el panel de control de Supabase.
-2.  Aplicar el esquema de base de datos ejecutando las migraciones de PostgreSQL locales (`pnpm exec supabase db push` o importando los scripts SQL en el editor de Supabase).
+2.  Aplicar el esquema de base de datos ejecutando las migraciones versionadas con
+    `supabase db push` desde un entorno autorizado.
 3.  Obtener las credenciales del proyecto y agregarlas en el panel de variables de entorno de producción/local:
     *   `SUPABASE_PROJECT_ID`
     *   `SUPABASE_URL`
@@ -33,7 +34,7 @@ Para cada nuevo cliente, es obligatorio aprovisionar e integrar instancias indep
 ## 2. Personalización Visual y de Marca
 
 ### A. Paleta de Colores y Estilos (Tailwind CSS v4)
-Los tokens de diseño visual (colores de fondo, acentos primarios/secundarios, bordes de botones) están definidos en [src/styles.css](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/src/styles.css) utilizando variables CSS nativas.
+Los tokens de diseño visual (colores de fondo, acentos primarios/secundarios, bordes de botones) están definidos en [`src/styles.css`](../../src/styles.css) utilizando variables CSS nativas.
 Para cambiar los colores corporativos del cliente, modifica los valores HSL en la sección de temas:
 
 ```css
@@ -47,7 +48,7 @@ Para cambiar los colores corporativos del cliente, modifica los valores HSL en l
 
 ### B. Logotipo e Iconografía
 *   **Archivos de imagen:** Los logotipos e isotipos del e-commerce se encuentran en el directorio `public/` (e.g., `logo.svg`, `favicon.ico`). Reemplázalos por los assets del nuevo comercio manteniendo los nombres de archivo para consistencia.
-*   **Metadata del Sitio:** Actualiza el título y descripciones del sitio en [src/routes/__root.tsx](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/src/routes/__root.tsx) para la optimización SEO inicial del cliente.
+*   **Metadata del Sitio:** Actualiza el título y descripciones del sitio en [`src/routes/__root.tsx`](../../src/routes/__root.tsx) para la optimización SEO inicial del cliente.
 
 ---
 
@@ -66,5 +67,5 @@ El proyecto actual está configurado por defecto para el mercado chileno. Para m
 ---
 
 ## 4. Carga de Catálogo y Control administrativo
-1.  **Carga Inicial:** Sigue las instrucciones de [SEED-PRODUCTOS-DEMO.md](file:///C:/Users/galin/OneDrive/Documentos/tienda-orbynexdigital/docs/development/SEED-PRODUCTOS-DEMO.md) para cargar los productos iniciales y las imágenes de catálogo.
+1.  **Carga Inicial:** Sigue las instrucciones de [SEED-PRODUCTOS-DEMO.md](SEED-PRODUCTOS-DEMO.md) para cargar los productos iniciales y las imágenes de catálogo.
 2.  **Roles Admin:** Crea el primer usuario administrador registrándolo en Supabase Auth y luego insertando su `user_id` en la tabla `user_roles` con `role = 'admin'`.

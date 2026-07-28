@@ -16,7 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-export function sendJson(res: ApiResponse, statusCode: number, payload: Record<string, unknown>) {
+export function sendJson(res: ApiResponse, statusCode: number, payload: unknown) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(payload));

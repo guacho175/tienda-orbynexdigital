@@ -149,6 +149,7 @@ Eventos usados:
 
 - `product_create`
 - `product_update`
+- `product_delete`
 - `stock_adjustment`
 
 Reglas:

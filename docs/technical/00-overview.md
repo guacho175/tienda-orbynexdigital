@@ -18,7 +18,10 @@ El propósito principal del e-commerce de **Orbynex Digital** es proporcionar un
 ### Qué SÍ hace el sistema:
 *   **Visualización en tiempo real**: Renderiza productos y servicios filtrando dinámicamente aquellos marcados como inactivos o configurados para ocultarse por falta de stock.
 *   **Reserva temporal de stock (10 minutos)**: Reserva el stock físico de un producto de forma atómica en base de datos al momento de iniciar la redirección al portal de pago de Flow.
-*   **Liberación por inactividad / vencimiento**: Libera de forma automática e integrada (a través de un webhook o cron cada 1 minuto) aquellas reservas de stock asociadas a compras no concretadas.
+*   **Liberación por inactividad / vencimiento**: La migración versionada programa Supabase Cron
+    para ejecutar `public.expire_stock_reservations()` cada 10 minutos. Los flujos de inventario
+    también pueden ejecutar esta limpieza de forma oportunista. La aplicación y última ejecución
+    del job deben verificarse en cada entorno.
 *   **Gestión de conflictos de inventario**: Mitiga el sobre-stock y las compras fantasmas. Si un usuario paga por una orden cuya reserva ya venció, el sistema detecta el desfase de tiempo y previene decrementos incorrectos de stock, asignando la orden a revisión manual (`requires_manual_review`) o conflicto de stock (`stock_conflict`).
 *   **Soporte de Backorder**: Permite comprar ciertos productos sin stock físico (bajo demanda) si la bandera `allow_backorder` está habilitada.
 *   **Desactivación de inventario**: Admite la venta continua de productos no físicos (servicios/consultorías) que no requieren control de stock mediante la bandera `track_inventory = false`.

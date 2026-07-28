@@ -58,7 +58,8 @@ La clave `SUPABASE_SERVICE_ROLE_KEY` actúa como un bypass de todas las reglas d
 Los siguientes archivos deben estar excluidos en el archivo `.gitignore` y nunca subirse al repositorio de Git:
 *   `.env` (Variables locales de desarrollo)
 *   `.env.local` / `.env.*.local` (Configuraciones de entorno locales)
-*   `.vercel/` (Archivos de caché y metadata del hosting Vercel)
+*   `.vercel/` (Archivos de caché y metadata del hosting Vercel; debe estar en
+    `.gitignore`, no solo en exclusiones locales de Git)
 *   `*.log` / `*.err.log` (Archivos de logs temporales generados por la ejecución)
 *   `node_modules/` (Dependencias del proyecto)
 *   `dist/` / `.output/` (Archivos compilados de build)

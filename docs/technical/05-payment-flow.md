@@ -69,7 +69,8 @@ sequenceDiagram
     5.  Si tiene éxito, actualiza la orden local con el `flow_token` y responde al frontend con la URL de redirección y el `public_lookup_token`.
 
 ### 2.2. Confirmar Pago Webhook (`api/flow/confirm.ts`)
-*   **Método**: `POST` (ejecutado por Flow) o `GET` (cuando el cliente retorna y se forza actualización).
+*   **Método**: `POST`. Flow lo ejecuta como webhook y el frontend puede sincronizar enviando el
+    token mediante el mismo método.
 *   **Función**: Webhook transaccional definitivo que procesa los cobros y descuenta inventario físico.
 *   **Seguridad Obligatoria**:
     *   **Validación de Montos y Monedas**: El script obtiene los datos oficiales desde Flow y los compara de forma estricta contra la orden en la base de datos local para verificar correspondencia de `commerceOrder`, `currency` y `amount` total, previniendo ataques de inyección o suplantación de pagos.
@@ -86,7 +87,8 @@ sequenceDiagram
 
 El endpoint de confirmación (`api/flow/confirm.ts`) implementa una política estricta de idempotencia para tolerar múltiples llamadas repetidas del webhook de Flow o recargas del cliente sin duplicar cobros ni realizar decrementos incorrectos de stock:
 
-*   **Verificación de Estado Terminal**: Si la orden ya se encuentra en estado `paid`, el endpoint responde inmediatamente `idempotent: true` con código HTTP 200 sin ejecutar ninguna consulta a base de datos.
+*   **Verificación de Estado Terminal**: Si la orden ya se encuentra en estado `paid`, el workflow
+    responde `idempotent: true` sin volver a capturar inventario.
 *   **Estados Terminales Operacionales**: Si la orden posee un estado terminal operacional (`reservation_expired`, `stock_conflict`, `requires_manual_review`) y el nuevo estado recibido por Flow no es exitoso (`paid`), se descarta la confirmación y se responde éxito para evitar inconsistencias de stock.
 
 ---

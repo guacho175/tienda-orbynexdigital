@@ -1,0 +1,58 @@
+name: Validación
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validacion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Documentación, código y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOCS_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+      DOCS_NO_IMPACT_REASON: ${{ github.event.pull_request.body || '' }}
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Validar documentación
+        shell: bash
+        run: npm run check:docs -- --base "$DOCS_BASE_REF"
+
+      - name: Probar validador documental
+        run: npm run test:docs
+
+      - name: Ejecutar lint
+        run: npm run lint
+
+      - name: Validar tipos
+        run: npm run typecheck
+
+      - name: Comprobar formato
+        run: npm run format:check
+
+      - name: Construir aplicación
+        run: npm run build

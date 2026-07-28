@@ -12,7 +12,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -269,7 +269,7 @@ function MetricCard({
   detail,
 }: {
   label: string;
-  value: number | JSX.Element;
+  value: number | ReactNode;
   detail: string;
 }) {
   return (
@@ -491,7 +491,7 @@ function OrderDetail({ order }: { order: AdminOrder }) {
   );
 }
 
-function InfoBlock({ label, value }: { label: string; value: string | JSX.Element }) {
+function InfoBlock({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0">
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>

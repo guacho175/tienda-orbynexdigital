@@ -31,7 +31,9 @@ Durante checkout Flow:
 3. Inserta orden y reservas `active`.
 4. El usuario es redirigido a Flow.
 5. Si paga dentro de la ventana, `confirm_order_payment_and_capture_stock` confirma reserva y descuenta stock fisico.
-6. Si no paga, el cron expira reservas.
+6. Si no paga, el job declarado para Supabase Cron ejecuta
+   `public.expire_stock_reservations()` cada 10 minutos y expira las reservas vencidas. El
+   despliegue debe verificar que el job esté activo.
 
 Estados de `stock_reservations`:
 

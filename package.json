@@ -8,9 +8,16 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
-    "lint": "eslint .",
-    "format": "prettier --write .",
+    "lint": "eslint src api vite.config.ts eslint.config.js",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write src api scripts .github package.json package-lock.json vite.config.ts eslint.config.js tsconfig.json",
+    "format:check": "prettier --check src api scripts .github package.json package-lock.json vite.config.ts eslint.config.js tsconfig.json",
+    "check:docs": "node scripts/check-docs-sync.mjs",
+    "test:docs": "node --test scripts/check-docs-sync.test.mjs",
     "clean:logs": "node scripts/clean-logs.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -84,6 +91,5 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
-  },
-  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed"
+  }
 }

@@ -28,7 +28,7 @@ graph LR
         API_CP[api/flow/create-payment]
         API_CF[api/flow/confirm]
         API_AV[api/products/availability]
-        API_EX[api/stock/expire-reservations]
+        API_EX[api/stock/expire-reservations: respaldo manual]
     end
 
     subgraph Backend (Supabase)
@@ -37,6 +37,7 @@ graph LR
         RPC_CR[RPC: create_order_with_stock_reservation]
         RPC_CO[RPC: confirm_order_payment_and_capture_stock]
         RPC_EX[RPC: expire_stock_reservations]
+        CRON[Supabase Cron: cada 10 minutos]
         Storage[Storage: product-images]
     end
 
@@ -55,7 +56,8 @@ graph LR
     API_CF -->|9. Obtiene estado oficial| FlowAPI
     API_CF -->|10. Captura inventario| RPC_CO
     RPC_CO -->|11. Reduce stock físico| DB
-    API_EX -->|12. Cron de limpieza| RPC_EX
+    CRON -->|12. Limpieza programada| RPC_EX
+    API_EX -.->|Respaldo manual| RPC_EX
 ```
 
 ---
@@ -69,12 +71,15 @@ El sistema sigue una arquitectura desacoplada donde el servidor web actúa exclu
 *   **Seguridad**: Accede a Supabase usando llaves públicas anonimizadas (`SUPABASE_PUBLISHABLE_KEY`). Todas las consultas directas de lectura del cliente a las tablas están restringidas por **RLS (Row Level Security)**.
 
 ### 2.2. API Serverless (Vercel Functions)
-*   **Responsabilidades**: Actuar como puente seguro entre el cliente y los servicios externos (Flow, Cron, Supabase Admin). Realiza la firma criptográfica de parámetros Flow en el servidor y procesa webhooks.
-*   **Seguridad**: Ejecuta bajo un ambiente de servidor aislado. Posee acceso exclusivo a secretos sensibles (`FLOW_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`).
+*   **Responsabilidades**: Actuar como puente seguro entre el cliente, Flow y Supabase Admin. Realiza la firma criptográfica de parámetros Flow en el servidor, procesa webhooks y conserva un endpoint manual de respaldo para la limpieza de reservas.
+*   **Seguridad**: Ejecuta bajo un ambiente de servidor aislado. Posee acceso exclusivo a secretos sensibles (`FLOW_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). El endpoint manual de respaldo requiere además `CRON_SECRET`.
 
 ### 2.3. Base de Datos (Supabase / PostgreSQL)
-*   **Responsabilidades**: Almacenamiento persistente, resguardo de imágenes mediante buckets, aplicación de políticas RLS para lectura/escritura y ejecución transaccional a nivel SQL.
+*   **Responsabilidades**: Almacenamiento persistente, resguardo de imágenes mediante buckets, aplicación de políticas RLS para lectura/escritura, ejecución transaccional a nivel SQL y programación de la limpieza de reservas con Supabase Cron.
 *   **Seguridad**: El acceso privilegido de escritura (creación de órdenes, manipulación de stock) se encapsula de forma estricta en **RPCs (Remote Procedure Calls)**. Estas funciones están configuradas con `SECURITY DEFINER` y tienen todos los permisos de ejecución revocados para roles públicos, ejecutándose exclusivamente mediante clientes instanciados con la `service_role_key` de Supabase.
+
+La migración define el job de Cron; `docs/PROJECT_STATE.md` distingue esa configuración
+versionada de su aplicación y ejecución en un entorno remoto.
 
 ---
 

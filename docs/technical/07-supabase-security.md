@@ -97,14 +97,22 @@ Usan permisos restringidos y se ejecutan desde backend:
 
 ## Advisors Supabase
 
-Ultima correccion aplicada:
+Última migración de optimización versionada:
 
 - `20260709232902_optimize_rls_policies_advisors.sql`
+- `20260728224128_harden_public_exposure.sql`:
+  - revoca a `PUBLIC`, `anon` y `authenticated` la ejecución de `public.rls_auto_enable()`, si
+    existe;
+  - elimina el listado público de metadatos de `storage.objects`;
+  - conserva lectura por URL pública y permite listar metadatos del bucket solo a administradores.
 
-Resultado:
+Comandos requeridos para verificar el entorno objetivo:
 
-- `supabase db lint --schema public --fail-on none`: sin errores.
-- `supabase db advisors --type all --level warn --fail-on none`: sin issues.
+- `supabase db lint --schema public --fail-on none`.
+- `supabase db advisors --type all --level warn --fail-on none`.
+
+Los resultados históricos no garantizan el estado actual de una base remota. Registra el resultado
+real en la pull request o reporte de despliegue, no en este documento canónico.
 
 ## Reglas Que No Se Deben Romper
 

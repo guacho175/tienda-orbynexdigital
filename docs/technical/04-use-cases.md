@@ -83,10 +83,10 @@ Este documento detalla los flujos de interacción del sistema, especificando act
 
 ### 1.5. Pago Recibido con Reserva Expirada (Desfase Temporal)
 
-- **Actor**: Pasarela Flow / Sistema Cron.
-- **Precondiciones**: El cliente demoró más de 10 minutos en el portal bancario. El cron ya liberó el stock.
+- **Actor**: Pasarela Flow / Supabase Cron.
+- **Precondiciones**: El cliente demoró más de 10 minutos en el portal bancario. Supabase Cron ya liberó el stock.
 - **Flujo Principal**:
-  1.  El cron ejecuta `/api/stock/expire-reservations` y actualiza la orden a `reservation_expired` y las reservas a `expired`.
+  1.  Supabase Cron ejecuta `public.expire_stock_reservations()` y actualiza la orden a `reservation_expired` y las reservas a `expired`.
   2.  El cliente finaliza el pago en el banco con éxito.
   3.  Flow notifica la confirmación tardía a `/api/flow/confirm`.
   4.  La API de Vercel detecta que la orden local ya está en estado `reservation_expired`.

@@ -16,7 +16,7 @@ La aplicación está construida sobre un stack moderno y eficiente optimizado pa
 | **Runtime Serverless** | Nitro (dentro de TanStack Start) | Motor de servidor portable de alto rendimiento para API endpoints. |
 | **Base de Datos / Backend** | Supabase | PostgreSQL gestionado con autenticación, RLS y almacenamiento. |
 | **Pasarela de Pagos** | Flow.cl | Procesamiento local chileno de pagos online (Webpay, Khipu, etc.). |
-| **Plataforma Cloud** | Vercel | Hosting, Vercel Functions y Vercel Crons. |
+| **Plataforma Cloud** | Vercel + Supabase | Vercel aloja la aplicación y sus funciones; Supabase ejecuta las tareas programadas dentro de PostgreSQL. |
 
 ---
 
@@ -43,7 +43,7 @@ graph TD
     Client[React/TanStack Start Client] --> Vercel[Vercel Serverless Platform]
     Vercel --> Supabase[Supabase PostgreSQL]
     Vercel --> Flow[Flow Chile Payment API]
-    VercelCron[Vercel Cron Service] --> Vercel
+    SupabaseCron[Supabase Cron] --> Supabase
 ```
 
 ### 3.1. Supabase (BaaS)
@@ -51,6 +51,9 @@ graph TD
 *   **Autenticación**: Proveedor incorporado para control de accesos de clientes y administradores.
 *   **RLS (Row Level Security)**: Restricción nativa a nivel de fila que previene lecturas y escrituras no autorizadas directamente desde el cliente.
 *   **Supabase Storage**: Bucket público `product-images` para almacenar las variantes optimizadas de imágenes de productos.
+*   **Supabase Cron (`pg_cron`)**: La migración del repositorio programa
+    `public.expire_stock_reservations()` cada 10 minutos, sin depender de GitHub Actions ni de
+    solicitudes HTTP externas. Su estado remoto se verifica durante el despliegue.
 
 ### 3.2. Flow Chile
 *   Pasarela de pago online de bajo costo para transferencias y tarjetas bancarias en Chile.
@@ -58,7 +61,7 @@ graph TD
 
 ### 3.3. Vercel
 *   **Vercel Functions**: Aloja los endpoints serverless ubicados bajo la carpeta `/api` para procesamiento seguro del lado del servidor.
-*   **Vercel Crons**: Planificador automático que gatilla la liberación de reservas de inventario expiradas cada 1 minuto.
+*   **Tareas programadas**: No se usa Vercel Cron para la expiración de reservas; esta responsabilidad pertenece a Supabase Cron.
 
 ---
 
@@ -69,6 +72,8 @@ La organización del código fuente en el repositorio sigue las convenciones del
 ```
 tienda-orbynexdigital/
 ├── api/                             # Endpoints Serverless (Vercel Functions)
+│   ├── account/                     # Operaciones autenticadas de cuenta
+│   ├── admin/                       # Operaciones administrativas server-only
 │   ├── flow/                        # Integración con la pasarela Flow
 │   │   ├── confirm.ts               # Webhook / confirmación de pagos
 │   │   ├── create-payment.ts        # Inicialización de órdenes y cobros
@@ -76,7 +81,7 @@ tienda-orbynexdigital/
 │   ├── products/
 │   │   └── availability.ts          # Consulta dinámica de stock vendible
 │   └── stock/
-│       └── expire-reservations.ts   # Endpoint del cron para limpiar reservas
+│       └── expire-reservations.ts   # Respaldo HTTP manual para limpiar reservas
 ├── docs/                            # Documentación técnica general y activos
 │   ├── assets/                      # Diagramas e imágenes de documentación
 │   └── technical/                   # Guías técnicas modulares
@@ -111,6 +116,6 @@ tienda-orbynexdigital/
 ├── supabase/                        # Migraciones SQL y scripts locales
 │   └── migrations/                  # Archivos de migración de base de datos
 ├── package.json                     # Archivo de configuración NPM y dependencias
-├── vercel.json                      # Configuración de despliegue y crons en Vercel
+├── vercel.json                      # Configuración de despliegue en Vercel (sin crons)
 └── vite.config.ts                   # Configuración del empaquetador Vite
 ```
