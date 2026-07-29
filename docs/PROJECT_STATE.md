@@ -39,7 +39,11 @@ de cambios ni instrucciones de trabajo.
 | Ejecución del job | Cinco ejecuciones consecutivas `succeeded` verificadas el 2026-07-28 |
 | RLS en tablas `public` | Activa en las siete tablas expuestas verificadas |
 | Advisors de seguridad | Sin exposiciones de base; queda protección de contraseñas filtradas desactivada |
-| Visibilidad del repositorio GitHub | Privada; aptitud pública auditada en la guía de publicación |
+| Visibilidad del repositorio GitHub | Pública desde el 2026-07-28 |
+| Seguridad del repositorio GitHub | Secret Scanning, Push Protection, Dependabot Alerts, Security Updates y Dependency Graph activos |
+| Protección de `main` | Ruleset activo: sin borrado ni force push, pull request y CI obligatorios, conversaciones resueltas y bypass exclusivo del propietario |
+| Code Scanning | Setup predeterminado de CodeQL activo; primera ejecución correcta para Actions y JavaScript/TypeScript |
+| CI de `main` | Workflow `Validación` correcto después de la publicación |
 | Configuración productiva de secretos | No verificable y no debe almacenarse aquí |
 | Despliegue productivo actual | Requiere comprobación en Vercel |
 

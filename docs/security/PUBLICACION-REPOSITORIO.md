@@ -1,22 +1,45 @@
 # Publicación segura del repositorio
 
-Última auditoría: 2026-07-28.
+Última verificación: 2026-07-28.
 
-## Dictamen
+## Estado
 
-El repositorio puede hacerse público desde la perspectiva de secretos versionados, pero su
-visibilidad debe cambiarse solo mediante una decisión explícita. Actualmente sigue privado.
+El repositorio es público en
+<https://github.com/guacho175/tienda-orbynexdigital>. La conversión se realizó el 2026-07-28
+después de completar el preflight de GitHub y corregir el token ficticio de la referencia API.
 
-La auditoría incluyó archivos vigentes, cambios pendientes y el historial Git completo. Gitleaks
-`8.30.1`, descargado desde su release oficial y verificado por SHA-256, informó tres hallazgos:
+No se encontró una clave privilegiada real y no fue necesario activar el procedimiento de
+incidente, rotación o revocación.
 
-- dos JWT históricos bajo variables `SUPABASE_PUBLISHABLE_KEY` y
-  `VITE_SUPABASE_PUBLISHABLE_KEY`;
-- un `publicLookupToken` ficticio incluido como respuesta de ejemplo.
+## Preflight de superficies almacenadas en GitHub
+
+La revisión anterior al cambio de visibilidad produjo estos resultados:
+
+- GitHub Actions contenía 130 registros: una ejecución real y correcta con log descargable, y 129
+  fallos de arranque programados sin jobs ni logs. Se analizaron el log disponible y los resultados
+  de los 130 check suites sin coincidencias privilegiadas.
+- No existían artefactos descargables, releases, adjuntos de releases ni packages publicados.
+- Existía una cache de npm creada por `setup-node`; sus metadatos no contenían coincidencias y el
+  workflow que la genera instala dependencias públicas mediante `npm ci`.
+- Existían 46 registros de deployment. Sus metadatos y estados no contenían credenciales,
+  encabezados de autorización, cookies ni sesiones reutilizables.
+- No se encontraron claves `service_role` o `sb_secret_*`, secretos de Flow, tokens privados de
+  Vercel, contraseñas, cadenas de conexión, tokens de GitHub, claves privadas, encabezados
+  `Authorization` ni cookies o sesiones reutilizables.
+
+## Gitleaks
+
+Gitleaks `8.30.1`, descargado desde su release oficial y verificado por SHA-256, informó:
+
+- cero hallazgos en el snapshot de archivos versionados vigente;
+- tres hallazgos históricos: dos JWT Supabase publicables y el `publicLookupToken` ficticio que
+  fue reemplazado en la versión vigente por `PUBLIC_LOOKUP_TOKEN_EXAMPLE`.
 
 Las claves publicables de Supabase identifican el proyecto y están diseñadas para estar en
 aplicaciones cliente. No se encontró `service_role`, clave secreta de Supabase, secreto de Flow,
 contraseña de base de datos, clave privada, token GitHub ni archivo local vigente versionado.
+
+No se reescribió el historial por estos tres hallazgos permitidos.
 
 ## Información que sí quedaría pública
 
@@ -40,12 +63,20 @@ y rotación de secretos privadas.
 - Los archivos se sirven mediante el acceso público propio del bucket.
 - Supabase Security Advisor no informa exposiciones de base de datos después de la migración
   `20260728224128_harden_public_exposure.sql`.
+- GitHub Secret Scanning y Push Protection están activos.
+- Dependabot Alerts, Dependabot Security Updates y Dependency Graph están activos.
+- Code Scanning usa el setup predeterminado de CodeQL; la primera ejecución para Actions y
+  JavaScript/TypeScript terminó correctamente.
+- El ruleset `Proteccion de main` está activo y bloquea borrado y force push. Exige pull request,
+  conversaciones resueltas y el check `Documentación, código y build`; el único bypass permanente
+  corresponde al propietario del repositorio.
 
-## Pendientes no bloqueantes para la visibilidad
+## Operación continua
 
-- Activar protección contra contraseñas filtradas si el proyecto usa Supabase Pro o superior.
-- Habilitar Secret Scanning y protección de push en GitHub al cambiar la visibilidad.
-- Mantener revisión de dependencias y protección de la rama `main`.
+- Activar protección contra contraseñas filtradas si el proyecto Supabase usa un plan que la
+  incluya.
+- Revisar alertas de Secret Scanning, Dependabot y Code Scanning cuando GitHub las genere.
+- Conservar activo el ruleset de `main` y comprobarlo después de cambios de plan o visibilidad.
 - No convertir en públicas las variables privadas de Vercel, Flow o Supabase.
 
 Si en el futuro aparece una clave privilegiada en Git, se debe rotar primero. No basta con eliminar
