@@ -35,7 +35,7 @@ Este documento detalla la especificación de los endpoints HTTP serverless imple
 {
   "redirectUrl": "https://sandbox.flow.cl/app/pay/run?token=4A2D3C4E5F6F7...",
   "commerceOrder": "ORD-1783455718265",
-  "publicLookupToken": "b1b2b3b4-c5c6-4d7d-8e9e-f0f1f2f3f4f5"
+  "publicLookupToken": "PUBLIC_LOOKUP_TOKEN_EXAMPLE"
 }
 ```
 
